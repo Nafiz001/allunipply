@@ -7,6 +7,53 @@ import { Phone } from 'lucide-react';
 
 const page = () => {
   const [selectedUniversityType, setSelectedUniversityType] = useState('public');
+
+  // Universities data by category
+  const universitiesByType: { [key: string]: Array<{ name: string; type: string; location: string; image: string }> } = {
+    public: [
+      { name: 'University of Dhaka', type: 'Public university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/dhaka-uni/800/600' },
+      { name: 'University of Chittagong', type: 'Public university', location: 'Chittagong, Bangladesh', image: 'https://picsum.photos/seed/chittagong-uni/800/600' },
+      { name: 'Jahangirnagar University', type: 'Public university', location: 'Savar, Bangladesh', image: 'https://picsum.photos/seed/jahangir-uni/800/600' },
+      { name: 'Rajshahi University', type: 'Public university', location: 'Rajshahi, Bangladesh', image: 'https://picsum.photos/seed/rajshahi-uni/800/600' },
+      { name: 'Khulna University', type: 'Public university', location: 'Khulna, Bangladesh', image: 'https://picsum.photos/seed/khulna-uni/800/600' },
+      { name: 'Shahjalal University', type: 'Public university', location: 'Sylhet, Bangladesh', image: 'https://picsum.photos/seed/sust/800/600' },
+      { name: 'Islamic University', type: 'Public university', location: 'Kushtia, Bangladesh', image: 'https://picsum.photos/seed/islamic-uni/800/600' },
+      { name: 'Comilla University', type: 'Public university', location: 'Comilla, Bangladesh', image: 'https://picsum.photos/seed/comilla-uni/800/600' },
+    ],
+    private: [
+      { name: 'North South University', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/nsu/800/600' },
+      { name: 'BRAC University', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/bracu/800/600' },
+      { name: 'Independent University', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/iub/800/600' },
+      { name: 'East West University', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/ewu/800/600' },
+      { name: 'United International', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/uiu/800/600' },
+      { name: 'American International', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/aiub/800/600' },
+      { name: 'Daffodil International', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/diu/800/600' },
+      { name: 'Ahsanullah University', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/aust/800/600' },
+    ],
+    agricultural: [
+      { name: 'Bangladesh Agricultural University', type: 'Agricultural university', location: 'Mymensingh, Bangladesh', image: 'https://picsum.photos/seed/bau/800/600' },
+      { name: 'Sher-e-Bangla Agricultural', type: 'Agricultural university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/sau/800/600' },
+      { name: 'Sylhet Agricultural University', type: 'Agricultural university', location: 'Sylhet, Bangladesh', image: 'https://picsum.photos/seed/sylhet-agri/800/600' },
+      { name: 'Patuakhali Science & Tech', type: 'Agricultural university', location: 'Patuakhali, Bangladesh', image: 'https://picsum.photos/seed/pstu/800/600' },
+      { name: 'Khulna Agricultural University', type: 'Agricultural university', location: 'Khulna, Bangladesh', image: 'https://picsum.photos/seed/kau/800/600' },
+      { name: 'Bangabandhu Sheikh Mujibur', type: 'Agricultural university', location: 'Gazipur, Bangladesh', image: 'https://picsum.photos/seed/bsmrau/800/600' },
+      { name: 'Hajee Mohammad Danesh', type: 'Agricultural university', location: 'Dinajpur, Bangladesh', image: 'https://picsum.photos/seed/hstu/800/600' },
+      { name: 'Chittagong Veterinary', type: 'Agricultural university', location: 'Chittagong, Bangladesh', image: 'https://picsum.photos/seed/cvasu/800/600' },
+    ],
+    engineering: [
+      { name: 'BUET', type: 'Engineering university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/buet/800/600' },
+      { name: 'CUET', type: 'Engineering university', location: 'Chittagong, Bangladesh', image: 'https://picsum.photos/seed/cuet/800/600' },
+      { name: 'RUET', type: 'Engineering university', location: 'Rajshahi, Bangladesh', image: 'https://picsum.photos/seed/ruet/800/600' },
+      { name: 'KUET', type: 'Engineering university', location: 'Khulna, Bangladesh', image: 'https://picsum.photos/seed/kuet/800/600' },
+      { name: 'Dhaka University of Engineering', type: 'Engineering university', location: 'Gazipur, Bangladesh', image: 'https://picsum.photos/seed/duet/800/600' },
+      { name: 'Military Institute of Science', type: 'Engineering university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/mist/800/600' },
+      { name: 'Rajshahi University of Engineering', type: 'Engineering university', location: 'Rajshahi, Bangladesh', image: 'https://picsum.photos/seed/ruet2/800/600' },
+      { name: 'Sylhet Engineering College', type: 'Engineering university', location: 'Sylhet, Bangladesh', image: 'https://picsum.photos/seed/sec/800/600' },
+    ],
+  };
+
+  const universities = universitiesByType[selectedUniversityType] || [];
+
   return (
     <div className="">
       {/* Hero Section - Full Width */}
@@ -304,165 +351,26 @@ const page = () => {
 
         {/* University Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* University Card 1 */}
-          <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-            <div className="relative h-48">
-              <Image
-                src="/universities/dhaka.jpg"
-                alt="Chittagong University"
-                fill
-                className="object-cover"
-              />
+          {universities.map((university, index) => (
+            <div key={index} className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
+              <div className="relative h-48">
+                <Image
+                  src={university.image}
+                  alt={university.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-bold text-lg mb-1">{university.name}</h3>
+                <p className="text-[#F88210] text-sm font-semibold mb-1">{university.type}</p>
+                <p className="text-gray-500 text-sm mb-4">{university.location}</p>
+                <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
+                  Application Form open
+                </button>
+              </div>
             </div>
-            <div className="p-4">
-              <h3 className="font-bold text-lg mb-1">Chittagong University</h3>
-              <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-              <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-              <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm ">
-                Application Form open
-              </button>
-            </div>
-          </div>
-
-          {/* University Card 2 */}
-          <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-            <div className="relative h-48">
-              <Image
-                src="/universities/dhaka.jpg"
-                alt="Dhaka University"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-lg mb-1">Dhaka University</h3>
-              <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-              <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-              <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                Application Form open
-              </button>
-            </div>
-          </div>
-
-          {/* University Card 3 */}
-          <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-            <div className="relative h-48">
-              <Image
-                src="/universities/jahangir.jpg"
-                alt="Jahangirnagar University"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-lg mb-1">Jahangirnagar University</h3>
-              <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-              <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-              <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                Application Form open
-              </button>
-            </div>
-          </div>
-
-          {/* University Card 4 */}
-          <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-            <div className="relative h-48">
-              <Image
-                src="/universities/laurentian.jpg"
-                alt="Laurentian University"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-lg mb-1">Laurentian University</h3>
-              <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-              <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-              <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                Application Form open
-              </button>
-            </div>
-          </div>
-
-          {/* University Card 5 */}
-          <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-            <div className="relative h-48">
-              <Image
-                src="/universities/jahangir.jpg"
-                alt="Chittagong University"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-lg mb-1">Chittagong University</h3>
-              <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-              <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-              <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                Application Form open
-              </button>
-            </div>
-          </div>
-
-          {/* University Card 6 */}
-          <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-            <div className="relative h-48">
-              <Image
-                src="/universities/dhaka.jpg"
-                alt="Dhaka University"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-lg mb-1">Dhaka University</h3>
-              <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-              <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-              <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                Application Form open
-              </button>
-            </div>
-          </div>
-
-          {/* University Card 7 */}
-          <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-            <div className="relative h-48">
-              <Image
-                src="/universities/jahangir.jpg"
-                alt="Jahangirnagar University"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-lg mb-1">Jahangirnagar University</h3>
-              <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-              <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-              <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                Application Form open
-              </button>
-            </div>
-          </div>
-
-          {/* University Card 8 */}
-          <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-            <div className="relative h-48">
-              <Image
-                src="/universities/laurentian.jpg"
-                alt="Laurentian University"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-lg mb-1">Laurentian University</h3>
-              <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-              <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-              <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                Application Form open
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Start Application Button */}

@@ -1,11 +1,23 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const page = () => {
-  const [selectedCountry, setSelectedCountry] = useState('Canada');
+  const [selectedCountry, setSelectedCountry] = useState('USA');
+  const [gpa, setGpa] = useState('');
+  const [ielts, setIelts] = useState('');
+  const [tuitionRange, setTuitionRange] = useState([0, 60000]);
+  const [isFiltering, setIsFiltering] = useState(false);
+  const router = useRouter();
+
+  // Check if any filter is active
+  useEffect(() => {
+    setIsFiltering(gpa !== '' || ielts !== '' || tuitionRange[1] < 60000);
+  }, [gpa, ielts, tuitionRange]);
+  
   const countries = [
     { name: 'USA', code: 'us' },
     { name: 'UK', code: 'gb' },
@@ -15,10 +27,198 @@ const page = () => {
     { name: 'Japan', code: 'jp' },
     { name: 'Italy', code: 'it' },
     { name: 'Spain', code: 'es' },
+    { name: 'Germany', code: 'de' },
+    { name: 'France', code: 'fr' },
+    { name: 'Netherlands', code: 'nl' },
+    { name: 'Sweden', code: 'se' },
   ];
+
+  const universitiesByCountry: { [key: string]: Array<{ name: string; type: string; location: string; image: string; minGpa: number; minIelts: number; tuition: number }> } = {
+    USA: [
+      { name: 'Harvard University', type: 'Private university', location: 'Cambridge, USA', image: 'https://picsum.photos/seed/harvard/800/600', minGpa: 3.8, minIelts: 7.5, tuition: 55000 },
+      { name: 'Stanford University', type: 'Private university', location: 'Stanford, USA', image: 'https://picsum.photos/seed/stanford/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 52000 },
+      { name: 'MIT', type: 'Private university', location: 'Cambridge, USA', image: 'https://picsum.photos/seed/mit/800/600', minGpa: 3.9, minIelts: 7.5, tuition: 54000 },
+      { name: 'Yale University', type: 'Private university', location: 'New Haven, USA', image: 'https://picsum.photos/seed/yale/800/600', minGpa: 3.8, minIelts: 7.5, tuition: 56000 },
+      { name: 'Princeton University', type: 'Private university', location: 'Princeton, USA', image: 'https://picsum.photos/seed/princeton/800/600', minGpa: 3.8, minIelts: 7.0, tuition: 53000 },
+      { name: 'Columbia University', type: 'Private university', location: 'New York, USA', image: 'https://picsum.photos/seed/columbia/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 51000 },
+      { name: 'UC Berkeley', type: 'Public university', location: 'Berkeley, USA', image: 'https://picsum.photos/seed/berkeley/800/600', minGpa: 3.6, minIelts: 6.5, tuition: 42000 },
+      { name: 'Cornell University', type: 'Private university', location: 'Ithaca, USA', image: 'https://picsum.photos/seed/cornell/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 50000 },
+    ],
+    UK: [
+      { name: 'University of Oxford', type: 'Public university', location: 'Oxford, UK', image: 'https://picsum.photos/seed/oxford/800/600', minGpa: 3.8, minIelts: 7.5, tuition: 32000 },
+      { name: 'University of Cambridge', type: 'Public university', location: 'Cambridge, UK', image: 'https://picsum.photos/seed/cambridge/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 30000 },
+      { name: 'Imperial College London', type: 'Public university', location: 'London, UK', image: 'https://picsum.photos/seed/imperial/800/600', minGpa: 3.6, minIelts: 7.0, tuition: 35000 },
+      { name: 'UCL', type: 'Public university', location: 'London, UK', image: 'https://picsum.photos/seed/ucl/800/600', minGpa: 3.6, minIelts: 7.0, tuition: 33000 },
+      { name: 'University of Edinburgh', type: 'Public university', location: 'Edinburgh, UK', image: 'https://picsum.photos/seed/edinburgh/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 28000 },
+      { name: 'King\'s College London', type: 'Public university', location: 'London, UK', image: 'https://picsum.photos/seed/kings/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 31000 },
+      { name: 'LSE', type: 'Public university', location: 'London, UK', image: 'https://picsum.photos/seed/lse/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 34000 },
+      { name: 'University of Manchester', type: 'Public university', location: 'Manchester, UK', image: 'https://picsum.photos/seed/manchester/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 26000 },
+    ],
+    Australia: [
+      { name: 'University of Melbourne', type: 'Public university', location: 'Melbourne, Australia', image: 'https://picsum.photos/seed/melbourne/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 28000 },
+      { name: 'University of Sydney', type: 'Public university', location: 'Sydney, Australia', image: 'https://picsum.photos/seed/sydney/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 27000 },
+      { name: 'ANU', type: 'Public university', location: 'Canberra, Australia', image: 'https://picsum.photos/seed/anu/800/600', minGpa: 3.6, minIelts: 6.5, tuition: 29000 },
+      { name: 'UNSW Sydney', type: 'Public university', location: 'Sydney, Australia', image: 'https://picsum.photos/seed/unsw/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 28500 },
+      { name: 'University of Queensland', type: 'Public university', location: 'Brisbane, Australia', image: 'https://picsum.photos/seed/queensland/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 26500 },
+      { name: 'Monash University', type: 'Public university', location: 'Melbourne, Australia', image: 'https://picsum.photos/seed/monash/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 25000 },
+      { name: 'University of Adelaide', type: 'Public university', location: 'Adelaide, Australia', image: 'https://picsum.photos/seed/adelaide/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 24000 },
+      { name: 'UTS', type: 'Public university', location: 'Sydney, Australia', image: 'https://picsum.photos/seed/uts/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 26000 },
+    ],
+    Canada: [
+      { name: 'University of Toronto', type: 'Public university', location: 'Toronto, Canada', image: 'https://picsum.photos/seed/toronto/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 25000 },
+      { name: 'UBC', type: 'Public university', location: 'Vancouver, Canada', image: 'https://picsum.photos/seed/ubc/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 24000 },
+      { name: 'McGill University', type: 'Public university', location: 'Montreal, Canada', image: 'https://picsum.photos/seed/mcgill/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 22000 },
+      { name: 'McMaster University', type: 'Public university', location: 'Hamilton, Canada', image: 'https://picsum.photos/seed/mcmaster/800/600', minGpa: 3.2, minIelts: 6.5, tuition: 23000 },
+      { name: 'University of Alberta', type: 'Public university', location: 'Edmonton, Canada', image: 'https://picsum.photos/seed/alberta/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 21000 },
+      { name: 'University of Montreal', type: 'Public university', location: 'Montreal, Canada', image: 'https://picsum.photos/seed/montreal/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 20000 },
+      { name: 'University of Waterloo', type: 'Public university', location: 'Waterloo, Canada', image: 'https://picsum.photos/seed/waterloo/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 24500 },
+      { name: 'Western University', type: 'Public university', location: 'London, Canada', image: 'https://picsum.photos/seed/western/800/600', minGpa: 3.2, minIelts: 6.5, tuition: 22500 },
+    ],
+    China: [
+      { name: 'Tsinghua University', type: 'Public university', location: 'Beijing, China', image: 'https://picsum.photos/seed/tsinghua/800/600', minGpa: 3.7, minIelts: 6.5, tuition: 15000 },
+      { name: 'Peking University', type: 'Public university', location: 'Beijing, China', image: 'https://picsum.photos/seed/peking/800/600', minGpa: 3.7, minIelts: 6.5, tuition: 15000 },
+      { name: 'Fudan University', type: 'Public university', location: 'Shanghai, China', image: 'https://picsum.photos/seed/fudan/800/600', minGpa: 3.6, minIelts: 6.0, tuition: 14000 },
+      { name: 'Zhejiang University', type: 'Public university', location: 'Hangzhou, China', image: 'https://picsum.photos/seed/zhejiang/800/600', minGpa: 3.5, minIelts: 6.0, tuition: 13500 },
+      { name: 'Shanghai Jiao Tong', type: 'Public university', location: 'Shanghai, China', image: 'https://picsum.photos/seed/sjtu/800/600', minGpa: 3.6, minIelts: 6.5, tuition: 14500 },
+      { name: 'Nanjing University', type: 'Public university', location: 'Nanjing, China', image: 'https://picsum.photos/seed/nanjing/800/600', minGpa: 3.5, minIelts: 6.0, tuition: 13000 },
+      { name: 'University of Science', type: 'Public university', location: 'Hefei, China', image: 'https://picsum.photos/seed/ustc/800/600', minGpa: 3.6, minIelts: 6.0, tuition: 13500 },
+      { name: 'Wuhan University', type: 'Public university', location: 'Wuhan, China', image: 'https://picsum.photos/seed/wuhan/800/600', minGpa: 3.4, minIelts: 6.0, tuition: 12500 },
+    ],
+    Japan: [
+      { name: 'University of Tokyo', type: 'Public university', location: 'Tokyo, Japan', image: 'https://picsum.photos/seed/utokyo/800/600', minGpa: 3.6, minIelts: 6.5, tuition: 18000 },
+      { name: 'Kyoto University', type: 'Public university', location: 'Kyoto, Japan', image: 'https://picsum.photos/seed/kyoto/800/600', minGpa: 3.6, minIelts: 6.5, tuition: 18000 },
+      { name: 'Osaka University', type: 'Public university', location: 'Osaka, Japan', image: 'https://picsum.photos/seed/osaka/800/600', minGpa: 3.5, minIelts: 6.0, tuition: 17000 },
+      { name: 'Tohoku University', type: 'Public university', location: 'Sendai, Japan', image: 'https://picsum.photos/seed/tohoku/800/600', minGpa: 3.4, minIelts: 6.0, tuition: 16500 },
+      { name: 'Tokyo Tech', type: 'Public university', location: 'Tokyo, Japan', image: 'https://picsum.photos/seed/titech/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 17500 },
+      { name: 'Nagoya University', type: 'Public university', location: 'Nagoya, Japan', image: 'https://picsum.photos/seed/nagoya/800/600', minGpa: 3.4, minIelts: 6.0, tuition: 16000 },
+      { name: 'Hokkaido University', type: 'Public university', location: 'Sapporo, Japan', image: 'https://picsum.photos/seed/hokkaido/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 15500 },
+      { name: 'Keio University', type: 'Private university', location: 'Tokyo, Japan', image: 'https://picsum.photos/seed/keio/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 20000 },
+    ],
+    Italy: [
+      { name: 'Sapienza University', type: 'Public university', location: 'Rome, Italy', image: 'https://picsum.photos/seed/sapienza/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 8000 },
+      { name: 'University of Bologna', type: 'Public university', location: 'Bologna, Italy', image: 'https://picsum.photos/seed/bologna/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 8000 },
+      { name: 'Politecnico di Milano', type: 'Public university', location: 'Milan, Italy', image: 'https://picsum.photos/seed/polimi/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 9000 },
+      { name: 'University of Padua', type: 'Public university', location: 'Padua, Italy', image: 'https://picsum.photos/seed/padua/800/600', minGpa: 3.1, minIelts: 6.0, tuition: 7500 },
+      { name: 'University of Milan', type: 'Public university', location: 'Milan, Italy', image: 'https://picsum.photos/seed/milan/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 8500 },
+      { name: 'University of Pisa', type: 'Public university', location: 'Pisa, Italy', image: 'https://picsum.photos/seed/pisa/800/600', minGpa: 3.1, minIelts: 5.5, tuition: 7000 },
+      { name: 'University of Florence', type: 'Public university', location: 'Florence, Italy', image: 'https://picsum.photos/seed/florence/800/600', minGpa: 3.1, minIelts: 6.0, tuition: 7500 },
+      { name: 'University of Turin', type: 'Public university', location: 'Turin, Italy', image: 'https://picsum.photos/seed/turin/800/600', minGpa: 3.0, minIelts: 5.5, tuition: 7000 },
+    ],
+    Spain: [
+      { name: 'University of Barcelona', type: 'Public university', location: 'Barcelona, Spain', image: 'https://picsum.photos/seed/barcelona/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 9000 },
+      { name: 'Complutense University', type: 'Public university', location: 'Madrid, Spain', image: 'https://picsum.photos/seed/complutense/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 8500 },
+      { name: 'Autonomous Barcelona', type: 'Public university', location: 'Barcelona, Spain', image: 'https://picsum.photos/seed/uab/800/600', minGpa: 3.1, minIelts: 6.0, tuition: 8000 },
+      { name: 'Autonomous Madrid', type: 'Public university', location: 'Madrid, Spain', image: 'https://picsum.photos/seed/uam/800/600', minGpa: 3.1, minIelts: 6.0, tuition: 8000 },
+      { name: 'University of Valencia', type: 'Public university', location: 'Valencia, Spain', image: 'https://picsum.photos/seed/valencia/800/600', minGpa: 3.0, minIelts: 5.5, tuition: 7500 },
+      { name: 'Pompeu Fabra University', type: 'Public university', location: 'Barcelona, Spain', image: 'https://picsum.photos/seed/upf/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 9000 },
+      { name: 'University of Granada', type: 'Public university', location: 'Granada, Spain', image: 'https://picsum.photos/seed/granada/800/600', minGpa: 3.0, minIelts: 5.5, tuition: 7000 },
+      { name: 'University of Seville', type: 'Public university', location: 'Seville, Spain', image: 'https://picsum.photos/seed/seville/800/600', minGpa: 3.0, minIelts: 5.5, tuition: 7000 },
+    ],
+    Germany: [
+      { name: 'TU Munich', type: 'Public university', location: 'Munich, Germany', image: 'https://picsum.photos/seed/tum/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 5000 },
+      { name: 'LMU Munich', type: 'Public university', location: 'Munich, Germany', image: 'https://picsum.photos/seed/lmu/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 5000 },
+      { name: 'Heidelberg University', type: 'Public university', location: 'Heidelberg, Germany', image: 'https://picsum.photos/seed/heidelberg/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 5000 },
+      { name: 'Humboldt Berlin', type: 'Public university', location: 'Berlin, Germany', image: 'https://picsum.photos/seed/humboldt/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 5000 },
+      { name: 'Free University Berlin', type: 'Public university', location: 'Berlin, Germany', image: 'https://picsum.photos/seed/fuberlin/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 5000 },
+      { name: 'RWTH Aachen', type: 'Public university', location: 'Aachen, Germany', image: 'https://picsum.photos/seed/rwth/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 5000 },
+      { name: 'University of Bonn', type: 'Public university', location: 'Bonn, Germany', image: 'https://picsum.photos/seed/bonn/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 5000 },
+      { name: 'University of Freiburg', type: 'Public university', location: 'Freiburg, Germany', image: 'https://picsum.photos/seed/freiburg/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 5000 },
+    ],
+    France: [
+      { name: 'Sorbonne University', type: 'Public university', location: 'Paris, France', image: 'https://picsum.photos/seed/sorbonne/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 6000 },
+      { name: 'École Polytechnique', type: 'Public university', location: 'Palaiseau, France', image: 'https://picsum.photos/seed/polytechnique/800/600', minGpa: 3.6, minIelts: 7.0, tuition: 10000 },
+      { name: 'PSL University', type: 'Public university', location: 'Paris, France', image: 'https://picsum.photos/seed/psl/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 6000 },
+      { name: 'University of Paris', type: 'Public university', location: 'Paris, France', image: 'https://picsum.photos/seed/uparis/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 5500 },
+      { name: 'Sciences Po', type: 'Public university', location: 'Paris, France', image: 'https://picsum.photos/seed/sciencespo/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 12000 },
+      { name: 'ENS Paris', type: 'Public university', location: 'Paris, France', image: 'https://picsum.photos/seed/ens/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 5500 },
+      { name: 'University of Strasbourg', type: 'Public university', location: 'Strasbourg, France', image: 'https://picsum.photos/seed/strasbourg/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 5000 },
+      { name: 'University of Lyon', type: 'Public university', location: 'Lyon, France', image: 'https://picsum.photos/seed/lyon/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 5000 },
+    ],
+    Netherlands: [
+      { name: 'University of Amsterdam', type: 'Public university', location: 'Amsterdam, Netherlands', image: 'https://picsum.photos/seed/uva/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 12000 },
+      { name: 'Delft University', type: 'Public university', location: 'Delft, Netherlands', image: 'https://picsum.photos/seed/delft/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 12500 },
+      { name: 'Utrecht University', type: 'Public university', location: 'Utrecht, Netherlands', image: 'https://picsum.photos/seed/utrecht/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 11000 },
+      { name: 'Leiden University', type: 'Public university', location: 'Leiden, Netherlands', image: 'https://picsum.photos/seed/leiden/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 11000 },
+      { name: 'Erasmus University', type: 'Public university', location: 'Rotterdam, Netherlands', image: 'https://picsum.photos/seed/erasmus/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 11500 },
+      { name: 'Wageningen University', type: 'Public university', location: 'Wageningen, Netherlands', image: 'https://picsum.photos/seed/wageningen/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 11000 },
+      { name: 'Groningen University', type: 'Public university', location: 'Groningen, Netherlands', image: 'https://picsum.photos/seed/groningen/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 10500 },
+      { name: 'Maastricht University', type: 'Public university', location: 'Maastricht, Netherlands', image: 'https://picsum.photos/seed/maastricht/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 10500 },
+    ],
+    Sweden: [
+      { name: 'Lund University', type: 'Public university', location: 'Lund, Sweden', image: 'https://picsum.photos/seed/lund/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 14000 },
+      { name: 'Uppsala University', type: 'Public university', location: 'Uppsala, Sweden', image: 'https://picsum.photos/seed/uppsala/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 14000 },
+      { name: 'KTH Royal Institute', type: 'Public university', location: 'Stockholm, Sweden', image: 'https://picsum.photos/seed/kth/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 15000 },
+      { name: 'Stockholm University', type: 'Public university', location: 'Stockholm, Sweden', image: 'https://picsum.photos/seed/su/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 13000 },
+      { name: 'Gothenburg University', type: 'Public university', location: 'Gothenburg, Sweden', image: 'https://picsum.photos/seed/gothenburg/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 13000 },
+      { name: 'Karolinska Institute', type: 'Public university', location: 'Stockholm, Sweden', image: 'https://picsum.photos/seed/karolinska/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 16000 },
+      { name: 'Linköping University', type: 'Public university', location: 'Linköping, Sweden', image: 'https://picsum.photos/seed/linkoping/800/600', minGpa: 3.1, minIelts: 6.0, tuition: 12500 },
+      { name: 'Chalmers University', type: 'Public university', location: 'Gothenburg, Sweden', image: 'https://picsum.photos/seed/chalmers/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 14500 },
+    ],
+  };
+
+  // Filter universities based on criteria
+  const allUniversities = universitiesByCountry[selectedCountry] || [];
+  const filteredUniversities = allUniversities.filter(uni => {
+    const userGpa = parseFloat(gpa) || 0;
+    const userIelts = parseFloat(ielts) || 0;
+    
+    // If no filters applied, return all
+    if (!isFiltering) return true;
+    
+    // Check if user meets requirements
+    const meetsGpa = gpa === '' || userGpa >= uni.minGpa;
+    const meetsIelts = ielts === '' || userIelts >= uni.minIelts;
+    const meetsTuition = uni.tuition <= tuitionRange[1];
+    
+    return meetsGpa && meetsIelts && meetsTuition;
+  });
+
+  // Limit to 2 universities when filtering
+  const universities = isFiltering ? filteredUniversities.slice(0, 2) : allUniversities;
+  const hasMoreResults = isFiltering && filteredUniversities.length > 2;
   const [selectedUniversityType, setSelectedUniversityType] = useState('public');
   return (
     <div className="">
+      <style jsx>{`
+        @keyframes marquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        .marquee-container {
+          display: flex;
+        }
+        .marquee-content {
+          display: flex;
+          animation: marquee 20s linear infinite;
+        }
+        .marquee-container:hover .marquee-content {
+          animation-play-state: paused;
+        }
+        input[type='range']::-webkit-slider-thumb {
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: #E3572B;
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3);
+        }
+        input[type='range']::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: #E3572B;
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3);
+        }
+      `}</style>
+      
       {/* Hero Section - Full Width */}
       <div className="relative w-full">
         {/* Background Image */}
@@ -251,193 +451,153 @@ const page = () => {
                 Trusted by Top National Universities to Simplify Admissions and Empower<br className="hidden sm:block" /> Student Application Experience.
               </p>
       
-              {/* Country Filter Buttons */}
-        <div className="flex justify-center gap-3 md:gap-4 mb-12 flex-wrap px-4">
-          {countries.map((country) => (
-            <button
-              key={country.name}
-              onClick={() => setSelectedCountry(country.name)}
-              className={`flex justify-center items-center gap-2 px-4 md:px-6 py-2 rounded-full font-outfit font-semibold text-sm md:text-base transition-all border border-orange-300 ${selectedCountry === country.name
-                  ? 'bg-[#d95d39] text-white border-[#d95d39]'
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'
-                }`}
-            >
-              <span className={`fi fi-${country.code} text-xl fis rounded-full`}></span>
-              {country.name}
-            </button>
-          ))}
+              {/* Country Filter Buttons with Marquee */}
+        <div className="relative overflow-hidden mb-12 px-4">
+          <div className="marquee-container">
+            <div className="marquee-content">
+              {/* First set of countries */}
+              {countries.map((country, index) => (
+                <button
+                  key={`${country.name}-1-${index}`}
+                  onClick={() => setSelectedCountry(country.name)}
+                  className={`flex justify-center items-center gap-2 px-4 md:px-6 py-2 rounded-full font-outfit font-semibold text-sm md:text-base transition-all border mx-2 flex-shrink-0 ${selectedCountry === country.name
+                      ? 'bg-[#d95d39] text-white border-[#d95d39]'
+                      : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'
+                    }`}
+                >
+                  <span className={`fi fi-${country.code} text-xl fis rounded-full`}></span>
+                  {country.name}
+                </button>
+              ))}
+              {/* Duplicate set for seamless loop */}
+              {countries.map((country, index) => (
+                <button
+                  key={`${country.name}-2-${index}`}
+                  onClick={() => setSelectedCountry(country.name)}
+                  className={`flex justify-center items-center gap-2 px-4 md:px-6 py-2 rounded-full font-outfit font-semibold text-sm md:text-base transition-all border mx-2 flex-shrink-0 ${selectedCountry === country.name
+                      ? 'bg-[#d95d39] text-white border-[#d95d39]'
+                      : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'
+                    }`}
+                >
+                  <span className={`fi fi-${country.code} text-xl fis rounded-full`}></span>
+                  {country.name}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
+      
+              {/* Refine Your Search Filter Section */}
+              <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8 mb-12 border border-gray-100 max-w-[1320px] mx-auto">
+                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 font-outfit">
+                  Refine Your Search
+                </h3>
+                
+                {/* GPA and IELTS Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  {/* GPA Input */}
+                  <div>
+                    <label className="block text-gray-900 font-semibold mb-3 font-outfit text-sm md:text-base">
+                      Your GPA (0.0 - 4.0)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="e.g., 3.5"
+                      value={gpa}
+                      onChange={(e) => setGpa(e.target.value)}
+                      min="0"
+                      max="4"
+                      step="0.1"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit focus:outline-none focus:border-[#E3572B] transition-colors text-gray-700 placeholder:text-gray-400"
+                    />
+                  </div>
+
+                  {/* IELTS Input */}
+                  <div>
+                    <label className="block text-gray-900 font-semibold mb-3 font-outfit text-sm md:text-base">
+                      Your IELTS Score (0.0 - 9.0)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="e.g., 7.0"
+                      value={ielts}
+                      onChange={(e) => setIelts(e.target.value)}
+                      min="0"
+                      max="9"
+                      step="0.5"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit focus:outline-none focus:border-[#E3572B] transition-colors text-gray-700 placeholder:text-gray-400"
+                    />
+                  </div>
+                </div>
+
+                {/* Tuition Fee Range */}
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <label className="text-gray-900 font-semibold font-outfit text-sm md:text-base">
+                      Tuition Fee Range
+                    </label>
+                    <span className="text-[#E3572B] font-bold font-outfit text-sm md:text-base">
+                      ${tuitionRange[0].toLocaleString()} - ${tuitionRange[1].toLocaleString()}
+                    </span>
+                  </div>
+                  
+                  {/* Range Slider */}
+                  <div className="relative">
+                    <input
+                      type="range"
+                      min="0"
+                      max="60000"
+                      step="1000"
+                      value={tuitionRange[1]}
+                      onChange={(e) => setTuitionRange([tuitionRange[0], parseInt(e.target.value)])}
+                      className="w-full h-2 bg-gradient-to-r from-[#E3572B] to-[#FF8B22] rounded-lg appearance-none cursor-pointer"
+                      style={{
+                        background: `linear-gradient(to right, #E3572B 0%, #FF8B22 ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb 100%)`
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
       
               {/* University Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        {/* University Card 1 */}
-                        <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-                          <div className="relative h-48">
-                            <Image
-                              src="/universities/dhaka.jpg"
-                              alt="Chittagong University"
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="p-4">
-                            <h3 className="font-bold text-lg mb-1">Chittagong University</h3>
-                            <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-                            <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-                            <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm ">
-                              Application Form open
-                            </button>
-                          </div>
-                        </div>
-              
-                        {/* University Card 2 */}
-                        <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-                          <div className="relative h-48">
-                            <Image
-                              src="/universities/dhaka.jpg"
-                              alt="Dhaka University"
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="p-4">
-                            <h3 className="font-bold text-lg mb-1">Dhaka University</h3>
-                            <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-                            <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-                            <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                              Application Form open
-                            </button>
-                          </div>
-                        </div>
-              
-                        {/* University Card 3 */}
-                        <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-                          <div className="relative h-48">
-                            <Image
-                              src="/universities/jahangir.jpg"
-                              alt="Jahangirnagar University"
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="p-4">
-                            <h3 className="font-bold text-lg mb-1">Jahangirnagar University</h3>
-                            <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-                            <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-                            <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                              Application Form open
-                            </button>
-                          </div>
-                        </div>
-              
-                        {/* University Card 4 */}
-                        <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-                          <div className="relative h-48">
-                            <Image
-                              src="/universities/laurentian.jpg"
-                              alt="Laurentian University"
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="p-4">
-                            <h3 className="font-bold text-lg mb-1">Laurentian University</h3>
-                            <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-                            <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-                            <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                              Application Form open
-                            </button>
-                          </div>
-                        </div>
-              
-                        {/* University Card 5 */}
-                        <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-                          <div className="relative h-48">
-                            <Image
-                              src="/universities/jahangir.jpg"
-                              alt="Chittagong University"
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="p-4">
-                            <h3 className="font-bold text-lg mb-1">Chittagong University</h3>
-                            <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-                            <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-                            <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                              Application Form open
-                            </button>
-                          </div>
-                        </div>
-              
-                        {/* University Card 6 */}
-                        <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-                          <div className="relative h-48">
-                            <Image
-                              src="/universities/dhaka.jpg"
-                              alt="Dhaka University"
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="p-4">
-                            <h3 className="font-bold text-lg mb-1">Dhaka University</h3>
-                            <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-                            <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-                            <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                              Application Form open
-                            </button>
-                          </div>
-                        </div>
-              
-                        {/* University Card 7 */}
-                        <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-                          <div className="relative h-48">
-                            <Image
-                              src="/universities/jahangir.jpg"
-                              alt="Jahangirnagar University"
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="p-4">
-                            <h3 className="font-bold text-lg mb-1">Jahangirnagar University</h3>
-                            <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-                            <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-                            <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                              Application Form open
-                            </button>
-                          </div>
-                        </div>
-              
-                        {/* University Card 8 */}
-                        <div className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-                          <div className="relative h-48">
-                            <Image
-                              src="/universities/laurentian.jpg"
-                              alt="Laurentian University"
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="p-4">
-                            <h3 className="font-bold text-lg mb-1">Laurentian University</h3>
-                            <p className="text-[#F88210] text-sm font-semibold mb-1">Public university</p>
-                            <p className="text-gray-500 text-sm mb-4">Dhaka, Bangladesh</p>
-                            <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                              Application Form open
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                {universities.map((university, index) => (
+                  <div key={index} className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
+                    <div className="relative h-48">
+                      <Image
+                        src={university.image}
+                        alt={university.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg mb-1">{university.name}</h3>
+                      <p className="text-[#F88210] text-sm font-semibold mb-1">{university.type}</p>
+                      <p className="text-gray-500 text-sm mb-4">{university.location}</p>
+                      <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
+                        Application Form open
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
       
-              {/* Start Application Button */}
+              {/* Buttons - Show "See More" when filtering, otherwise show "Start Application" */}
               <div className="flex justify-center">
-          <button className="px-8 py-3.5 rounded-xl rou bg-[#E3572B] text-white font-outfit font-bold text-base md:text-lg hover:bg-[#e67609] transition-all flex items-center gap-3 shadow-lg border border-black">
-            Start Application now
-            
-          </button>
-        </div>
+                {hasMoreResults ? (
+                  <button 
+                    onClick={() => router.push('/sign-in')}
+                    className="px-8 py-3.5 rounded-xl bg-[#E3572B] text-white font-outfit font-bold text-base md:text-lg hover:bg-[#e67609] transition-all flex items-center gap-3 shadow-lg"
+                  >
+                    See More Results ({filteredUniversities.length - 2} more)
+                  </button>
+                ) : (
+                  <button className="px-8 py-3.5 rounded-xl bg-[#E3572B] text-white font-outfit font-bold text-base md:text-lg hover:bg-[#e67609] transition-all flex items-center gap-3 shadow-lg border border-black">
+                    Start Application now
+                  </button>
+                )}
+              </div>
             </div>
 
       {/* Applying Process Section */}

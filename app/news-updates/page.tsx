@@ -97,14 +97,15 @@ const NewsUpdatesPage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#FF8B22] to-[#E3572B] py-16 md:py-24">
+      <div className="py-8 md:py-12">
         <div className="max-w-[1320px] mx-auto px-4 md:px-6">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center mb-4 font-outfit">
-            News & Updates
+          <h1 className="text-4xl md:text-[43px]  font-medium  text-center mb-4 font-outfit">
+            News & Updates <br />
+             Here's the news & updates that you all need to stay up to date
           </h1>
-          <p className="text-white text-center text-lg md:text-xl font-outfit">
-            Here's the news & updates that you all need to stay up to date
-          </p>
+          
+           
+          
         </div>
       </div>
 
@@ -152,29 +153,7 @@ const NewsUpdatesPage = () => {
         )}
       </div>
 
-      {/* Newsletter Subscription Section */}
-      <div className="bg-[#FF8B22] py-12 md:py-16 mb-12">
-        <div className="max-w-[1320px] mx-auto px-4 md:px-6 text-center">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 font-outfit">
-            Get all the news delivery fast in your Inbox
-          </h2>
-          <p className="text-white text-base md:text-lg mb-8 font-outfit">
-            Stay informed with the latest news, insights, and updates delivered straight to your Inbox
-          </p>
-          
-          {/* Email Input */}
-          <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
-            <input
-              type="email"
-              placeholder="📧 Email address"
-              className="flex-1 px-6 py-4 text-gray-800 font-outfit rounded-full focus:outline-none focus:ring-2 focus:ring-white border border-white/40"
-            />
-            <button className="px-8 py-4 bg-white text-[#FF8B22] rounded-full font-outfit font-semibold text-lg hover:bg-gray-100 transition-all">
-              Submit
-            </button>
-          </div>
-        </div>
-      </div>
+      
 
       {/* International University News Section */}
       <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-16">
@@ -263,6 +242,33 @@ const NewsUpdatesPage = () => {
           <button className="px-10 py-4 bg-[#E3572B] text-white rounded-full font-outfit font-semibold text-lg hover:bg-[#c24d2b] transition-all">
             Search for specific news
           </button>
+        </div>
+      </div>
+      {/* Newsletter Subscription Section */}
+      <div className="py-12 max-w-[1120px] mx-auto md:py-16 mb-12 rounded-[24px]"
+      style={{
+            background: 'linear-gradient(90deg, rgba(255, 139, 34, 1) 0%, rgba(255, 182.29, 116.47, 1) 100%)'
+          }}>
+        <div className="max-w-[1320px] mx-auto px-4 md:px-6 text-center">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 font-outfit">
+            Get all the news delivery fast <br /> in your Inbox
+          </h2>
+          <p className="text-white text-base md:text-lg mb-8 font-outfit">
+            Stay informed with the latest news, insights, and updates delivered straight to your Inbox
+          </p>
+          
+          {/* Email Input */}
+          <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
+            <input
+              type="email"
+              placeholder="📧 Email address"
+              className="flex-1 px-6 py-4 text-gray-800 font-outfit rounded-full focus:outline-none focus:ring-2 focus:ring-white border border-white/40
+              placeholder-white"
+            />
+            <button className="px-8 py-4 bg-white text-[#FF8B22] rounded-full font-outfit font-semibold text-lg hover:bg-gray-100 transition-all">
+              Submit
+            </button>
+          </div>
         </div>
       </div>
     </div>
