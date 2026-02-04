@@ -1,21 +1,37 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const page = () => {
+const Page = () => {
   const [selectedCountry, setSelectedCountry] = useState('USA');
   const [gpa, setGpa] = useState('');
   const [ielts, setIelts] = useState('');
   const [tuitionRange, setTuitionRange] = useState([0, 60000]);
-  const [isFiltering, setIsFiltering] = useState(false);
   const router = useRouter();
 
+  // Hero section filter states
+  const [heroLocation, setHeroLocation] = useState('');
+  const [heroDate, setHeroDate] = useState('');
+  const [heroProcess, setHeroProcess] = useState('');
+  const [heroCriteria, setHeroCriteria] = useState('');
+  const [heroTestScore, setHeroTestScore] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [modalResults, setModalResults] = useState<Array<{
+    name: string;
+    type: string;
+    location: string;
+    image: string;
+    minGpa: number;
+    minIelts: number;
+    tuition: number;
+  }>>([]);
+
   // Check if any filter is active
-  useEffect(() => {
-    setIsFiltering(gpa !== '' || ielts !== '' || tuitionRange[1] < 60000);
+  const isFiltering = useMemo(() => {
+    return gpa !== '' || ielts !== '' || tuitionRange[1] < 60000;
   }, [gpa, ielts, tuitionRange]);
   
   const countries = [
@@ -176,7 +192,29 @@ const page = () => {
   // Limit to 2 universities when filtering
   const universities = isFiltering ? filteredUniversities.slice(0, 2) : allUniversities;
   const hasMoreResults = isFiltering && filteredUniversities.length > 2;
-  const [selectedUniversityType, setSelectedUniversityType] = useState('public');
+
+  // Hero section search handler
+  const handleHeroSearch = () => {
+    // Filter universities based on hero section inputs
+    let filtered = allUniversities;
+
+    // Filter by location if specified
+    if (heroLocation) {
+      filtered = filtered.filter(uni => 
+        uni.location.toLowerCase().includes(heroLocation.toLowerCase())
+      );
+    }
+
+    // Filter by test score if specified
+    if (heroTestScore) {
+      const score = parseFloat(heroTestScore);
+      filtered = filtered.filter(uni => uni.minIelts <= score);
+    }
+
+    // Show modal with first 2 results
+    setModalResults(filtered.slice(0, 2));
+    setShowModal(true);
+  };
   return (
     <div className="">
       <style jsx>{`
@@ -256,35 +294,83 @@ const page = () => {
 
           {/* Search/Filter Card */}
           <div className="bg-[#dcdcdc70] backdrop-blur-[70px] rounded-2xl md:rounded-3xl p-4 md:p-6 w-full max-w-6xl mx-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 lg:gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 items-end">
               {/* Location */}
-              <div className="flex flex-col text-left border-r border-[#121417] pr-4 md:pr-6">
-                <h3 className="font-outfit font-bold text-gray-900 text-sm md:text-base lg:text-lg mb-1">Location</h3>
-                <p className="text-gray-500 text-xs md:text-sm">Search destination</p>
+              <div className="flex flex-col text-left">
+                <label className="font-outfit font-bold text-gray-900 text-sm md:text-base mb-2">Location</label>
+                <input
+                  type="text"
+                  placeholder="Search destination"
+                  value={heroLocation}
+                  onChange={(e) => setHeroLocation(e.target.value)}
+                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#E3572B] bg-white/80"
+                />
               </div>
 
               {/* Application Date */}
-              <div className="flex flex-col text-left border-r border-[#121417] pr-4 md:pr-6">
-                <h3 className="font-outfit font-bold text-gray-900 text-sm md:text-base lg:text-lg mb-1">Application date</h3>
-                <p className="text-gray-500 text-xs md:text-sm">Select date</p>
+              <div className="flex flex-col text-left">
+                <label className="font-outfit font-bold text-gray-900 text-sm md:text-base mb-2">Application date</label>
+                <input
+                  type="date"
+                  value={heroDate}
+                  onChange={(e) => setHeroDate(e.target.value)}
+                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#E3572B] bg-white/80"
+                />
               </div>
 
               {/* Application Process */}
-              <div className="flex flex-col text-left border-r border-[#121417] pr-4 md:pr-6">
-                <h3 className="font-outfit font-bold text-gray-900 text-sm md:text-base lg:text-lg mb-1">Application Process</h3>
-                <p className="text-gray-500 text-xs md:text-sm">View process</p>
+              <div className="flex flex-col text-left">
+                <label className="font-outfit font-bold text-gray-900 text-sm md:text-base mb-2">Process</label>
+                <select
+                  value={heroProcess}
+                  onChange={(e) => setHeroProcess(e.target.value)}
+                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#E3572B] bg-white/80"
+                >
+                  <option value="">View process</option>
+                  <option value="direct">Direct Application</option>
+                  <option value="agent">Through Agent</option>
+                  <option value="transfer">Transfer</option>
+                </select>
               </div>
 
               {/* Criteria */}
-              <div className="flex flex-col text-left border-r border-[#121417] pr-4 md:pr-6">
-                <h3 className="font-outfit font-bold text-gray-900 text-sm md:text-base lg:text-lg mb-1">Criteria</h3>
-                <p className="text-gray-500 text-xs md:text-sm">See all info</p>
+              <div className="flex flex-col text-left">
+                <label className="font-outfit font-bold text-gray-900 text-sm md:text-base mb-2">Criteria</label>
+                <select
+                  value={heroCriteria}
+                  onChange={(e) => setHeroCriteria(e.target.value)}
+                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#E3572B] bg-white/80"
+                >
+                  <option value="">See all info</option>
+                  <option value="gpa">GPA Based</option>
+                  <option value="test">Test Score</option>
+                  <option value="portfolio">Portfolio</option>
+                </select>
+              </div>
+
+              {/* Test Score */}
+              <div className="flex flex-col text-left">
+                <label className="font-outfit font-bold text-gray-900 text-sm md:text-base mb-2">IELTS/GRE</label>
+                <input
+                  type="number"
+                  placeholder="Score"
+                  value={heroTestScore}
+                  onChange={(e) => setHeroTestScore(e.target.value)}
+                  step="0.5"
+                  min="0"
+                  max="9"
+                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#E3572B] bg-white/80"
+                />
               </div>
 
               {/* Search Button */}
               <div className="flex flex-col text-left">
-                <h3 className="font-outfit font-bold text-gray-900 text-sm md:text-base lg:text-lg mb-1">IELTS, GRE</h3>
-                <p className="text-gray-500 text-xs md:text-sm">facilities Program</p>
+                <button
+                  onClick={handleHeroSearch}
+                  className="px-6 py-2 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm hover:bg-[#d95d39] transition-all"
+                >
+                  Search
+                </button>
               </div>
             </div>
           </div>
@@ -887,8 +973,81 @@ const page = () => {
                       </div>
                     </div>
                   </div>
+
+      {/* Results Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 font-outfit">Search Results</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Results Count */}
+            <p className="text-gray-600 mb-6">
+              Found {modalResults.length} universities matching your criteria
+            </p>
+
+            {/* University Cards */}
+            {modalResults.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {modalResults.map((university, index) => (
+                  <div key={index} className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
+                    <div className="relative h-48">
+                      <Image
+                        src={university.image}
+                        alt={university.name}
+                        fill
+                        className="object-cover rounded-xl"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg mb-1">{university.name}</h3>
+                      <p className="text-[#F88210] text-sm font-semibold mb-1">{university.type}</p>
+                      <p className="text-gray-500 text-sm mb-2">{university.location}</p>
+                      <div className="text-xs text-gray-600 mb-3">
+                        <p>Min GPA: {university.minGpa} • IELTS: {university.minIelts}</p>
+                        <p>Tuition: ${university.tuition.toLocaleString()}/year</p>
+                      </div>
+                      <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm hover:bg-[#d95d39] transition-all">
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">No universities found matching your criteria. Try adjusting your filters.</p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-8 py-3 rounded-lg border-2 border-[#E3572B] text-[#E3572B] font-outfit font-semibold hover:bg-[#E3572B] hover:text-white transition-all"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => router.push('/sign-in')}
+                className="px-8 py-3 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold hover:bg-[#d95d39] transition-all"
+              >
+                See More Results
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default page;
+export default Page;
