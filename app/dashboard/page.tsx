@@ -3,13 +3,16 @@
 import React, { useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Users, Award, Bell, Search, SlidersHorizontal, CircleDollarSign, Clock, X, ChevronDown, Crown } from 'lucide-react';
+import { Bell, Search, SlidersHorizontal, CircleDollarSign, Clock, X, ChevronDown, Crown } from 'lucide-react';
 
 const DashboardPage = () => {
   const [userName] = useState('Aklima');
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notificationTab, setNotificationTab] = useState<'all' | 'unread'>('all');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -30,6 +33,30 @@ const DashboardPage = () => {
     projects: '',
     researchPapers: ''
   });
+
+  const notifications = [
+    {
+      id: 1,
+      icon: '⚠️',
+      message: 'Welcome to allunipply. Please complete your profile update',
+      time: '2m ago',
+      isRead: false
+    },
+    {
+      id: 2,
+      icon: '✅',
+      message: 'You have started your application process. Finish it before deadline.',
+      time: '2m ago',
+      isRead: false
+    },
+    {
+      id: 3,
+      icon: '💼',
+      message: 'Try our new premium package offer',
+      time: '2m ago',
+      isRead: false
+    }
+  ];
 
   const universities = [
     {
@@ -112,27 +139,149 @@ const DashboardPage = () => {
             {/* User Actions */}
             <div className="flex items-center gap-4">
               {/* Notification Bell */}
-              <button className="relative">
-                <Bell size={24} className="text-gray-600" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-              </button>
+              <div className="relative">
+                <button 
+                  className="relative"
+                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                >
+                  <Bell size={24} className="text-gray-600" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                </button>
 
-              {/* User Profile */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-                  <Image 
-                    src="/icons/user-avatar.png" 
-                    alt="User" 
-                    width={40} 
-                    height={40}
-                    className="object-cover"
-                  />
-                </div>
-                <span className="text-gray-900 font-outfit font-semibold hidden sm:inline">Aklima Tul</span>
+                {/* Notification Dropdown */}
+                {isNotificationOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-30"
+                      onClick={() => setIsNotificationOpen(false)}
+                    ></div>
+                    <div className="absolute right-0 top-12 w-96 bg-[#4A4A4A] rounded-3xl shadow-2xl z-40 overflow-hidden">
+                      {/* Header */}
+                      <div className="px-6 py-5 flex items-center justify-between border-b border-gray-600">
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-8 bg-[#E3572B] rounded-full"></div>
+                          <h2 className="text-white text-2xl font-bold font-outfit">Notification</h2>
+                        </div>
+                        <button 
+                          onClick={() => setIsNotificationOpen(false)}
+                          className="text-white hover:text-gray-300 transition-colors"
+                        >
+                          <X size={24} />
+                        </button>
+                      </div>
+
+                      {/* Tabs */}
+                      <div className="px-6 py-4">
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => setNotificationTab('all')}
+                            className={`flex-1 py-3 rounded-full font-outfit font-semibold text-sm transition-all ${
+                              notificationTab === 'all'
+                                ? 'bg-[#E3572B] text-white'
+                                : 'bg-transparent text-white hover:bg-gray-600'
+                            }`}
+                          >
+                            All
+                          </button>
+                          <button
+                            onClick={() => setNotificationTab('unread')}
+                            className={`flex-1 py-3 rounded-full font-outfit font-semibold text-sm transition-all ${
+                              notificationTab === 'unread'
+                                ? 'bg-[#E3572B] text-white'
+                                : 'bg-transparent text-white hover:bg-gray-600'
+                            }`}
+                          >
+                            Unread
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Notifications List */}
+                      <div className="px-6 pb-6 space-y-4 max-h-96 overflow-y-auto">
+                        {notifications.map((notification) => (
+                          <div key={notification.id} className="flex gap-4">
+                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0">
+                              <Bell size={24} className="text-[#E3572B]" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-white font-outfit text-sm mb-1">
+                                <span className="mr-1">{notification.icon}</span>
+                                {notification.message}
+                              </p>
+                              <p className="text-gray-400 text-xs font-outfit">{notification.time}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* View All Button */}
+                      <div className="px-6 pb-6">
+                        <button className="w-full py-4 bg-[#E3572B] text-white rounded-2xl font-outfit font-semibold hover:bg-[#d95d39] transition-all">
+                          View all notifications
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
-              {/* Sign Out Button */}
-              <button className="px-6 py-2 border-2 border-[#E3572B] text-[#E3572B] rounded-lg font-outfit font-semibold hover:bg-[#E3572B] hover:text-white transition-all">
+              {/* User Profile with Dropdown */}
+              <div className="relative">
+                <button 
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="flex items-center gap-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                    <Image 
+                      src="/icons/user-avatar.png" 
+                      alt="User" 
+                      width={40} 
+                      height={40}
+                      className="object-cover"
+                    />
+                  </div>
+                  <span className="text-gray-900 font-outfit font-semibold hidden sm:inline">Aklima Tul</span>
+                  <ChevronDown size={20} className={`text-gray-600 hidden sm:block transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {isProfileDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    <Link 
+                      href="#"
+                      className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      Help Center
+                    </Link>
+                    <Link 
+                      href="/my-profile"
+                      className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      My Profile
+                    </Link>
+                    <Link 
+                      href="#"
+                      className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      Privacy Policy
+                    </Link>
+                    <Link 
+                      href="#"
+                      className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      Payment History
+                    </Link>
+                    <button 
+                      className="block w-full text-left px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Sign Out Button - Hidden on mobile, shown on larger screens */}
+              <button className="hidden lg:flex px-6 py-2 border-2 border-[#E3572B] text-[#E3572B] rounded-lg font-outfit font-semibold hover:bg-[#E3572B] hover:text-white transition-all">
                 Sign out
               </button>
             </div>
@@ -147,7 +296,7 @@ const DashboardPage = () => {
           Hello, {userName}!
         </h1>
         <h2 className="text-4xl md:text-6xl font-medium  mb-8 font-outfit text-center">
-          Here's your personalized list of universities!
+          Here&apos;s your personalized list of universities!
         </h2>
 
         {/* Shortlist Banner */}
