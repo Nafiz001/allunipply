@@ -10,7 +10,15 @@ export default function ConditionalLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const hideNavAndFooter = pathname === "/sign-in" || pathname === "/sign-up" || pathname === "/otp-verification" || pathname === "/dashboard" || pathname === "/my-profile" ;
+  const hideNavAndFooter =
+    pathname === "/sign-in" ||
+    pathname === "/sign-up" ||
+    pathname === "/otp-verification" ||
+    pathname === "/dashboard" ||
+    pathname === "/my-profile" ||
+    pathname === "/national-university/start-applying" ||
+    pathname === "/national-university/public-university" ||
+    pathname.startsWith("/national-university/public-university/");
 
   return (
     <>

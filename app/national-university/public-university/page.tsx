@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import Image from "next/image";
+import Link from "next/link";
 import { Search, SlidersHorizontal, CircleDollarSign, Clock, X, ChevronDown, Crown } from 'lucide-react';
 import DashboardHeader from "@/components/layout/DashboardHeader";
 
-const DashboardPage = () => {
+const PublicUniversityPage = () => {
   const [userName] = useState('Aklima');
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,65 +35,65 @@ const DashboardPage = () => {
   const universities = [
     {
       id: 1,
-      name: "University of Delaware",
-      location: "United States",
-      image: "/universities/delaware.png",
+      name: "University of Chittagong",
+      location: "Chittagong",
+      image: "/universities/chittagong.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 2,
-      name: "University of Delaware",
-      location: "United States",
-      image: "/universities/delaware.png",
+      name: "University of Chittagong",
+      location: "Chittagong",
+      image: "/universities/chittagong.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 3,
-      name: "University of Delaware",
-      location: "United States",
-      image: "/universities/delaware.png",
+      name: "University of Chittagong",
+      location: "Chittagong",
+      image: "/universities/chittagong.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 4,
-      name: "University of Delaware",
-      location: "United States",
-      image: "/universities/delaware.png",
+      name: "University of Chittagong",
+      location: "Chittagong",
+      image: "/universities/chittagong.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 5,
-      name: "University of Delaware",
-      location: "United States",
-      image: "/universities/delaware.png",
+      name: "University of Chittagong",
+      location: "Chittagong",
+      image: "/universities/chittagong.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 6,
-      name: "University of Delaware",
-      location: "United States",
-      image: "/universities/delaware.png",
+      name: "University of Chittagong",
+      location: "Chittagong",
+      image: "/universities/chittagong.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 7,
-      name: "University of Delaware",
-      location: "United States",
-      image: "/universities/delaware.png",
+      name: "University of Chittagong",
+      location: "Chittagong",
+      image: "/universities/chittagong.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 8,
-      name: "University of Delaware",
-      location: "United States",
-      image: "/universities/delaware.png",
+      name: "University of Chittagong",
+      location: "Chittagong",
+      image: "/universities/chittagong.png",
       price: "$21,090/year",
       duration: "24 months"
     }
@@ -218,11 +219,15 @@ const DashboardPage = () => {
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3">
                   <button className="flex-1 py-3 text-[#E3572B] text-sm font-semibold font-outfit rounded-full hover:bg-gray-50 transition-colors" style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}>
-                    Shortlisted
+                    Apply Now
                   </button>
-                  <button className="flex-1 py-3 text-[#E3572B] text-sm font-semibold font-outfit rounded-full hover:bg-gray-50 transition-colors" style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}>
+                  <Link
+                    href="/national-university/public-university/see-all-details"
+                    className="flex-1 py-3 text-[#E3572B] text-sm font-semibold font-outfit rounded-full hover:bg-gray-50 transition-colors text-center"
+                    style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}
+                  >
                     See all details
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -250,7 +255,7 @@ const DashboardPage = () => {
               </p>
             </div>
             <button className="px-10 py-3 bg-white text-gray-900 rounded-full font-outfit font-semibold hover:shadow-lg transition-all whitespace-nowrap">
-              Try gain
+              Try again
             </button>
           </div>
         </div>
@@ -321,7 +326,7 @@ const DashboardPage = () => {
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit text-gray-500 focus:outline-none focus:border-[#E3572B] transition-colors appearance-none"
                         >
                           <option value="">Which country</option>
-                          <option value="usa">United States</option>
+                          <option value="usa">Chittagong</option>
                           <option value="uk">United Kingdom</option>
                           <option value="canada">Canada</option>
                           <option value="australia">Australia</option>
@@ -660,6 +665,7 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage;
+export default PublicUniversityPage;
+
 
 

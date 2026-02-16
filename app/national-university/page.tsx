@@ -86,13 +86,19 @@ const page = () => {
           </p>
 
           {/* Filter Tabs */}
-          <div className="flex flex-wrap gap-3 md:gap-4 justify-center">
-            <button className="px-6 py-2.5 md:px-8 md:py-3 rounded-t-2xl bg-[#e67609] text-white font-outfit font-semibold text-sm md:text-base hover:bg-[#e67609] transition-all">
+          <div className="flex flex-wrap gap-3 md:gap-4 justify-center my-4">
+            <Link
+              href="/national-university/public-university"
+              className="px-6 py-2.5 md:px-8 md:py-3 rounded-full bg-[#e67609] text-white font-outfit font-semibold text-sm md:text-base hover:cursor-pointer transition-all"
+            >
               Public University
-            </button>
-            <button className="px-6 py-2.5 md:px-8 md:py-3 rounded-t-2xl bg-white text-gray-700 font-outfit font-semibold text-sm md:text-base hover:bg-gray-100 transition-all">
+            </Link>
+            <Link
+              href="/national-university/start-applying"
+              className="px-6 py-2.5 md:px-8 md:py-3 rounded-full bg-[#e67609] text-white font-outfit font-semibold text-sm md:text-base hover:cursor-pointer transition-all"
+            >
               Start Applying
-            </button>
+            </Link>
           </div>
 
           {/* Search/Filter Card */}
@@ -375,10 +381,12 @@ const page = () => {
 
         {/* Start Application Button */}
         <div className="flex justify-center">
-          <button className="px-8 py-3.5 rounded-xl rou bg-[#E3572B] text-white font-outfit font-bold text-base md:text-lg hover:bg-[#e67609] transition-all flex items-center gap-3 shadow-lg border border-black">
+          <Link
+            href="/national-university/start-applying"
+            className="px-8 py-3.5 rounded-xl rou bg-[#E3572B] text-white font-outfit font-bold text-base md:text-lg hover:bg-[#e67609] transition-all flex items-center gap-3 shadow-lg border border-black"
+          >
             Start Application now
-            
-          </button>
+          </Link>
         </div>
       </div>
 

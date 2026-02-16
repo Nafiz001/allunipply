@@ -1,43 +1,15 @@
 "use client";
 
 import React, { useState } from 'react';
-import Image from "next/image";
-import Link from "next/link";
-import { Bell, ChevronDown, Search, SlidersHorizontal, Check, Trash2, Download, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Check, Trash2, Download } from 'lucide-react';
+import DashboardHeader from "@/components/layout/DashboardHeader";
 
 const MyProfilePage = () => {
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notificationTab, setNotificationTab] = useState<'all' | 'unread'>('all');
   const [activeTab, setActiveTab] = useState('myApplication');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProgramTab, setSelectedProgramTab] = useState('find');
   const [sortBy, setSortBy] = useState('deadline');
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-
-  const notifications = [
-    {
-      id: 1,
-      icon: '⚠️',
-      message: 'Welcome to allunipply. Please complete your profile update',
-      time: '2m ago',
-      isRead: false
-    },
-    {
-      id: 2,
-      icon: '✅',
-      message: 'You have started your application process. Finish it before deadline.',
-      time: '2m ago',
-      isRead: false
-    },
-    {
-      id: 3,
-      icon: '💼',
-      message: 'Try our new premium package offer',
-      time: '2m ago',
-      isRead: false
-    }
-  ];
 
   // Programs data
   const [programs] = useState([
@@ -284,173 +256,14 @@ const MyProfilePage = () => {
         </>
       )}
 
-      {/* Header */}
-      <div className="bg-white ">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="">
-            <Image src="/icons/logo.png" alt="allunipply logo" width={216} height={84} className="object-contain" />
-          </Link>
+      <DashboardHeader />
 
-            {/* User Actions */}
-            <div className="flex items-center gap-4">
-              {/* Notification Bell */}
-              <div className="relative">
-                <button 
-                  className="relative"
-                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                >
-                  <Bell size={24} className="text-gray-600" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-                </button>
-
-                {/* Notification Dropdown */}
-                {isNotificationOpen && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-30"
-                      onClick={() => setIsNotificationOpen(false)}
-                    ></div>
-                    <div className="absolute right-0 top-12 w-96 bg-[#4A4A4A] rounded-3xl shadow-2xl z-40 overflow-hidden">
-                      {/* Header */}
-                      <div className="px-6 py-5 flex items-center justify-between border-b border-gray-600">
-                        <div className="flex items-center gap-3">
-                          <div className="w-1 h-8 bg-[#E3572B] rounded-full"></div>
-                          <h2 className="text-white text-2xl font-bold font-outfit">Notification</h2>
-                        </div>
-                        <button 
-                          onClick={() => setIsNotificationOpen(false)}
-                          className="text-white hover:text-gray-300 transition-colors"
-                        >
-                          <X size={24} />
-                        </button>
-                      </div>
-
-                      {/* Tabs */}
-                      <div className="px-6 py-4">
-                        <div className="flex gap-3">
-                          <button
-                            onClick={() => setNotificationTab('all')}
-                            className={`flex-1 py-3 rounded-full font-outfit font-semibold text-sm transition-all ${
-                              notificationTab === 'all'
-                                ? 'bg-[#E3572B] text-white'
-                                : 'bg-transparent text-white hover:bg-gray-600'
-                            }`}
-                          >
-                            All
-                          </button>
-                          <button
-                            onClick={() => setNotificationTab('unread')}
-                            className={`flex-1 py-3 rounded-full font-outfit font-semibold text-sm transition-all ${
-                              notificationTab === 'unread'
-                                ? 'bg-[#E3572B] text-white'
-                                : 'bg-transparent text-white hover:bg-gray-600'
-                            }`}
-                          >
-                            Unread
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Notifications List */}
-                      <div className="px-6 pb-6 space-y-4 max-h-96 overflow-y-auto">
-                        {notifications.map((notification) => (
-                          <div key={notification.id} className="flex gap-4">
-                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0">
-                              <Bell size={24} className="text-[#E3572B]" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-white font-outfit text-sm mb-1">
-                                <span className="mr-1">{notification.icon}</span>
-                                {notification.message}
-                              </p>
-                              <p className="text-gray-400 text-xs font-outfit">{notification.time}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* View All Button */}
-                      <div className="px-6 pb-6">
-                        <button className="w-full py-4 bg-[#E3572B] text-white rounded-2xl font-outfit font-semibold hover:bg-[#d95d39] transition-all">
-                          View all notifications
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* User Profile with Dropdown */}
-              <div className="relative">
-                <button 
-                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center gap-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-                    <Image 
-                      src="/icons/user-avatar.png" 
-                      alt="User" 
-                      width={40} 
-                      height={40}
-                      className="object-cover"
-                    />
-                  </div>
-                  <span className="text-gray-900 font-outfit font-semibold hidden sm:inline">Aklima Tul</span>
-                  <ChevronDown size={20} className={`text-gray-600 hidden sm:block transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Dropdown Menu */}
-                {isProfileDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                    <Link 
-                      href="#"
-                      className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
-                    >
-                      Help Center
-                    </Link>
-                    <Link 
-                      href="/my-profile"
-                      className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
-                    >
-                      My Profile
-                    </Link>
-                    <Link 
-                      href="#"
-                      className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
-                    >
-                      Privacy Policy
-                    </Link>
-                    <Link 
-                      href="#"
-                      className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
-                    >
-                      Payment History
-                    </Link>
-                    <button 
-                      className="block w-full text-left px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
-                    >
-                      Sign Out
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Sign Out Button - Hidden on mobile, shown on larger screens */}
-              <button className="hidden lg:flex px-6 py-2 border-2 border-[#E3572B] text-[#E3572B] rounded-lg font-outfit font-semibold hover:bg-[#E3572B] hover:text-white transition-all">
-                Sign out
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
       {/* Navigation Tabs */}
           <div className="border-b border-gray-200">
             <div className="flex items-center gap-8 max-w-7xl mx-auto px-4 justify-between">
               <button
                 onClick={() => setActiveTab('myApplication')}
-                className={`py-4 font-outfit text-sm font-medium transition-colors relative ${
+                className={`py-4 font-outfit text-[22px] font-medium transition-colors relative ${
                   activeTab === 'myApplication'
                     ? 'text-[#E3572B]'
                     : 'text-gray-500 hover:text-gray-700'
@@ -463,7 +276,7 @@ const MyProfilePage = () => {
               </button>
               <button
                 onClick={() => setActiveTab('addPrograms')}
-                className={`py-4 font-outfit text-sm font-medium transition-colors relative ${
+                className={`py-4 font-outfit text-[22px] font-medium transition-colors relative ${
                   activeTab === 'addPrograms'
                     ? 'text-[#E3572B]'
                     : 'text-gray-500 hover:text-gray-700'
@@ -476,7 +289,7 @@ const MyProfilePage = () => {
               </button>
               <button
                 onClick={() => setActiveTab('submitApplication')}
-                className={`py-4 font-outfit text-sm font-medium transition-colors relative ${
+                className={`py-4 font-outfit text-[22px] font-medium transition-colors relative ${
                   activeTab === 'submitApplication'
                     ? 'text-[#E3572B]'
                     : 'text-gray-500 hover:text-gray-700'
@@ -489,7 +302,7 @@ const MyProfilePage = () => {
               </button>
               <button
                 onClick={() => setActiveTab('checkStatus')}
-                className={`py-4 font-outfit text-sm font-medium transition-colors relative ${
+                className={`py-4 font-outfit text-[22px] font-medium transition-colors relative ${
                   activeTab === 'checkStatus'
                     ? 'text-[#E3572B]'
                     : 'text-gray-500 hover:text-gray-700'
@@ -577,7 +390,7 @@ const MyProfilePage = () => {
                   </p>
                 </div>
                 <button className="px-10 py-3 bg-white text-gray-900 rounded-full font-outfit font-semibold hover:shadow-lg transition-all whitespace-nowrap">
-                  Try gain
+                  Try again
                 </button>
               </div>
             </div>
@@ -586,7 +399,7 @@ const MyProfilePage = () => {
 
         {/* Add Program Tab Content */}
         {activeTab === 'addPrograms' && (
-          <div className="bg-[#FFF4EA] rounded-3xl p-6 md:p-8">
+          <div className="bg-[#ff8b2221] rounded-3xl p-6 md:p-8">
             {/* Sub Navigation */}
             <div className="flex gap-2 mb-6">
               <button
@@ -700,7 +513,7 @@ const MyProfilePage = () => {
             </div>
 
             {/* Summary Bar */}
-            <div className="bg-[#FFF4EA] rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
+            <div className=" rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
               <div>
                 <p className="text-gray-700 font-outfit text-sm mb-1">Applications ready for submission</p>
                 <p className="text-5xl font-bold text-gray-900 font-outfit">0</p>
@@ -715,12 +528,12 @@ const MyProfilePage = () => {
             </div>
 
             {/* Sort By */}
-            <div className="flex items-center gap-2 mb-6">
+            <div className="bg-[#FFF4EA]  p-4 flex items-center gap-2 mb-6">
               <span className="font-outfit text-sm text-gray-700">Sort By</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 rounded-full bg-[#E3572B] text-white font-outfit font-semibold text-sm border-none focus:outline-none cursor-pointer"
+                className="px-3 py-2 rounded-full bg-[#E3572B] text-white font-outfit font-semibold text-sm border-none focus:outline-none cursor-pointer"
               >
                 <option value="deadline">Deadline</option>
                 <option value="university">University</option>
@@ -731,46 +544,53 @@ const MyProfilePage = () => {
             {/* Application Cards */}
             <div className="space-y-6">
               {applicationsForSubmission.map((app) => (
-                <div key={app.id} className="bg-white rounded-2xl border border-gray-200 p-8">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 font-outfit mb-2">{app.university}</h3>
-                      <p className="text-gray-600 font-outfit">{app.program}</p>
-                    </div>
-                    <div className="flex gap-4">
-                      <button className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center hover:bg-red-200 transition-colors">
-                        <Trash2 size={20} className="text-red-600" />
-                      </button>
-                      <button className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                        <Download size={20} className="text-gray-600" />
-                      </button>
-                    </div>
-                  </div>
+                <div key={app.id}>
+                  <div className="bg-[#F4EEEA] rounded-[28px] p-8 md:p-10">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 md:gap-10">
+                      <div>
+                        <h3 className="text-[20px] leading-tight md:text-[32px] font-bold text-gray-900 font-outfit mb-4">
+                          {app.university}
+                        </h3>
+                        <p className="text-[30px] leading-snug text-gray-800 font-outfit mb-8">{app.program}</p>
+                        <div className="w-full max-w-[320px] bg-[#E3DCD4] h-[8px] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#F08A24] rounded-full transition-all"
+                            style={{ width: `${Math.max(0, Math.min(app.progress, 100)) * 0.3}%` }}
+                          ></div>
+                        </div>
+                      </div>
 
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-outfit text-sm text-gray-700">Deadline:</span>
-                        <span className="font-outfit text-sm font-semibold text-gray-900">{app.deadline}</span>
+                      <div className="space-y-3 md:pt-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-outfit text-[20px] text-gray-900">Deadline :</span>
+                          <span className="font-outfit text-[20px] text-gray-900">{app.deadline}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-outfit text-[20px] text-gray-900">Term :</span>
+                          <span className="font-outfit text-[20px] text-gray-900">{app.term}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-outfit text-sm text-gray-700">Term:</span>
-                        <span className="font-outfit text-sm font-semibold text-gray-900">{app.term}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[#E3572B] rounded-full transition-all"
-                          style={{ width: `${app.progress}%` }}
-                        ></div>
+
+                      <div className="flex items-center gap-5 md:pt-1">
+                        <button className="text-[#E7CFC8] hover:text-[#D9B4AA] transition-colors">
+                          <Download size={34} />
+                        </button>
+                        <button className="text-[#E7CFC8] hover:text-[#D9B4AA] transition-colors">
+                          <Trash2 size={34} />
+                        </button>
                       </div>
                     </div>
-                    <button 
+                    <div className="flex justify-center mt-4">
+                    <button
                       onClick={() => setIsSubmitModalOpen(true)}
-                      className="px-10 py-3 bg-[#E3572B] text-white rounded-full font-outfit font-semibold hover:bg-[#d95d39] transition-all"
+                      className="min-w-[230px] px-10 py-3 bg-[#E3572B] text-white rounded-[22px] font-outfit text-[24px] leading-none hover:bg-[#d95d39] transition-all"
                     >
                       Submit
                     </button>
                   </div>
+                  </div>
+
+                  
                 </div>
               ))}
             </div>
@@ -780,7 +600,7 @@ const MyProfilePage = () => {
         {/* Check Status Tab Content */}
         {activeTab === 'checkStatus' && (
           <>
-            <div className="bg-[#FFF4EA] rounded-2xl p-6 mb-8">
+            <div className="bg-[#ffe5ce] rounded-2xl p-6 mb-8">
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <h4 className="font-outfit font-bold text-gray-900 text-sm mb-2">My Program</h4>
@@ -797,15 +617,17 @@ const MyProfilePage = () => {
             {/* Status Cards */}
             <div className="space-y-6">
               {applicationStatuses.map((status) => (
-                <div key={status.id} className="bg-white rounded-2xl border border-gray-200 p-8">
-                  <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-                    <div className="flex-1">
+                <div key={status.id} className="bg-[#fff4ea8f] rounded-2xl border border-gray-200 p-8">
+                  <div className="flex flex-col md:flex-row justify-between items-start">
+                    <div className="">
                       <h3 className="text-2xl font-bold text-gray-900 font-outfit mb-1">
                         {status.university} - <span className="text-[#E3572B]">{status.status}</span>
                       </h3>
                       <p className="text-gray-600 font-outfit">{status.program}</p>
 
-                      <div className="mt-6 space-y-3">
+                      
+                    </div>
+                    <div className="mt-6 space-y-3">
                         {status.steps.map((step, idx) => (
                           <div key={idx} className="flex items-center gap-3">
                             {step.completed ? (
@@ -819,7 +641,6 @@ const MyProfilePage = () => {
                           </div>
                         ))}
                       </div>
-                    </div>
 
                     {/* Progress Circle */}
                     <div className="relative shrink-0">
@@ -848,3 +669,5 @@ const MyProfilePage = () => {
 };
 
 export default MyProfilePage;
+
+
