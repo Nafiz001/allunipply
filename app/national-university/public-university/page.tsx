@@ -218,9 +218,13 @@ const PublicUniversityPage = () => {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3">
-                  <button className="flex-1 py-3 text-[#E3572B] text-sm font-semibold font-outfit rounded-full hover:bg-gray-50 transition-colors" style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}>
+                  <Link
+                    href="/national-university/public-university/my-application"
+                    className="flex-1 py-3 text-[#E3572B] text-sm font-semibold font-outfit rounded-full hover:bg-gray-50 transition-colors text-center"
+                    style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}
+                  >
                     Apply Now
-                  </button>
+                  </Link>
                   <Link
                     href="/national-university/public-university/see-all-details"
                     className="flex-1 py-3 text-[#E3572B] text-sm font-semibold font-outfit rounded-full hover:bg-gray-50 transition-colors text-center"
