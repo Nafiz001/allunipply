@@ -88,7 +88,7 @@ const page = () => {
           {/* Filter Tabs */}
           <div className="flex flex-wrap gap-3 md:gap-4 justify-center my-4">
             <Link
-              href="/national-university/public-university"
+              href="/national-university/public-university?openFinder=true"
               className="px-6 py-2.5 md:px-8 md:py-3 rounded-full bg-[#e67609] text-white font-outfit font-semibold text-sm md:text-base hover:cursor-pointer transition-all"
             >
               Public University

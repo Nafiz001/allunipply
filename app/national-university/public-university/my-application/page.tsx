@@ -2,6 +2,7 @@
 
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import Link from "next/link";
+import MyApplicationTabs from "@/components/national-university/MyApplicationTabs";
 
 const applicationSections = [
   {
@@ -42,19 +43,7 @@ const PublicUniversityMyApplicationPage = () => {
         />
 
         <div className="relative max-w-5xl mx-auto px-4 py-10 md:py-14">
-          <div className="border-b border-gray-200 mb-10">
-            <div className="flex items-center justify-center gap-8 md:gap-16">
-              <button className="py-4 px-2 font-outfit text-base md:text-xl font-medium text-[#E3572B] border-b-2 border-[#E3572B]">
-                My Application
-              </button>
-              <button className="py-4 px-2 font-outfit text-base md:text-xl font-medium text-gray-500 hover:text-gray-700 transition-colors">
-                Submit Application
-              </button>
-              <button className="py-4 px-2 font-outfit text-base md:text-xl font-medium text-gray-500 hover:text-gray-700 transition-colors">
-                Check Status
-              </button>
-            </div>
-          </div>
+          <MyApplicationTabs activeTab="my-application" />
 
           <div className="text-center mb-10">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 font-outfit mb-4">My Application</h1>
