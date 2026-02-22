@@ -6,13 +6,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 
+const slides = ['/icons/laptop.png', '/icons/slider2.png', '/icons/slider3.png'];
+
 const SignInPage = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
-  const slides = ['/icons/laptop.png', '/icons/slider2.png', '/icons/slider3.png'];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -24,7 +25,7 @@ const SignInPage = () => {
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     // Validate credentials here if needed
-    router.push('/dashboard');
+    router.push('/dashboard?openFilter=true');
   };
 
   return (
@@ -43,7 +44,7 @@ const SignInPage = () => {
               Get Started
             </h1>
             <p className="text-gray-700 mb-8 font-outfit">
-              Welcome! We're thrilled to have you
+              Welcome! We&apos;re thrilled to have you
             </p>
 
             {/* Email Input */}
@@ -114,7 +115,7 @@ const SignInPage = () => {
 
             {/* Sign Up Link */}
             <p className="text-center text-gray-600 font-outfit">
-              Don't have an account yet?{' '}
+              Don&apos;t have an account yet?{' '}
               <Link href="/sign-up" className="text-[#E3572B] font-semibold hover:underline">
                 Sign up
               </Link>

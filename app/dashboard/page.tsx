@@ -1,14 +1,21 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
-import { Search, SlidersHorizontal, CircleDollarSign, Clock, X, ChevronDown, Crown } from 'lucide-react';
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Search, SlidersHorizontal, CircleDollarSign, Clock, X, ChevronDown, Crown } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 
-const DashboardPage = () => {
-  const [userName] = useState('Aklima');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const DashboardPageContent = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const shouldAutoOpenFilter = searchParams.get("openFilter") === "true";
+
+  const [userName] = useState("Aklima");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(shouldAutoOpenFilter);
   const [currentStep, setCurrentStep] = useState(1);
   
   // Form state
@@ -30,6 +37,12 @@ const DashboardPage = () => {
     projects: '',
     researchPapers: ''
   });
+
+  useEffect(() => {
+    if (shouldAutoOpenFilter) {
+      router.replace(pathname, { scroll: false });
+    }
+  }, [pathname, router, shouldAutoOpenFilter]);
 
   const universities = [
     {
@@ -154,7 +167,10 @@ const DashboardPage = () => {
 
           {/* Filter Button */}
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setCurrentStep(1);
+              setIsModalOpen(true);
+            }}
             className="px-6 py-3 border-2 border-gray-300 rounded-full font-outfit font-semibold text-gray-700 hover:border-[#E3572B] transition-all flex items-center justify-center gap-2"
           >
             <SlidersHorizontal size={20} />
@@ -217,9 +233,13 @@ const DashboardPage = () => {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3">
-                  <button className="flex-1 py-3 text-[#E3572B] text-sm font-semibold font-outfit rounded-full hover:bg-gray-50 transition-colors" style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}>
+                  <Link
+                    href="/dashboard/my-application"
+                    className="flex-1 py-3 text-[#E3572B] text-sm font-semibold font-outfit rounded-full hover:bg-gray-50 transition-colors text-center"
+                    style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}
+                  >
                     Shortlisted
-                  </button>
+                  </Link>
                   <button className="flex-1 py-3 text-[#E3572B] text-sm font-semibold font-outfit rounded-full hover:bg-gray-50 transition-colors" style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}>
                     See all details
                   </button>
@@ -249,8 +269,14 @@ const DashboardPage = () => {
                 Consult with our experts to understand how to create the best shortlist for your needs
               </p>
             </div>
-            <button className="px-10 py-3 bg-white text-gray-900 rounded-full font-outfit font-semibold hover:shadow-lg transition-all whitespace-nowrap">
-              Try gain
+            <button
+              onClick={() => {
+                setCurrentStep(1);
+                setIsModalOpen(true);
+              }}
+              className="px-10 py-3 bg-white text-gray-900 rounded-full font-outfit font-semibold hover:shadow-lg transition-all whitespace-nowrap"
+            >
+              Try again
             </button>
           </div>
         </div>
@@ -657,6 +683,14 @@ const DashboardPage = () => {
         </div>
       )}
     </div>
+  );
+};
+
+const DashboardPage = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F5F5F5]" />}>
+      <DashboardPageContent />
+    </Suspense>
   );
 };
 

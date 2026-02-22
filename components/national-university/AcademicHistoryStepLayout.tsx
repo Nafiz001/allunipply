@@ -60,7 +60,7 @@ const AcademicHistoryStepLayout = ({
 
         <div className="relative max-w-7xl mx-auto px-4 py-8 md:py-12">
           <div className="border-b border-gray-200 mb-8">
-            <div className="flex items-center justify-center gap-8 md:gap-16">
+            <div className="flex items-center justify-between gap-8 md:gap-16">
               <Link
                 href="/national-university/public-university/my-application"
                 className="py-4 px-2 font-outfit text-sm md:text-[22px] font-medium text-[#E3572B] border-b-2 border-[#E3572B]"

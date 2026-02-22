@@ -15,6 +15,7 @@ export default function ConditionalLayout({
     pathname === "/sign-up" ||
     pathname === "/otp-verification" ||
     pathname === "/dashboard" ||
+    pathname.startsWith("/dashboard/") ||
     pathname === "/my-profile" ||
     pathname === "/national-university/start-applying" ||
     pathname === "/national-university/public-university" ||

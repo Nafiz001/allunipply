@@ -29,7 +29,7 @@ const tabs: Array<{ key: TabKey; label: string; href: string }> = [
 const MyApplicationTabs = ({ activeTab }: MyApplicationTabsProps) => {
   return (
     <div className="border-b border-gray-200 mb-10">
-      <div className="flex items-center justify-center gap-8 md:gap-16">
+      <div className="flex items-center justify-between gap-8 md:gap-16">
         {tabs.map((tab) => (
           <Link
             key={tab.key}
