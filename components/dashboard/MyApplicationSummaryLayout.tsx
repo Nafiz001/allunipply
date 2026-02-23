@@ -6,7 +6,7 @@ import DashboardHeader from "@/components/layout/DashboardHeader";
 type MyApplicationSummaryLayoutProps = {
   title: string;
   cardTitle: string;
-  items: string[];
+  items: Array<string | { label: string; href?: string }>;
   progressWidthClass?: string;
 };
 
@@ -74,11 +74,30 @@ const MyApplicationSummaryLayout = ({
             </div>
 
             <div className="space-y-3">
-              {items.map((item) => (
-                <div key={item} className="w-full rounded-md bg-[#F4DAC3] text-gray-600 px-4 py-2 text-sm font-outfit">
-                  {item}
-                </div>
-              ))}
+              {items.map((item) => {
+                const entry = typeof item === "string" ? { label: item } : item;
+
+                if (entry.href) {
+                  return (
+                    <Link
+                      key={entry.label}
+                      href={entry.href}
+                      className="w-full block rounded-md bg-[#F4DAC3] text-gray-600 px-4 py-2 text-sm font-outfit hover:bg-[#f0d4bc] transition-colors"
+                    >
+                      {entry.label}
+                    </Link>
+                  );
+                }
+
+                return (
+                  <div
+                    key={entry.label}
+                    className="w-full rounded-md bg-[#F4DAC3] text-gray-600 px-4 py-2 text-sm font-outfit"
+                  >
+                    {entry.label}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -88,4 +107,3 @@ const MyApplicationSummaryLayout = ({
 };
 
 export default MyApplicationSummaryLayout;
-

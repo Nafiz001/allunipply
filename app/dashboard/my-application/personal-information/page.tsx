@@ -8,10 +8,22 @@ const PersonalInformationPage = () => {
       title="Personal Information"
       cardTitle="Personal Information"
       items={[
-        "Release & Acknowledge statement",
-        "Biometric information",
-        "Contact information",
-        "Other Information",
+        {
+          label: "Release & Acknowledge statement",
+          href: "/dashboard/my-application/personal-information/release-acknowledge-statement",
+        },
+        {
+          label: "Biometric information",
+          href: "/dashboard/my-application/personal-information/biometric-information",
+        },
+        {
+          label: "Contact information",
+          href: "/dashboard/my-application/personal-information/contact-information",
+        },
+        {
+          label: "Other Information",
+          href: "/dashboard/my-application/personal-information/other-information",
+        },
       ]}
       progressWidthClass="w-[20%]"
     />
@@ -19,4 +31,3 @@ const PersonalInformationPage = () => {
 };
 
 export default PersonalInformationPage;
-
