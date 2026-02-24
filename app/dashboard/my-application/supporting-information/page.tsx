@@ -7,11 +7,15 @@ const SupportingInformationPage = () => {
     <MyApplicationSummaryLayout
       title="Supporting Information"
       cardTitle="Supporting Information"
-      items={["Documents"]}
+      items={[
+        {
+          label: "Documents",
+          href: "/dashboard/my-application/supporting-information/documents",
+        },
+      ]}
       progressWidthClass="w-[20%]"
     />
   );
 };
 
 export default SupportingInformationPage;
-

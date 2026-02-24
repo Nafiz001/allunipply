@@ -7,11 +7,15 @@ const ProgramMaterialsPage = () => {
     <MyApplicationSummaryLayout
       title="Program Materials"
       cardTitle="Program Materials"
-      items={["Program-details"]}
+      items={[
+        {
+          label: "Program details",
+          href: "/dashboard/my-application/program-materials/program-details",
+        },
+      ]}
       progressWidthClass="w-[20%]"
     />
   );
 };
 
 export default ProgramMaterialsPage;
-
