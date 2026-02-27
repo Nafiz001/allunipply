@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight, CircleUserRound } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 
@@ -41,7 +42,15 @@ const helpItems = [
 ];
 
 const MyProfilePage = () => {
+  const searchParams = useSearchParams();
   const [activeSection, setActiveSection] = useState<ProfileSection>("profile");
+
+  useEffect(() => {
+    const section = searchParams.get("section") as ProfileSection | null;
+    if (section && ["profile", "privacy", "payment", "help"].includes(section)) {
+      setActiveSection(section);
+    }
+  }, [searchParams]);
 
   const sectionTitle = useMemo(() => {
     if (activeSection === "privacy") return "Privacy Policy";

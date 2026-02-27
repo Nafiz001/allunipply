@@ -171,26 +171,30 @@ const DashboardHeader = () => {
               {isProfileDropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                   <Link
-                    href="#"
+                    href="/my-profile?section=help"
                     className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsProfileDropdownOpen(false)}
                   >
                     Help Center
                   </Link>
                   <Link
-                    href="/my-profile"
+                    href="/my-profile?section=profile"
                     className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsProfileDropdownOpen(false)}
                   >
                     My Profile
                   </Link>
                   <Link
-                    href="#"
+                    href="/my-profile?section=privacy"
                     className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsProfileDropdownOpen(false)}
                   >
                     Privacy Policy
                   </Link>
                   <Link
-                    href="#"
+                    href="/my-profile?section=payment"
                     className="block px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsProfileDropdownOpen(false)}
                   >
                     Payment History
                   </Link>
