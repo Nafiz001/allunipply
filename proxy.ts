@@ -5,6 +5,7 @@ const AUTH_COOKIE = "allunipply_auth";
 const isProtectedRoute = (pathname: string) => {
   return (
     pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/scholarship") ||
     pathname.startsWith("/national-university/public-university") ||
     pathname === "/national-university/start-applying"
   );
@@ -31,8 +32,9 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/scholarship",
+    "/scholarship/:path*",
     "/national-university/public-university/:path*",
     "/national-university/start-applying",
   ],
 };
-

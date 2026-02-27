@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Bell, ChevronDown, X } from "lucide-react";
 
 type NotificationTab = "all" | "unread";
@@ -32,9 +33,16 @@ const notifications = [
 ];
 
 const DashboardHeader = () => {
+  const router = useRouter();
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notificationTab, setNotificationTab] = useState<NotificationTab>("all");
+
+  const handleSignOut = () => {
+    document.cookie = "allunipply_auth=; path=/; max-age=0; samesite=lax";
+    setIsProfileDropdownOpen(false);
+    router.push("/");
+  };
 
   const visibleNotifications =
     notificationTab === "all"
@@ -186,14 +194,20 @@ const DashboardHeader = () => {
                   >
                     Payment History
                   </Link>
-                  <button className="block w-full text-left px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors">
+                  <button
+                    onClick={handleSignOut}
+                    className="block w-full text-left px-4 py-3 text-gray-900 font-outfit font-semibold hover:bg-gray-50 transition-colors"
+                  >
                     Sign Out
                   </button>
                 </div>
               )}
             </div>
 
-            <button className="hidden lg:flex px-6 py-2 border-2 border-[#E3572B] text-[#E3572B] rounded-lg font-outfit font-semibold hover:bg-[#E3572B] hover:text-white transition-all">
+            <button
+              onClick={handleSignOut}
+              className="hidden lg:flex px-6 py-2 border-2 border-[#E3572B] text-[#E3572B] rounded-lg font-outfit font-semibold hover:bg-[#E3572B] hover:text-white transition-all"
+            >
               Sign out
             </button>
           </div>

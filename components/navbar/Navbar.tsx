@@ -2,15 +2,65 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { ChevronDown, Menu, X } from 'lucide-react';
 
 const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [showScholarshipAuthModal, setShowScholarshipAuthModal] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
+    const scholarshipTarget = "/scholarship?openFilter=true";
+
+    const handleScholarshipClick = () => {
+        const hasAuthCookie = document.cookie
+            .split("; ")
+            .some((cookie) => cookie.startsWith("allunipply_auth=1"));
+
+        if (hasAuthCookie) {
+            router.push(scholarshipTarget);
+            return;
+        }
+
+        setShowScholarshipAuthModal(true);
+    };
 
     return (
         <div className='bg-[#fff4ea] relative z-50'>
+            {showScholarshipAuthModal ? (
+                <>
+                    <div
+                        className="fixed inset-0 bg-black/35 backdrop-blur-[2px] z-[80]"
+                        onClick={() => setShowScholarshipAuthModal(false)}
+                    />
+                    <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
+                        <div className="w-full max-w-[640px] rounded-[36px] bg-[#F7EFE6] p-8 md:p-12 text-center shadow-2xl">
+                            <h2 className="font-outfit text-4xl md:text-5xl font-bold text-gray-900 mb-10">
+                                Let get you sign up first ?
+                            </h2>
+
+                            <div className="space-y-5 max-w-[320px] mx-auto">
+                                <Link
+                                    href={`/sign-in?next=${encodeURIComponent(scholarshipTarget)}`}
+                                    className="block w-full rounded-full border border-[#E3572B] text-[#E3572B] font-outfit font-bold text-[40px] leading-none py-4 hover:bg-[#fff7f1] transition-colors"
+                                >
+                                    Sign in
+                                </Link>
+
+                                <p className="font-outfit text-4xl font-bold text-gray-900">Or</p>
+
+                                <Link
+                                    href={`/sign-up?next=${encodeURIComponent(scholarshipTarget)}`}
+                                    className="block w-full rounded-full border border-[#E3572B] text-[#E3572B] font-outfit font-bold text-[40px] leading-none py-4 hover:bg-[#fff7f1] transition-colors"
+                                >
+                                    Create account
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            ) : null}
+
             <nav className='flex flex-row justify-between mx-auto max-w-7xl items-center px-2 py-3'>
                 {/* Logo */}
                 <Link href='/' className="logo flex items-center">
@@ -34,7 +84,12 @@ const Navbar = () => {
                         </Link>
                     </li>
                     <li className='relative'>
-                        <button className='nav-link flex items-center gap-1.5  hover:text-[#d95d39] transition-colors'>
+                        <button
+                            onClick={handleScholarshipClick}
+                            className={`nav-link flex items-center gap-1.5 px-5 py-2.5 rounded-full transition-colors ${
+                                pathname === '/scholarship' ? 'bg-[#e3572b] text-white' : 'hover:text-[#d95d39]'
+                            }`}
+                        >
                             Scholarship
                             <ChevronDown size={16} strokeWidth={2.5} />
                         </button>
@@ -90,7 +145,15 @@ const Navbar = () => {
                         </Link>
                     </li>
                     <li>
-                        <button className='nav-link w-full flex items-center justify-center gap-1.5 px-6 py-3 text-[#2d3748] hover:text-[#d95d39] hover:bg-[#e8dfd5] rounded-full transition-colors'>
+                        <button
+                            onClick={() => {
+                                setIsMobileMenuOpen(false);
+                                handleScholarshipClick();
+                            }}
+                            className={`nav-link w-full flex items-center justify-center gap-1.5 px-6 py-3 rounded-full transition-colors ${
+                                pathname === '/scholarship' ? 'bg-[#d95d39] text-white' : 'text-[#2d3748] hover:text-[#d95d39] hover:bg-[#e8dfd5]'
+                            }`}
+                        >
                             Scholarship
                             <ChevronDown size={16} strokeWidth={2.5} />
                         </button>
