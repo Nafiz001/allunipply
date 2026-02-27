@@ -5,7 +5,11 @@ import { Plus, Minus, Heart, ArrowUpRight, Star, Mail, Phone, MapPin, Link as Li
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+let hasHandledScholarModalEntry = false;
+
 export default function Home() {
+  const [showScholarModal, setShowScholarModal] = useState(false);
+  const [scholarBarWidth, setScholarBarWidth] = useState(100);
   const [universityType, setUniversityType] = useState<'national' | 'international'>('national');
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
   const [selectedCountry, setSelectedCountry] = useState('Canada');
@@ -16,6 +20,47 @@ export default function Home() {
   const [tuitionRange, setTuitionRange] = useState([0, 60000]);
   const [isFiltering, setIsFiltering] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (hasHandledScholarModalEntry) {
+      return;
+    }
+    hasHandledScholarModalEntry = true;
+
+    const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    const navType = navEntry?.type;
+
+    let initialPath = window.location.pathname;
+    if (navEntry?.name) {
+      try {
+        initialPath = new URL(navEntry.name).pathname;
+      } catch {
+        initialPath = window.location.pathname;
+      }
+    }
+
+    const shouldOpen =
+      initialPath === "/" && (navType === "reload" || navType === "navigate");
+
+    if (shouldOpen) {
+      setShowScholarModal(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!showScholarModal) {
+      return;
+    }
+
+    setScholarBarWidth(100);
+    const animateTimer = window.setTimeout(() => setScholarBarWidth(0), 30);
+    const closeTimer = window.setTimeout(() => setShowScholarModal(false), 8000);
+
+    return () => {
+      window.clearTimeout(animateTimer);
+      window.clearTimeout(closeTimer);
+    };
+  }, [showScholarModal]);
 
   // Check if any filter is active
   useEffect(() => {
@@ -365,6 +410,60 @@ export default function Home() {
 
   return (
     <div className="">
+      {showScholarModal ? (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/25 backdrop-blur-[2px]"
+            onClick={() => setShowScholarModal(false)}
+          />
+
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="relative w-full max-w-2xl rounded-[28px] bg-[#F7EFE6F2] border border-[#EEDCCB] shadow-2xl p-8 md:p-12 text-center">
+              <button
+                type="button"
+                onClick={() => setShowScholarModal(false)}
+                className="absolute top-4 right-4 h-10 w-10 rounded-full border border-[#E3572B] text-[#E3572B] text-2xl leading-none hover:bg-[#fff7f1] transition-colors"
+                aria-label="Close modal"
+              >
+                &times;
+              </button>
+
+              <div className="mb-8">
+                <div className="h-1.5 w-full rounded-full overflow-hidden bg-white/60">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${scholarBarWidth}%`,
+                      transition: "width 8s linear",
+                      background:
+                        "linear-gradient(90deg, #ff4d4f 0%, #f88210 25%, #facc15 50%, #22c55e 75%, #3b82f6 100%)",
+                    }}
+                  />
+                </div>
+              </div>
+
+              <h2 className="font-outfit font-bold text-3xl md:text-5xl text-gray-900 mb-4">
+                Scholar GPT
+              </h2>
+              <p className="font-outfit text-lg md:text-2xl text-gray-700 mb-10">
+                is loading... coming soon
+              </p>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowScholarModal(false);
+                  router.push("/news-updates");
+                }}
+                className="inline-flex items-center justify-center px-10 py-3 rounded-full bg-[#E3572B] text-white font-outfit font-semibold text-lg hover:bg-[#c24d2b] transition-colors"
+              >
+                Explore More
+              </button>
+            </div>
+          </div>
+        </>
+      ) : null}
+
       {/* Hero Section */}
       <div className="max-w-[1320px] mx-auto px-4 md:px-6 pt-6 md:pt-12">
         <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden">

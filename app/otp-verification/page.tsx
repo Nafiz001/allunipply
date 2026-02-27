@@ -10,12 +10,20 @@ const OTPVerificationPage = () => {
   const [otp, setOtp] = useState(['', '', '', '']);
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = ['/icons/laptop.png', '/icons/slider2.png', '/icons/slider3.png'];
+  const [nextDestination, setNextDestination] = useState("/dashboard?openFilter=true");
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 3000); // Change slide every 3 seconds
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const rawNext = new URLSearchParams(window.location.search).get("next");
+    if (rawNext && rawNext.startsWith("/")) {
+      setNextDestination(rawNext);
+    }
   }, []);
 
   const handleOtpChange = (index: number, value: string) => {
@@ -45,7 +53,8 @@ const OTPVerificationPage = () => {
     e.preventDefault();
     const otpValue = otp.join('');
     console.log('OTP submitted:', otpValue);
-    // Handle OTP verification logic here
+    document.cookie = "allunipply_auth=1; path=/; max-age=2592000; samesite=lax";
+    router.push(nextDestination);
   };
 
   return (

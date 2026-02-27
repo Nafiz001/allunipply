@@ -14,6 +14,8 @@ const SignInPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [nextDestination, setNextDestination] = useState("/dashboard?openFilter=true");
+  const signUpHref = `/sign-up?next=${encodeURIComponent(nextDestination)}`;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -22,10 +24,18 @@ const SignInPage = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const rawNext = new URLSearchParams(window.location.search).get("next");
+    if (rawNext && rawNext.startsWith("/")) {
+      setNextDestination(rawNext);
+    }
+  }, []);
+
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     // Validate credentials here if needed
-    router.push('/dashboard?openFilter=true');
+    document.cookie = "allunipply_auth=1; path=/; max-age=2592000; samesite=lax";
+    router.push(nextDestination);
   };
 
   return (
@@ -101,7 +111,7 @@ const SignInPage = () => {
             </button>
 
             {/* Create Account Button */}
-            <Link href="/sign-up">
+            <Link href={signUpHref}>
               <button className="w-full py-4 bg-[#E3572B] text-white rounded-full font-outfit font-semibold text-lg hover:bg-[#c24d2b] transition-all mb-6">
                 Create Account
               </button>
@@ -116,7 +126,7 @@ const SignInPage = () => {
             {/* Sign Up Link */}
             <p className="text-center text-gray-600 font-outfit">
               Don&apos;t have an account yet?{' '}
-              <Link href="/sign-up" className="text-[#E3572B] font-semibold hover:underline">
+              <Link href={signUpHref} className="text-[#E3572B] font-semibold hover:underline">
                 Sign up
               </Link>
             </p>

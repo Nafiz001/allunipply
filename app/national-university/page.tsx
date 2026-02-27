@@ -3,10 +3,27 @@
 import React, { useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Phone } from 'lucide-react';
 
 const page = () => {
+  const router = useRouter();
   const [selectedUniversityType, setSelectedUniversityType] = useState('public');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const publicUniversityTarget = "/national-university/public-university?openFinder=true";
+
+  const handlePublicUniversityClick = () => {
+    const hasAuthCookie = document.cookie
+      .split("; ")
+      .some((cookie) => cookie.startsWith("allunipply_auth=1"));
+
+    if (hasAuthCookie) {
+      router.push(publicUniversityTarget);
+      return;
+    }
+
+    setShowAuthModal(true);
+  };
 
   // Universities data by category
   const universitiesByType: { [key: string]: Array<{ name: string; type: string; location: string; image: string }> } = {
@@ -56,6 +73,37 @@ const page = () => {
 
   return (
     <div className="">
+      {showAuthModal ? (
+        <>
+          <div className="fixed inset-0 bg-black/35 backdrop-blur-[2px] z-40" onClick={() => setShowAuthModal(false)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="w-full max-w-[640px] rounded-[36px] bg-[#F7EFE6] p-8 md:p-12 text-center shadow-2xl">
+              <h2 className="font-outfit text-4xl md:text-5xl font-bold text-gray-900 mb-10">
+                Let get you sign up first ?
+              </h2>
+
+              <div className="space-y-5 max-w-[320px] mx-auto">
+                <Link
+                  href={`/sign-in?next=${encodeURIComponent(publicUniversityTarget)}`}
+                  className="block w-full rounded-full border border-[#E3572B] text-[#E3572B] font-outfit font-bold text-[40px] leading-none py-4 hover:bg-[#fff7f1] transition-colors"
+                >
+                  Sign in
+                </Link>
+
+                <p className="font-outfit text-4xl font-bold text-gray-900">Or</p>
+
+                <Link
+                  href={`/sign-up?next=${encodeURIComponent(publicUniversityTarget)}`}
+                  className="block w-full rounded-full border border-[#E3572B] text-[#E3572B] font-outfit font-bold text-[40px] leading-none py-4 hover:bg-[#fff7f1] transition-colors"
+                >
+                  Create account
+                </Link>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
+
       {/* Hero Section - Full Width */}
       <div className="relative w-full">
         {/* Background Image */}
@@ -87,12 +135,13 @@ const page = () => {
 
           {/* Filter Tabs */}
           <div className="flex flex-wrap gap-3 md:gap-4 justify-center my-4">
-            <Link
-              href="/national-university/public-university?openFinder=true"
+            <button
+              type="button"
+              onClick={handlePublicUniversityClick}
               className="px-6 py-2.5 md:px-8 md:py-3 rounded-full bg-[#e67609] text-white font-outfit font-semibold text-sm md:text-base hover:cursor-pointer transition-all"
             >
               Public University
-            </Link>
+            </button>
             <Link
               href="/national-university/start-applying"
               className="px-6 py-2.5 md:px-8 md:py-3 rounded-full bg-[#e67609] text-white font-outfit font-semibold text-sm md:text-base hover:cursor-pointer transition-all"

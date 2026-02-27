@@ -16,7 +16,9 @@ const SignUpPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [nextDestination, setNextDestination] = useState("/dashboard?openFilter=true");
   const slides = ['/icons/laptop.png', '/icons/slider2.png', '/icons/slider3.png'];
+  const signInHref = `/sign-in?next=${encodeURIComponent(nextDestination)}`;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -25,9 +27,16 @@ const SignUpPage = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const rawNext = new URLSearchParams(window.location.search).get("next");
+    if (rawNext && rawNext.startsWith("/")) {
+      setNextDestination(rawNext);
+    }
+  }, []);
+
   const handleCreateAccount = () => {
     // Validate form fields here if needed
-    router.push('/otp-verification');
+    router.push(`/otp-verification?next=${encodeURIComponent(nextDestination)}`);
   };
 
   return (
@@ -155,7 +164,7 @@ const SignUpPage = () => {
             {/* Sign In Link */}
             <p className="text-center text-gray-600 font-outfit">
               Already have an account?{' '}
-              <Link href="/sign-in" className="text-[#E3572B] font-semibold hover:underline">
+              <Link href={signInHref} className="text-[#E3572B] font-semibold hover:underline">
                 Sign In
               </Link>
             </p>
