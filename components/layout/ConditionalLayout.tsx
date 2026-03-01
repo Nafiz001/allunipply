@@ -14,6 +14,7 @@ export default function ConditionalLayout({
     pathname === "/sign-in" ||
     pathname === "/sign-up" ||
     pathname === "/otp-verification" ||
+    pathname === "/course-page" ||
     pathname === "/dashboard" ||
     pathname.startsWith("/dashboard/") ||
     pathname === "/scholarship" ||
