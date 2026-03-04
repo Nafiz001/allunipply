@@ -148,7 +148,7 @@ const ScholarshipPageContent = () => {
                 {scholarship.description}
               </p>
 
-              <button className="inline-flex items-center justify-between min-w-[200px] px-6 py-3 rounded-full bg-[#E3572B] text-white font-outfit text-xl leading-none font-medium hover:bg-[#c24d2b] transition-colors">
+              <button className="inline-flex items-center justify-between min-w-[200px] pl-6 py-2 pr-2 rounded-full bg-[#E3572B] text-white font-urbanist text-[18px] leading-none font-medium hover:bg-[#c24d2b] transition-colors">
                 <span>Learn more</span>
                 <span className="ml-5 h-10 w-10 rounded-full bg-[#f58056] flex items-center justify-center">
                   <ArrowRight size={18} />
