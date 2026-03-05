@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 let hasHandledScholarModalEntry = false;
 
 export default function Home() {
-  const [showScholarModal, setShowScholarModal] = useState(false);
+  // Start with true directly to prevent the homepage from flashing
+  const [showScholarModal, setShowScholarModal] = useState(true);
   const [scholarBarWidth, setScholarBarWidth] = useState(100);
   const [universityType, setUniversityType] = useState<'national' | 'international'>('national');
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
@@ -21,12 +22,16 @@ export default function Home() {
   const [isFiltering, setIsFiltering] = useState(false);
   const router = useRouter();
 
+  // Run only once on mount to verify if we SHOULD keep showing it
   useEffect(() => {
     if (hasHandledScholarModalEntry) {
+      setShowScholarModal(false);
       return;
     }
+
     hasHandledScholarModalEntry = true;
 
+    // We check navigation type mostly to respect client-side transitions
     const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
     const navType = navEntry?.type;
 
@@ -39,11 +44,11 @@ export default function Home() {
       }
     }
 
-    const shouldOpen =
-      initialPath === "/" && (navType === "reload" || navType === "navigate");
+    const shouldOpen = initialPath === "/" && (navType === "reload" || navType === "navigate" || !navType);
 
-    if (shouldOpen) {
-      setShowScholarModal(true);
+    if (!shouldOpen) {
+      // If we aren't supposed to open the modal (e.g. from internal client transition), close it quickly.
+      setShowScholarModal(false);
     }
   }, []);
 
@@ -54,6 +59,7 @@ export default function Home() {
 
     setScholarBarWidth(100);
     const animateTimer = window.setTimeout(() => setScholarBarWidth(0), 30);
+    // Auto-close after 8 seconds
     const closeTimer = window.setTimeout(() => setShowScholarModal(false), 8000);
 
     return () => {
@@ -371,15 +377,15 @@ export default function Home() {
   const filteredUniversities = allUniversities.filter(uni => {
     const userGpa = parseFloat(gpa) || 0;
     const userIelts = parseFloat(ielts) || 0;
-    
+
     // If no filters applied, return all
     if (!isFiltering) return true;
-    
+
     // Check if user meets requirements
     const meetsGpa = gpa === '' || userGpa >= uni.minGpa;
     const meetsIelts = ielts === '' || userIelts >= uni.minIelts;
     const meetsTuition = uni.tuition <= tuitionRange[1];
-    
+
     return meetsGpa && meetsIelts && meetsTuition;
   });
 
@@ -413,51 +419,84 @@ export default function Home() {
       {showScholarModal ? (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/25 backdrop-blur-[2px]"
+            className="fixed inset-0 z-40 bg-gray-900/60 backdrop-blur-md transition-all duration-500"
             onClick={() => setShowScholarModal(false)}
           />
 
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="relative w-full max-w-2xl rounded-[28px] bg-[#F7EFE6F2] border border-[#EEDCCB] shadow-2xl p-8 md:p-12 text-center">
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 sm:p-6 pointer-events-none">
+            <div className="relative w-full max-w-xl rounded-[40px] bg-white backdrop-blur-2xl border border-white/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-10 md:p-14 text-center pointer-events-auto overflow-hidden flex flex-col items-center">
+
+              {/* Decorative background gradients */}
+              <div className="absolute -top-32 -right-32 w-72 h-72 bg-[#E3572B]/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-32 -left-32 w-72 h-72 bg-[#F88210]/10 rounded-full blur-3xl pointer-events-none" />
+
               <button
                 type="button"
                 onClick={() => setShowScholarModal(false)}
-                className="absolute top-4 right-4 h-10 w-10 rounded-full border border-[#E3572B] text-[#E3572B] text-2xl leading-none hover:bg-[#fff7f1] transition-colors"
+                className="absolute top-6 right-6 h-10 w-10 flex items-center justify-center rounded-full bg-white/60 border border-white text-gray-500 hover:text-gray-900 hover:bg-white hover:scale-110 transition-all shadow-sm z-20"
                 aria-label="Close modal"
               >
-                &times;
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
 
-              <div className="mb-8">
-                <div className="h-1.5 w-full rounded-full overflow-hidden bg-white/60">
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${scholarBarWidth}%`,
-                      transition: "width 8s linear",
-                      background:
-                        "linear-gradient(90deg, #ff4d4f 0%, #f88210 25%, #facc15 50%, #22c55e 75%, #3b82f6 100%)",
-                    }}
+              {/* Progress bar placed elegantly at the top */}
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/50">
+                <div
+                  className="h-full rounded-r-full"
+                  style={{
+                    width: `${scholarBarWidth}%`,
+                    transition: "width 8s linear",
+                    background: "linear-gradient(90deg, #E3572B 0%, #F88210 100%)",
+                  }}
+                />
+              </div>
+
+              {/* Logo Area */}
+              <div className="relative flex justify-center items-center mt-2 mb-8 w-full z-10">
+                {/* Glowing backdrop for logo */}
+                <div className="absolute w-40 h-40 md:w-56 md:h-56 bg-orange-400/20 rounded-full blur-3xl animate-pulse delay-75" />
+                <div className="relative w-56 h-56 md:w-72 md:h-72 transform hover:scale-105 transition-transform duration-500">
+                  <Image
+                    src="/icons/s-genie-logo.png"
+                    alt="S-Genie Logo"
+                    fill
+                    className="object-contain scale-[1.3] drop-shadow-2xl"
+                    priority
                   />
                 </div>
               </div>
 
-              <h2 className="font-outfit font-bold text-3xl md:text-5xl text-gray-900 mb-4">
-                Scholar GPT
-              </h2>
-              <p className="font-outfit text-lg md:text-2xl text-gray-700 mb-10">
-                is loading... coming soon
-              </p>
+              <div className="relative z-10 space-y-2">
+                <h2 className="font-outfit font-extrabold text-4xl md:text-5xl lg:text-6xl text-black bg-clip-text bg-gradient-to-r from-gray-900 to-gray-700 tracking-tight">
+                  S-Genie
+                </h2>
+                <p className="font-outfit font-medium text-lg md:text-xl text-gray-500 tracking-wider uppercase text-sm md:text-base mt-2">
+                  will soon be on board
+                </p>
+              </div>
+            </div>
 
+            {/* Button below modal */}
+            <div className="mt-8 pointer-events-auto z-50">
               <button
                 type="button"
                 onClick={() => {
                   setShowScholarModal(false);
-                  router.push("/scholarship?openFilter=true");
+                  
                 }}
-                className="inline-flex items-center justify-center px-10 py-3 rounded-full bg-[#E3572B] text-white font-outfit font-semibold text-lg hover:bg-[#c24d2b] transition-colors"
+                className="group relative inline-flex items-center justify-center px-8 md:px-12 py-4 font-outfit font-bold text-lg text-white transition-all duration-300 transform hover:-translate-y-1"
               >
-                Explore More
+                <div className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-r from-[#E3572B] to-[#F88210] shadow-[0_8px_30px_rgba(227,87,43,0.4)] group-hover:shadow-[0_12px_40px_rgba(227,87,43,0.6)] transition-all duration-300" />
+                <div className="absolute inset-0 w-full h-full rounded-full border border-white/20" />
+                <span className="relative flex items-center gap-3">
+                  Explore S-genie
+                  <svg className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </span>
               </button>
             </div>
           </div>
@@ -704,8 +743,8 @@ export default function Home() {
             {/* Start Application Button */}
             <div className="text-center">
               <button className="w-[280px] mx-auto mt-8 px-8 py-4 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-outfit font-extrabold text-xl hover:bg-[#d95d39] hover:text-white transition-all">
-              Start Application
-            </button>
+                Start Application
+              </button>
             </div>
           </div>
 
@@ -850,8 +889,8 @@ export default function Home() {
             {/* Start Application Button */}
             <div className="text-center">
               <button className="w-[280px] mx-auto mt-8 px-8 py-4 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-outfit font-extrabold text-xl hover:bg-[#d95d39] hover:text-white transition-all">
-              Start Application
-            </button>
+                Start Application
+              </button>
             </div>
           </div>
         </div>
@@ -883,7 +922,7 @@ export default function Home() {
               animation-play-state: paused;
             }
           `}</style>
-          
+
           <div className="flex">
             <div className="marquee-container">
               {/* First set */}
@@ -892,8 +931,8 @@ export default function Home() {
                   key={`${country.name}-1`}
                   onClick={() => setSelectedCountry(country.name)}
                   className={`flex justify-center items-center gap-2 px-4 md:px-6 py-2 rounded-full font-outfit font-semibold text-sm md:text-base transition-all border mx-2 whitespace-nowrap ${selectedCountry === country.name
-                      ? 'bg-[#d95d39] text-white border-[#d95d39]'
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'
+                    ? 'bg-[#d95d39] text-white border-[#d95d39]'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'
                     }`}
                 >
                   <span className={`fi fi-${country.code} text-xl fis rounded-full`}></span>
@@ -906,8 +945,8 @@ export default function Home() {
                   key={`${country.name}-2`}
                   onClick={() => setSelectedCountry(country.name)}
                   className={`flex justify-center items-center gap-2 px-4 md:px-6 py-2 rounded-full font-outfit font-semibold text-sm md:text-base transition-all border mx-2 whitespace-nowrap ${selectedCountry === country.name
-                      ? 'bg-[#d95d39] text-white border-[#d95d39]'
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'
+                    ? 'bg-[#d95d39] text-white border-[#d95d39]'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'
                     }`}
                 >
                   <span className={`fi fi-${country.code} text-xl fis rounded-full`}></span>
@@ -923,7 +962,7 @@ export default function Home() {
           <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 font-outfit">
             Refine Your Search
           </h3>
-          
+
           {/* GPA and IELTS Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* GPA Input */}
@@ -971,7 +1010,7 @@ export default function Home() {
                 ${tuitionRange[0].toLocaleString()} - ${tuitionRange[1].toLocaleString()}
               </span>
             </div>
-            
+
             {/* Range Slider */}
             <div className="relative">
               <input
@@ -1019,49 +1058,49 @@ export default function Home() {
                 key={index}
                 className="relative rounded-3xl overflow-hidden bg-white shadow-lg hover:shadow-xl transition-shadow"
               >
-                  {/* University Image */}
-                  <div className="relative h-[280px] md:h-[320px] overflow-hidden">
-                    <Image
-                      src={failedImages.has(university.image) ? 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop' : university.image}
-                      alt={university.name}
-                      width={400}
-                      height={320}
-                      className="object-cover w-full h-full"
-                      onError={() => {
-                        setFailedImages(prev => new Set(prev).add(university.image));
-                      }}
-                    />
-                    {/* Heart Icon */}
-                    <button className="absolute top-4 right-4 w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md">
-                      <Heart size={20} strokeWidth={2} className="text-gray-600" />
+                {/* University Image */}
+                <div className="relative h-[280px] md:h-[320px] overflow-hidden">
+                  <Image
+                    src={failedImages.has(university.image) ? 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop' : university.image}
+                    alt={university.name}
+                    width={400}
+                    height={320}
+                    className="object-cover w-full h-full"
+                    onError={() => {
+                      setFailedImages(prev => new Set(prev).add(university.image));
+                    }}
+                  />
+                  {/* Heart Icon */}
+                  <button className="absolute top-4 right-4 w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md">
+                    <Heart size={20} strokeWidth={2} className="text-gray-600" />
+                  </button>
+                </div>
+
+                {/* University Info */}
+                <div className="p-6 bg-white">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h3 className="text-xl md:text-2xl font-bold text-[#d95d39] mb-2">
+                        {university.name}
+                      </h3>
+                      <p className="text-gray-900 font-semibold mb-1">{university.type}</p>
+                      <p className="text-gray-600 text-sm">{university.location}</p>
+                    </div>
+                    {/* Arrow Icon */}
+                    <button className="w-10 h-10 md:w-12 md:h-12 bg-[#d95d39] rounded-full flex items-center justify-center hover:bg-[#c24d2b] transition-colors flex-shrink-0">
+                      <ArrowUpRight size={20} strokeWidth={2.5} className="text-white" />
                     </button>
                   </div>
-
-                  {/* University Info */}
-                  <div className="p-6 bg-white">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <h3 className="text-xl md:text-2xl font-bold text-[#d95d39] mb-2">
-                          {university.name}
-                        </h3>
-                        <p className="text-gray-900 font-semibold mb-1">{university.type}</p>
-                        <p className="text-gray-600 text-sm">{university.location}</p>
-                      </div>
-                      {/* Arrow Icon */}
-                      <button className="w-10 h-10 md:w-12 md:h-12 bg-[#d95d39] rounded-full flex items-center justify-center hover:bg-[#c24d2b] transition-colors flex-shrink-0">
-                        <ArrowUpRight size={20} strokeWidth={2.5} className="text-white" />
-                      </button>
-                    </div>
-                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
-        
+
         {/* Buttons - Show "See More" when filtering, otherwise show "Explore More" */}
         <div className="mx-auto text-center mt-8">
           {hasMoreResults ? (
-            <button 
+            <button
               onClick={() => router.push('/sign-in')}
               className="font-outfit font-semibold text-white text-xl md:text-2xl py-4 md:py-5 px-6 md:px-8 bg-[#E3572B] rounded-[40px] hover:bg-[#c24d2b] transition-all shadow-lg"
             >
@@ -1087,8 +1126,8 @@ export default function Home() {
           <button
             onClick={() => setNationalType('public')}
             className={`px-14 py-1 rounded-[20px] font-outfit font-semibold text-base md:text-lg transition-all ${nationalType === 'public'
-                ? 'bg-[#d95d39] text-white'
-                : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#d95d39]'
+              ? 'bg-[#d95d39] text-white'
+              : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#d95d39]'
               }`}
           >
             Public University
@@ -1096,8 +1135,8 @@ export default function Home() {
           <button
             onClick={() => setNationalType('private')}
             className={`px-14 py-1 rounded-[20px] font-outfit font-semibold text-base md:text-lg transition-all ${nationalType === 'private'
-                ? 'bg-[#d95d39] text-white'
-                : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#d95d39]'
+              ? 'bg-[#d95d39] text-white'
+              : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#d95d39]'
               }`}
           >
             Private University
@@ -1506,7 +1545,7 @@ export default function Home() {
             <h3 className="font-bold text-xl mb-2">Email</h3>
             <p className="text-gray-600 mb-4">Office : hello@skyline.co</p>
             <button className="px-6 py-2.5 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-outfit font-semibold text-sm hover:bg-[#d95d39] hover:text-white transition-all">
-              Contact us 
+              Contact us
             </button>
             <span className="text-[#00000066] text-xs ml-1">*available 24 hrs</span>
           </div>
@@ -1519,7 +1558,7 @@ export default function Home() {
             <h3 className="font-bold text-xl mb-2">Phone</h3>
             <p className="text-gray-600 mb-4">Office : +91 8932-1151-22</p>
             <button className="px-6 py-2.5 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-outfit font-semibold text-sm hover:bg-[#d95d39] hover:text-white transition-all">
-              Contact us 
+              Contact us
             </button>
             <span className="text-[#00000066] text-xs ml-1">*available 24 hrs</span>
           </div>
@@ -1532,7 +1571,7 @@ export default function Home() {
             <h3 className="font-bold text-xl mb-2">Location</h3>
             <p className="text-gray-600 mb-4">Office : 123 Maple Street, Springfield</p>
             <button className="px-6 py-2.5 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-outfit font-semibold text-sm hover:bg-[#d95d39] hover:text-white transition-all">
-              Contact us 
+              Contact us
             </button>
             <span className="text-[#00000066] text-xs ml-1">*available 24 hrs</span>
           </div>

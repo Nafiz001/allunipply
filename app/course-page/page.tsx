@@ -103,15 +103,15 @@ const feedbackCards = [
 
 const CoursePage = () => {
   return (
-    <div className="min-h-screen bg-[#F5F5F5]">
+    <div className="min-h-screen bg-[#FAFAF5]">
       <DashboardHeader />
 
       <main className="relative overflow-hidden">
         <div className="absolute left-5 top-64 h-2 w-2 rounded-full bg-[#E3572B]"></div>
         <div className="absolute left-24 top-28 text-2xl text-[#F6A623]">✦</div>
-        
+
         <div className="absolute right-96 top-54 text-4xl text-[#F6C27A]">✦</div>
-        
+
 
         <section className="mx-auto max-w-7xl px-6 pb-16 pt-[186px] md:px-10">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.06fr_0.94fr]">
@@ -120,14 +120,14 @@ const CoursePage = () => {
                 START TO SUCCESS
               </p>
 
-              <h1 className="relative mt-6 font-poppins text-4xl font-semibold leading-[1.2] text-[#0D2B1E] md:text-5xl md:leading-[1.18]">
+              <h1 className="relative mt-6 font-poppins text-4xl font-semibold leading-[1.2] text-[#06241B] md:text-5xl md:leading-[1.18]">
                 Access <span>To <span className="text-[#E3572B]">5000+<Image
-                    src="/icons/line.png"
-                    alt=""
-                    width={168.79}
-                    height={8}
-                    className="absolute left-50 "
-                  /></span> </span> Courses
+                  src="/icons/line.png"
+                  alt=""
+                  width={168.79}
+                  height={8}
+                  className="absolute left-50 "
+                /></span> </span> Courses
                 <br />
                 <span className="relative inline-block">
                   from
@@ -153,7 +153,7 @@ const CoursePage = () => {
                   <input
                     type="text"
                     placeholder="What do want to learn?"
-                    className="w-full bg-transparent font-outfit text-xl text-[#9CA3AF] outline-none md:text-2xl"
+                    className="w-full bg-transparent font-outfit text-xl text-[#6D737A] outline-none md:text-2xl"
                   />
                   <button aria-label="Search courses" className="text-[#4B5563] hover:text-[#111827]">
                     <Search size={30} />
@@ -187,11 +187,10 @@ const CoursePage = () => {
               {courseFilters.map((filter, index) => (
                 <button
                   key={filter}
-                  className={`rounded-full px-3 py-2 font-inter text-xs font-extrabold transition-colors whitespace-nowrap md:px-8 md:py-3 md:text-[16px] ${
-                    index === 0
-                      ? "bg-[#FF8B22] text-white"
-                      : "bg-transparent text-[#1F1F1F] hover:bg-white/60"
-                  }`}
+                  className={`rounded-full px-3 py-2 font-inter text-xs font-extrabold transition-colors whitespace-nowrap md:px-8 md:py-3 md:text-[16px] ${index === 0
+                    ? "bg-[#FF8B22] text-white"
+                    : "bg-transparent text-[#1F1F1F] hover:bg-white/60"
+                    }`}
                 >
                   {filter}
                 </button>
@@ -205,19 +204,19 @@ const CoursePage = () => {
                     <Image src="/news/news2.png" alt={course.title} fill className="object-cover" />
                   </div>
 
-                  <h3 className="mt-4 font-outfit text-3xl font-bold leading-tight text-[#1F1F1F] line-clamp-3">{course.title}</h3>
-                  <p className="mt-2 font-outfit text-2xl leading-snug text-[#666666] line-clamp-2">{course.description}</p>
+                  <h3 className="mt-4 font-outfit text-3xl font-bold leading-tight text-[#141219] line-clamp-3">{course.title}</h3>
+                  <p className="mt-2 font-outfit text-2xl leading-snug text-[#141219] line-clamp-2">{course.description}</p>
 
-                  <div className="mt-4 flex items-center justify-between font-outfit text-xl text-[#3B3B3B]">
-                    <p className="font-semibold">1,250,663 learners</p>
-                    <p className="flex items-center gap-1.5">
+                  <div className="mt-4 flex items-center justify-between font-outfit text-xl text-[#1B1D1F]">
+                    <p className="font-semibold text-[#1B1D1F]">1,250,663 learners</p>
+                    <p className="flex items-center gap-1.5 text-[#141219]">
                       <span className="text-lg">◷</span>
                       10hrs
                     </p>
                   </div>
 
                   <div className="mt-auto flex items-center gap-2 pt-4">
-                    <button className="rounded-full border border-[#D6D6D6] px-5 py-2 font-inter font-normal text-[16px] text-[#4A4A4A]">
+                    <button className="rounded-full border border-[#D6D6D6] px-5 py-2 font-inter font-normal text-[16px] text-[#141219]">
                       More info
                     </button>
                     <button className="rounded-full bg-[#E3572B] px-5 py-2 font-inter font-normal text-[16px] text-white">
@@ -240,22 +239,22 @@ const CoursePage = () => {
           <div className="mx-auto max-w-7xl px-6 md:px-10">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <h2 className="font-public-sans text-4xl font-semibold leading-tight text-[#0D2B1E] md:text-[40px]">
-                  Most <span className="text-[#E46B23]">Popular Category&apos;s 
+                <h2 className="font-public-sans text-4xl font-semibold leading-tight text-[#06241B] md:text-[40px]">
+                  Most <span className="text-[#E46B23]">Popular Category&apos;s
                     <Image
-                    src="/icons/line2.png"
-                    alt=""
-                    width={155.27}
-                    height={8}
-                    className="absolute left-70"
-                  /></span>
+                      src="/icons/line2.png"
+                      alt=""
+                      width={155.27}
+                      height={8}
+                      className="absolute left-70"
+                    /></span>
                 </h2>
                 <p className="mt-3 font-public-sans text-xl font-normal text-[#6D737A]">
                   Various versions have evolved over the years, sometimes by accident,
                 </p>
               </div>
 
-              <button className="inline-flex items-center gap-2 rounded-full border border-[#EFA078] px-5 py-3 font-inter text-[10px] text-[#1F1F1F] md:text-[16px]">
+              <button className="inline-flex items-center gap-2 rounded-full border border-[#EFA078] px-5 py-3 font-inter text-[10px] text-[#0A0707] md:text-[16px]">
                 <SlidersHorizontal size={16} />
                 Filter
               </button>
@@ -272,7 +271,7 @@ const CoursePage = () => {
                   >
                     <span className="inline-flex items-center gap-3">
                       <Icon size={24} className="text-[#8B8F96]" />
-                      <span className="font-public-sans text-[20px] font-medium text-[#3A3A3A]">{category.label}</span>
+                      <span className="font-public-sans text-[20px] font-medium text-[#1B1D1F]">{category.label}</span>
                     </span>
 
                     {index === 0 ? (
@@ -302,10 +301,10 @@ const CoursePage = () => {
                     <Image src="/news/news2.png" alt={course.title} fill className="object-cover" />
                   </div>
 
-                  <h3 className="mt-4 font-outfit text-3xl font-bold leading-tight text-[#1F1F1F] line-clamp-3">{course.title}</h3>
-                  <p className="mt-2 font-outfit text-2xl leading-snug text-[#666666] line-clamp-2">{course.description}</p>
+                  <h3 className="mt-4 font-outfit text-3xl font-bold leading-tight text-[#141219] line-clamp-3">{course.title}</h3>
+                  <p className="mt-2 font-outfit text-2xl leading-snug text-[#141219] line-clamp-2">{course.description}</p>
 
-                  <div className="mt-4 flex items-center gap-6 font-outfit text-lg text-[#5F6368]">
+                  <div className="mt-4 flex items-center gap-6 font-outfit text-lg text-[#141219]">
                     <span className="inline-flex items-center gap-1.5">
                       <BarChart3 size={15} />
                       Expert
@@ -317,7 +316,7 @@ const CoursePage = () => {
                   </div>
 
                   <div className="mt-auto flex items-center justify-between border-t border-[#E3E3E3] pt-4">
-                    <p className="font-outfit text-lg text-[#8A8A8A]">
+                    <p className="font-outfit text-lg text-[#141219]">
                       <span className="mr-2 line-through">$54</span>
                       <span className="text-4xl font-bold text-[#E3572B]">$40</span>
                     </p>
@@ -340,11 +339,11 @@ const CoursePage = () => {
         <section className="pb-20 pt-14">
           <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 md:px-10 lg:grid-cols-2">
             <div className="max-w-[546px]">
-              <h3 className="max-w-3xl font-outfit text-6xl font-semibold leading-[1.2] text-black md:text-[40px]">
+              <h3 className="max-w-3xl font-outfit text-6xl font-semibold leading-[1.2] text-[#000000] md:text-[40px]">
                 Earn Discount by referring <br /> courses to your friends & <br /> family
               </h3>
 
-              <p className="mt-8 max-w-3xl font-outfit text-3xl font-semibold leading-[1.45] text-[#1F1F1F] md:text-[20px]">
+              <p className="mt-8 max-w-3xl font-outfit text-3xl font-semibold leading-[1.45] text-[#000000] md:text-[20px]">
                 Refer to your friends & family out allunipply courses and earn 15% discount for any plan. Join today to
                 turn your trusted recommendations into income and grow your revenue.
               </p>
@@ -368,15 +367,15 @@ const CoursePage = () => {
           <div className="mx-auto max-w-7xl px-6 md:px-10">
             <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
               <div>
-                <h2 className="font-public-sans text-4xl font-semibold leading-tight text-[#0D2B1E] md:text-[40px]">
+                <h2 className="font-public-sans text-4xl font-semibold leading-tight text-[#06241B] md:text-[40px]">
                   Our <span className="text-[#E46B23]">Achievement
                     <Image
-                    src="/icons/line2.png"
-                    alt=""
-                    width={233.09}
-                    height={8}
-                    className="absolute left-60"
-                  />
+                      src="/icons/line2.png"
+                      alt=""
+                      width={233.09}
+                      height={8}
+                      className="absolute left-60"
+                    />
                   </span>
                 </h2>
                 <p className="mt-3 font-public-sans text-xl font-normal text-[#6D737A]">
@@ -393,7 +392,7 @@ const CoursePage = () => {
                         </span>
                         <div>
                           <p className="font-public-sans text-[32px] font-semibold text-black">{item.value}</p>
-                          <p className="font-public-sans text-[20px] font-normal text-[#7A7A7A]">{item.label}</p>
+                          <p className="font-public-sans text-[20px] font-normal text-[#6D737A]">{item.label}</p>
                         </div>
                       </div>
                     );
@@ -416,15 +415,15 @@ const CoursePage = () => {
 
         <section className="pb-20 pt-4">
           <div className="mx-auto max-w-7xl px-6 md:px-10">
-            <h2 className="font-public-sans text-4xl font-semibold leading-tight text-[#0D2B1E] md:text-[40px]">
+            <h2 className="font-public-sans text-4xl font-semibold leading-tight text-[#06241B] md:text-[40px]">
               Student <span className="text-[#E46B23]">Feedback
                 <Image
-                    src="/icons/line2.png"
-                    alt=""
-                    width={196}
-                    height={8}
-                    className="absolute left-80"
-                  />
+                  src="/icons/line2.png"
+                  alt=""
+                  width={196}
+                  height={8}
+                  className="absolute left-80"
+                />
               </span>
             </h2>
             <p className="mt-3 font-poppins text-xl font-normal text-[#6D737A]">
@@ -439,17 +438,17 @@ const CoursePage = () => {
                       <Image src={item.avatar} alt={item.name} fill className="object-cover" />
                     </div>
                     <div>
-                      <h3 className="font-outfit text-4xl font-bold text-[#1F1F1F]">{item.name}</h3>
-                      <p className="font-outfit text-2xl text-[#5A5A5A]">{item.role}</p>
+                      <h3 className="font-outfit text-4xl font-bold text-[#000000]">{item.name}</h3>
+                      <p className="font-outfit text-2xl text-[#000000]">{item.role}</p>
                     </div>
                   </div>
 
-                  <p className="mt-6 font-outfit text-[23px] leading-[1.45] text-[#4D4D4D]">
+                  <p className="mt-6 font-outfit text-[23px] leading-[1.45] text-[#363A3D]">
                     Ut pharetra ipsum nec leo blandit, sit amet tincidunt eros pharetra. Nam sed imperdiet turpis. In
                     hac habitasse platea dictumst. Praesent nulla massa, hendrerit vestibulum gravida in, feugiat
                     auctor felis.
                   </p>
-                  <p className="mt-4 font-outfit text-[23px] leading-[1.45] text-[#4D4D4D]">
+                  <p className="mt-4 font-outfit text-[23px] leading-[1.45] text-[#363A3D]">
                     Ut pharetra ipsum nec leo blandit, sit amet tincidunt eros pharetra. Nam sed imperdiet turpis. In
                     hac habitasse platea dictumst.
                   </p>
