@@ -73,9 +73,9 @@ const ContactPage = () => {
               <div className="pt-6">
                 <h3 className="text-2xl font-semibold mb-1 font-outfit">Let's talk</h3>
                 <ul className="space-y-1 font-outfit font-normal text-xl">
-                  <li><Image src="/icons/arrow.png" alt='arrow' width={16} height={16} className='inline mr-2'></Image>Facebook</li>
-                  <li><Image src="/icons/arrow.png" alt='arrow' width={16} height={16} className='inline mr-2'></Image>Linkedin</li>
-                  <li><Image src="/icons/arrow.png" alt='arrow' width={16} height={16} className='inline mr-2'></Image>Instagram</li>
+                  <li><Image src="/icons/arrow.png" alt='arrow' width={16} height={16} className='inline mr-2'></Image><a href="https://www.facebook.com/iniastratech">Facebook</a></li>
+                  <li><Image src="/icons/arrow.png" alt='arrow' width={16} height={16} className='inline mr-2'></Image><a href="https://www.linkedin.com/company/iniastratech">Linkedin</a></li>
+                  <li><Image src="/icons/arrow.png" alt='arrow' width={16} height={16} className='inline mr-2'></Image><a href="https://www.instagram.com/iniastratech">Instagram</a></li>
                 </ul>
               </div>
             </div>
