@@ -35,7 +35,7 @@ const ContactPage = () => {
         </h1>
 
         {/* Contact Card and Form */}
-        <div 
+        <div
           className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-20 rounded-[40px] p-8 md:p-12"
           style={{
             background: 'linear-gradient(180deg, rgba(255, 139, 34, 0.65) 0%, rgba(250.83, 124.36, 9.89, 0.73) 100%)'
@@ -46,14 +46,14 @@ const ContactPage = () => {
             <div className="space-y-6">
               {/* Contact */}
               <div>
-                
+
                 <p className="font-poppins font-normal text-xl">Contact: +880-1531-395312</p>
               </div>
 
               {/* Email */}
               <div>
-                <h3 className="text-2xl font-semibold mb-1 font-outfit">E-mail: iniastratech@gmail.com</h3>
-                
+                <h3 className="text-2xl font-semibold mb-1 font-outfit">E-mail: allunipply@gmail.com</h3>
+
               </div>
 
               {/* Address */}
@@ -73,7 +73,7 @@ const ContactPage = () => {
               <div className="pt-6">
                 <h3 className="text-2xl font-semibold mb-1 font-outfit">Let's talk</h3>
                 <ul className="space-y-1 font-outfit font-normal text-xl">
-                  <li><Image src="/icons/arrow.png" alt='arrow' width={16} height={16} className='inline mr-2'></Image><a href="https://www.facebook.com/iniastratech">Facebook</a></li>
+                  <li><Image src="/icons/arrow.png" alt='arrow' width={16} height={16} className='inline mr-2'></Image><a href="https://www.facebook.com/iniastratech" target='_blank'>Facebook</a></li>
                   <li><Image src="/icons/arrow.png" alt='arrow' width={16} height={16} className='inline mr-2'></Image><a href="https://www.linkedin.com/company/iniastratech">Linkedin</a></li>
                   <li><Image src="/icons/arrow.png" alt='arrow' width={16} height={16} className='inline mr-2'></Image><a href="https://www.instagram.com/iniastratech">Instagram</a></li>
                 </ul>

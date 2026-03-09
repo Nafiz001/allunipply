@@ -69,7 +69,7 @@ export default function Footer() {
                 <a href="#" className="w-10 h-10 bg-[#1DA1F2] text-white rounded-lg flex items-center justify-center hover:bg-[#1a8cd8] hover:scale-110 hover:-rotate-6 transition-all duration-300 shadow-md hover:shadow-lg">
                   <Twitter className="w-5 h-5" />
                 </a>
-                <a href="https://www.facebook.com/iniastratech" className="w-10 h-10 bg-[#1877F2] text-white rounded-lg flex items-center justify-center hover:bg-[#145dbf] hover:scale-110 hover:rotate-6 transition-all duration-300 shadow-md hover:shadow-lg">
+                <a href="https://www.facebook.com/iniastratech" className="w-10 h-10 bg-[#1877F2] text-white rounded-lg flex items-center justify-center hover:bg-[#145dbf] hover:scale-110 hover:rotate-6 transition-all duration-300 shadow-md hover:shadow-lg" target='_blank>
                   <Facebook className="w-5 h-5" />
                 </a>
                 <a href="#" className="w-10 h-10 bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCAF45] text-white rounded-lg flex items-center justify-center hover:scale-110 hover:-rotate-6 transition-all duration-300 shadow-md hover:shadow-lg">
