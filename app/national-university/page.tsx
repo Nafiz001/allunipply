@@ -196,27 +196,23 @@ const NationalUniversityPage = () => {
         </div>
       </div>
 
-      {/* ── Services ── */}
-      <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-16 md:py-24">
-        <ScrollReveal direction="up" className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold font-rubik text-[#E3572B] mb-4">Services we will provide</h2>
-          <p className="text-gray-500 text-lg font-jakarta">What We Offer to Simplify Your University Application Journey</p>
+      {/* Services Section */}
+      <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-20 lg:py-32">
+        <ScrollReveal direction="up" className="text-center mb-20">
+          <h2 className="text-4xl md:text-6xl font-bold font-rubik text-[#e3572b] mb-6">Services we will provide</h2>
+          <p className="text-gray-500 text-lg uppercase tracking-widest font-jakarta font-semibold">Simplifying Your Global Education Journey</p>
         </ScrollReveal>
 
-        <StaggerReveal className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {serviceCards.map((card, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ y: -10 }}
-              className="card-hover-glow bg-[#fff4ea] rounded-[32px] p-8 md:p-10 text-center border border-[#e3572b]/10 cursor-pointer group"
-            >
-              <h3 className="font-rubik font-bold text-xl md:text-2xl mb-4 text-gray-900 group-hover:text-[#E3572B] transition-colors">{card.title}</h3>
-              <p className="text-gray-600 text-base leading-relaxed mb-8">{card.desc}</p>
-              <div className="flex justify-center">
-                <motion.div whileHover={{ rotate: -5, scale: 1.1 }} transition={{ type: "spring" }}>
-                  <Image src={card.icon} width={card.w} height={card.h} alt={card.title} className="object-contain" />
-                </motion.div>
-              </div>
+        <StaggerReveal className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {[
+            { title: "One-Click Multi-University Application", icon: "/icons/application-icon.png", desc: "Apply to multiple universities worldwide with a single, smart profile." },
+            { title: "Smart Document Management", icon: "/icons/document-icon.png", desc: "Upload and reuse your credentials securely for every application." },
+            { title: "Real-Time Application Tracking", icon: "/icons/tracking-icon.png", desc: "Know exactly where your application stands at every moment." }
+          ].map((s, i) => (
+            <motion.div key={i} whileHover={{ y: -12 }} className="card-hover-glow bg-[#fff4ea] rounded-[40px] p-10 text-center border border-orange-100/50">
+              <h3 className="font-bold text-2xl mb-6 text-gray-900 leading-tight">{s.title}</h3>
+              <p className="text-gray-600 mb-10 leading-relaxed text-lg">{s.desc}</p>
+              <motion.div whileHover={{ scale: 1.15, rotate: 5 }} className="w-24 h-24 mx-auto bg-white rounded-3xl flex items-center justify-center shadow-lg"><Image src={s.icon} width={80} height={80} alt={s.title} /></motion.div>
             </motion.div>
           ))}
         </StaggerReveal>

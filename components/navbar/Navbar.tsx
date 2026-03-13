@@ -5,6 +5,7 @@ import Link from "next/link";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { motion } from "framer-motion";
 import { Bell, ChevronDown, LogOut, Menu, X } from "lucide-react";
 
 type NotificationTab = "all" | "unread";
@@ -305,45 +306,45 @@ const Navbar = () => {
 
   return (
     <>
-      <div
-        className={`fixed inset-x-0 top-0 z-50 transition-transform duration-300 ${
-          isHeaderVisible ? "translate-y-0" : "-translate-y-full"
-        }`}
-      >
       {showScholarshipAuthModal ? (
         <>
           <div
-            className="fixed inset-0 z-80 bg-black/35 backdrop-blur-[2px]"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
             onClick={() => setShowScholarshipAuthModal(false)}
           />
-          <div className="fixed inset-0 z-90 flex items-center justify-center px-4">
-            <div className="w-full max-w-160 rounded-[36px] bg-[#F7EFE6] p-8 text-center shadow-2xl md:p-12">
-              <h2 className="mb-10 font-outfit text-4xl font-bold text-gray-900 md:text-5xl">
-                Let get you sign up first ?
-              </h2>
-
-              <div className="mx-auto max-w-[320px] space-y-5">
+          <motion.div
+            className="fixed inset-0 z-[101] flex items-center justify-center px-4"
+            initial={{ opacity: 0, scale: 0.92, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 20 }}
+          >
+            <div className="w-full max-w-[560px] rounded-[36px] bg-[#F7EFE6] p-8 md:p-12 text-center shadow-2xl border border-white/20">
+              <h2 className="font-outfit text-3xl md:text-4xl font-bold text-gray-900 mb-8">Sign in to continue</h2>
+              <div className="space-y-4 max-w-[280px] mx-auto">
                 <Link
                   href={`/sign-in?next=${encodeURIComponent(scholarshipTarget)}`}
-                  className="block w-full rounded-full border border-[#E3572B] py-4 text-[40px] font-bold leading-none text-[#E3572B] transition-colors hover:bg-[#fff7f1]"
+                  className="block w-full rounded-full bg-[#E3572B] text-white font-outfit font-bold text-xl py-4 hover:bg-[#c24d2b] transition-all hover:-translate-y-1 shadow-lg shadow-orange-200"
                 >
                   Sign in
                 </Link>
-
-                <p className="font-outfit text-4xl font-bold text-gray-900">Or</p>
-
+                <p className="font-outfit text-xl font-bold text-gray-500">or</p>
                 <Link
                   href={`/sign-up?next=${encodeURIComponent(scholarshipTarget)}`}
-                  className="block w-full rounded-full border border-[#E3572B] py-4 text-[40px] font-bold leading-none text-[#E3572B] transition-colors hover:bg-[#fff7f1]"
+                  className="block w-full rounded-full border-2 border-[#E3572B] text-[#E3572B] font-outfit font-bold text-xl py-4 hover:bg-white transition-all hover:-translate-y-1"
                 >
                   Create account
                 </Link>
               </div>
             </div>
-          </div>
+          </motion.div>
         </>
       ) : null}
 
+      <div
+        className={`fixed inset-x-0 top-0 z-50 transition-transform duration-300 ${
+          isHeaderVisible ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
       <div className="mx-auto max-w-7xl px-3 py-3 md:px-4">
         <nav className="relative rounded-[30px] bg-gray-200/50 px-4 py-3   md:px-6">
           <div className="absolute inset-x-10 top-0 h-px  " />
