@@ -1,1053 +1,354 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import ScrollReveal from "@/components/animations/ScrollReveal";
+import StaggerReveal from "@/components/animations/StaggerReveal";
+import { Heart, ArrowUpRight } from "lucide-react";
 
-const Page = () => {
-  const [selectedCountry, setSelectedCountry] = useState('USA');
-  const [gpa, setGpa] = useState('');
-  const [ielts, setIelts] = useState('');
+const helpCards = [
+  { icon: '/icons/support.png', title: 'Customer Support', desc: 'Reach our 24/7 student support team for guidance on any part of your application journey.' },
+  { icon: '/icons/onetime.png', title: 'One-time Payment Process', desc: 'A single, transparent fee covers all your national university applications — no hidden charges.' },
+  { icon: '/icons/consult.png', title: 'Consult with Us In Office', desc: 'Book a one-on-one session with our advisors and get personalised application strategies.' },
+];
+
+const COUNTRY_FLAG_CODES: Record<string, string> = {
+  USA: "us",
+  UK: "gb",
+  Australia: "au",
+  Canada: "ca",
+  China: "cn",
+  Japan: "jp",
+  Italy: "it",
+  Spain: "es",
+  Germany: "de",
+  France: "fr",
+  Netherlands: "nl",
+  Sweden: "se",
+  Bangladesh: "bd",
+};
+
+type UniversityListItem = {
+  id: string;
+  name: string;
+  type: string;
+  country: string;
+  location: string;
+  image: string;
+  minGpa: number;
+  minIelts: number;
+  tuition: number;
+};
+
+function formatUniversityType(type: string) {
+  const lower = type.toLowerCase();
+  if (lower === "public") return "Public university";
+  if (lower === "private") return "Private university";
+  if (lower === "national") return "National university";
+  if (lower === "international") return "International university";
+  return `${type.charAt(0)}${type.slice(1).toLowerCase()} university`;
+}
+
+const InternationalUniversityPage = () => {
+  const [selectedCountry, setSelectedCountry] = useState("USA");
+  const [gpa, setGpa] = useState("");
+  const [ielts, setIelts] = useState("");
   const [tuitionRange, setTuitionRange] = useState([0, 60000]);
   const router = useRouter();
+  const [allRemoteUniversities, setAllRemoteUniversities] = useState<UniversityListItem[]>([]);
+  const [isUniversitiesLoading, setIsUniversitiesLoading] = useState(true);
 
   // Hero section filter states
-  const [heroLocation, setHeroLocation] = useState('');
-  const [heroDate, setHeroDate] = useState('');
-  const [heroProcess, setHeroProcess] = useState('');
-  const [heroCriteria, setHeroCriteria] = useState('');
-  const [heroTestScore, setHeroTestScore] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [modalResults, setModalResults] = useState<Array<{
-    name: string;
-    type: string;
-    location: string;
-    image: string;
-    minGpa: number;
-    minIelts: number;
-    tuition: number;
-  }>>([]);
+  const [heroLocation, setHeroLocation] = useState("");
+  const [heroDate, setHeroDate] = useState("");
+  const [heroProcess, setHeroProcess] = useState("");
+  const [heroCriteria, setHeroCriteria] = useState("");
+  const [heroTestScore, setHeroTestScore] = useState("");
 
-  // Check if any filter is active
   const isFiltering = useMemo(() => {
-    return gpa !== '' || ielts !== '' || tuitionRange[1] < 60000;
+    return gpa !== "" || ielts !== "" || tuitionRange[1] < 60000;
   }, [gpa, ielts, tuitionRange]);
-  
-  const countries = [
-    { name: 'USA', code: 'us' },
-    { name: 'UK', code: 'gb' },
-    { name: 'Australia', code: 'au' },
-    { name: 'Canada', code: 'ca' },
-    { name: 'China', code: 'cn' },
-    { name: 'Japan', code: 'jp' },
-    { name: 'Italy', code: 'it' },
-    { name: 'Spain', code: 'es' },
-    { name: 'Germany', code: 'de' },
-    { name: 'France', code: 'fr' },
-    { name: 'Netherlands', code: 'nl' },
-    { name: 'Sweden', code: 'se' },
-  ];
 
-  const universitiesByCountry: { [key: string]: Array<{ name: string; type: string; location: string; image: string; minGpa: number; minIelts: number; tuition: number }> } = {
-    USA: [
-      { name: 'Harvard University', type: 'Private university', location: 'Cambridge, USA', image: 'https://picsum.photos/seed/harvard/800/600', minGpa: 3.8, minIelts: 7.5, tuition: 55000 },
-      { name: 'Stanford University', type: 'Private university', location: 'Stanford, USA', image: 'https://picsum.photos/seed/stanford/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 52000 },
-      { name: 'MIT', type: 'Private university', location: 'Cambridge, USA', image: 'https://picsum.photos/seed/mit/800/600', minGpa: 3.9, minIelts: 7.5, tuition: 54000 },
-      { name: 'Yale University', type: 'Private university', location: 'New Haven, USA', image: 'https://picsum.photos/seed/yale/800/600', minGpa: 3.8, minIelts: 7.5, tuition: 56000 },
-      { name: 'Princeton University', type: 'Private university', location: 'Princeton, USA', image: 'https://picsum.photos/seed/princeton/800/600', minGpa: 3.8, minIelts: 7.0, tuition: 53000 },
-      { name: 'Columbia University', type: 'Private university', location: 'New York, USA', image: 'https://picsum.photos/seed/columbia/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 51000 },
-      { name: 'UC Berkeley', type: 'Public university', location: 'Berkeley, USA', image: 'https://picsum.photos/seed/berkeley/800/600', minGpa: 3.6, minIelts: 6.5, tuition: 42000 },
-      { name: 'Cornell University', type: 'Private university', location: 'Ithaca, USA', image: 'https://picsum.photos/seed/cornell/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 50000 },
-    ],
-    UK: [
-      { name: 'University of Oxford', type: 'Public university', location: 'Oxford, UK', image: 'https://picsum.photos/seed/oxford/800/600', minGpa: 3.8, minIelts: 7.5, tuition: 32000 },
-      { name: 'University of Cambridge', type: 'Public university', location: 'Cambridge, UK', image: 'https://picsum.photos/seed/cambridge/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 30000 },
-      { name: 'Imperial College London', type: 'Public university', location: 'London, UK', image: 'https://picsum.photos/seed/imperial/800/600', minGpa: 3.6, minIelts: 7.0, tuition: 35000 },
-      { name: 'UCL', type: 'Public university', location: 'London, UK', image: 'https://picsum.photos/seed/ucl/800/600', minGpa: 3.6, minIelts: 7.0, tuition: 33000 },
-      { name: 'University of Edinburgh', type: 'Public university', location: 'Edinburgh, UK', image: 'https://picsum.photos/seed/edinburgh/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 28000 },
-      { name: 'King\'s College London', type: 'Public university', location: 'London, UK', image: 'https://picsum.photos/seed/kings/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 31000 },
-      { name: 'LSE', type: 'Public university', location: 'London, UK', image: 'https://picsum.photos/seed/lse/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 34000 },
-      { name: 'University of Manchester', type: 'Public university', location: 'Manchester, UK', image: 'https://picsum.photos/seed/manchester/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 26000 },
-    ],
-    Australia: [
-      { name: 'University of Melbourne', type: 'Public university', location: 'Melbourne, Australia', image: 'https://picsum.photos/seed/melbourne/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 28000 },
-      { name: 'University of Sydney', type: 'Public university', location: 'Sydney, Australia', image: 'https://picsum.photos/seed/sydney/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 27000 },
-      { name: 'ANU', type: 'Public university', location: 'Canberra, Australia', image: 'https://picsum.photos/seed/anu/800/600', minGpa: 3.6, minIelts: 6.5, tuition: 29000 },
-      { name: 'UNSW Sydney', type: 'Public university', location: 'Sydney, Australia', image: 'https://picsum.photos/seed/unsw/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 28500 },
-      { name: 'University of Queensland', type: 'Public university', location: 'Brisbane, Australia', image: 'https://picsum.photos/seed/queensland/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 26500 },
-      { name: 'Monash University', type: 'Public university', location: 'Melbourne, Australia', image: 'https://picsum.photos/seed/monash/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 25000 },
-      { name: 'University of Adelaide', type: 'Public university', location: 'Adelaide, Australia', image: 'https://picsum.photos/seed/adelaide/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 24000 },
-      { name: 'UTS', type: 'Public university', location: 'Sydney, Australia', image: 'https://picsum.photos/seed/uts/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 26000 },
-    ],
-    Canada: [
-      { name: 'University of Toronto', type: 'Public university', location: 'Toronto, Canada', image: 'https://picsum.photos/seed/toronto/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 25000 },
-      { name: 'UBC', type: 'Public university', location: 'Vancouver, Canada', image: 'https://picsum.photos/seed/ubc/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 24000 },
-      { name: 'McGill University', type: 'Public university', location: 'Montreal, Canada', image: 'https://picsum.photos/seed/mcgill/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 22000 },
-      { name: 'McMaster University', type: 'Public university', location: 'Hamilton, Canada', image: 'https://picsum.photos/seed/mcmaster/800/600', minGpa: 3.2, minIelts: 6.5, tuition: 23000 },
-      { name: 'University of Alberta', type: 'Public university', location: 'Edmonton, Canada', image: 'https://picsum.photos/seed/alberta/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 21000 },
-      { name: 'University of Montreal', type: 'Public university', location: 'Montreal, Canada', image: 'https://picsum.photos/seed/montreal/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 20000 },
-      { name: 'University of Waterloo', type: 'Public university', location: 'Waterloo, Canada', image: 'https://picsum.photos/seed/waterloo/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 24500 },
-      { name: 'Western University', type: 'Public university', location: 'London, Canada', image: 'https://picsum.photos/seed/western/800/600', minGpa: 3.2, minIelts: 6.5, tuition: 22500 },
-    ],
-    China: [
-      { name: 'Tsinghua University', type: 'Public university', location: 'Beijing, China', image: 'https://picsum.photos/seed/tsinghua/800/600', minGpa: 3.7, minIelts: 6.5, tuition: 15000 },
-      { name: 'Peking University', type: 'Public university', location: 'Beijing, China', image: 'https://picsum.photos/seed/peking/800/600', minGpa: 3.7, minIelts: 6.5, tuition: 15000 },
-      { name: 'Fudan University', type: 'Public university', location: 'Shanghai, China', image: 'https://picsum.photos/seed/fudan/800/600', minGpa: 3.6, minIelts: 6.0, tuition: 14000 },
-      { name: 'Zhejiang University', type: 'Public university', location: 'Hangzhou, China', image: 'https://picsum.photos/seed/zhejiang/800/600', minGpa: 3.5, minIelts: 6.0, tuition: 13500 },
-      { name: 'Shanghai Jiao Tong', type: 'Public university', location: 'Shanghai, China', image: 'https://picsum.photos/seed/sjtu/800/600', minGpa: 3.6, minIelts: 6.5, tuition: 14500 },
-      { name: 'Nanjing University', type: 'Public university', location: 'Nanjing, China', image: 'https://picsum.photos/seed/nanjing/800/600', minGpa: 3.5, minIelts: 6.0, tuition: 13000 },
-      { name: 'University of Science', type: 'Public university', location: 'Hefei, China', image: 'https://picsum.photos/seed/ustc/800/600', minGpa: 3.6, minIelts: 6.0, tuition: 13500 },
-      { name: 'Wuhan University', type: 'Public university', location: 'Wuhan, China', image: 'https://picsum.photos/seed/wuhan/800/600', minGpa: 3.4, minIelts: 6.0, tuition: 12500 },
-    ],
-    Japan: [
-      { name: 'University of Tokyo', type: 'Public university', location: 'Tokyo, Japan', image: 'https://picsum.photos/seed/utokyo/800/600', minGpa: 3.6, minIelts: 6.5, tuition: 18000 },
-      { name: 'Kyoto University', type: 'Public university', location: 'Kyoto, Japan', image: 'https://picsum.photos/seed/kyoto/800/600', minGpa: 3.6, minIelts: 6.5, tuition: 18000 },
-      { name: 'Osaka University', type: 'Public university', location: 'Osaka, Japan', image: 'https://picsum.photos/seed/osaka/800/600', minGpa: 3.5, minIelts: 6.0, tuition: 17000 },
-      { name: 'Tohoku University', type: 'Public university', location: 'Sendai, Japan', image: 'https://picsum.photos/seed/tohoku/800/600', minGpa: 3.4, minIelts: 6.0, tuition: 16500 },
-      { name: 'Tokyo Tech', type: 'Public university', location: 'Tokyo, Japan', image: 'https://picsum.photos/seed/titech/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 17500 },
-      { name: 'Nagoya University', type: 'Public university', location: 'Nagoya, Japan', image: 'https://picsum.photos/seed/nagoya/800/600', minGpa: 3.4, minIelts: 6.0, tuition: 16000 },
-      { name: 'Hokkaido University', type: 'Public university', location: 'Sapporo, Japan', image: 'https://picsum.photos/seed/hokkaido/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 15500 },
-      { name: 'Keio University', type: 'Private university', location: 'Tokyo, Japan', image: 'https://picsum.photos/seed/keio/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 20000 },
-    ],
-    Italy: [
-      { name: 'Sapienza University', type: 'Public university', location: 'Rome, Italy', image: 'https://picsum.photos/seed/sapienza/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 8000 },
-      { name: 'University of Bologna', type: 'Public university', location: 'Bologna, Italy', image: 'https://picsum.photos/seed/bologna/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 8000 },
-      { name: 'Politecnico di Milano', type: 'Public university', location: 'Milan, Italy', image: 'https://picsum.photos/seed/polimi/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 9000 },
-      { name: 'University of Padua', type: 'Public university', location: 'Padua, Italy', image: 'https://picsum.photos/seed/padua/800/600', minGpa: 3.1, minIelts: 6.0, tuition: 7500 },
-      { name: 'University of Milan', type: 'Public university', location: 'Milan, Italy', image: 'https://picsum.photos/seed/milan/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 8500 },
-      { name: 'University of Pisa', type: 'Public university', location: 'Pisa, Italy', image: 'https://picsum.photos/seed/pisa/800/600', minGpa: 3.1, minIelts: 5.5, tuition: 7000 },
-      { name: 'University of Florence', type: 'Public university', location: 'Florence, Italy', image: 'https://picsum.photos/seed/florence/800/600', minGpa: 3.1, minIelts: 6.0, tuition: 7500 },
-      { name: 'University of Turin', type: 'Public university', location: 'Turin, Italy', image: 'https://picsum.photos/seed/turin/800/600', minGpa: 3.0, minIelts: 5.5, tuition: 7000 },
-    ],
-    Spain: [
-      { name: 'University of Barcelona', type: 'Public university', location: 'Barcelona, Spain', image: 'https://picsum.photos/seed/barcelona/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 9000 },
-      { name: 'Complutense University', type: 'Public university', location: 'Madrid, Spain', image: 'https://picsum.photos/seed/complutense/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 8500 },
-      { name: 'Autonomous Barcelona', type: 'Public university', location: 'Barcelona, Spain', image: 'https://picsum.photos/seed/uab/800/600', minGpa: 3.1, minIelts: 6.0, tuition: 8000 },
-      { name: 'Autonomous Madrid', type: 'Public university', location: 'Madrid, Spain', image: 'https://picsum.photos/seed/uam/800/600', minGpa: 3.1, minIelts: 6.0, tuition: 8000 },
-      { name: 'University of Valencia', type: 'Public university', location: 'Valencia, Spain', image: 'https://picsum.photos/seed/valencia/800/600', minGpa: 3.0, minIelts: 5.5, tuition: 7500 },
-      { name: 'Pompeu Fabra University', type: 'Public university', location: 'Barcelona, Spain', image: 'https://picsum.photos/seed/upf/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 9000 },
-      { name: 'University of Granada', type: 'Public university', location: 'Granada, Spain', image: 'https://picsum.photos/seed/granada/800/600', minGpa: 3.0, minIelts: 5.5, tuition: 7000 },
-      { name: 'University of Seville', type: 'Public university', location: 'Seville, Spain', image: 'https://picsum.photos/seed/seville/800/600', minGpa: 3.0, minIelts: 5.5, tuition: 7000 },
-    ],
-    Germany: [
-      { name: 'TU Munich', type: 'Public university', location: 'Munich, Germany', image: 'https://picsum.photos/seed/tum/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 5000 },
-      { name: 'LMU Munich', type: 'Public university', location: 'Munich, Germany', image: 'https://picsum.photos/seed/lmu/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 5000 },
-      { name: 'Heidelberg University', type: 'Public university', location: 'Heidelberg, Germany', image: 'https://picsum.photos/seed/heidelberg/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 5000 },
-      { name: 'Humboldt Berlin', type: 'Public university', location: 'Berlin, Germany', image: 'https://picsum.photos/seed/humboldt/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 5000 },
-      { name: 'Free University Berlin', type: 'Public university', location: 'Berlin, Germany', image: 'https://picsum.photos/seed/fuberlin/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 5000 },
-      { name: 'RWTH Aachen', type: 'Public university', location: 'Aachen, Germany', image: 'https://picsum.photos/seed/rwth/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 5000 },
-      { name: 'University of Bonn', type: 'Public university', location: 'Bonn, Germany', image: 'https://picsum.photos/seed/bonn/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 5000 },
-      { name: 'University of Freiburg', type: 'Public university', location: 'Freiburg, Germany', image: 'https://picsum.photos/seed/freiburg/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 5000 },
-    ],
-    France: [
-      { name: 'Sorbonne University', type: 'Public university', location: 'Paris, France', image: 'https://picsum.photos/seed/sorbonne/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 6000 },
-      { name: 'École Polytechnique', type: 'Public university', location: 'Palaiseau, France', image: 'https://picsum.photos/seed/polytechnique/800/600', minGpa: 3.6, minIelts: 7.0, tuition: 10000 },
-      { name: 'PSL University', type: 'Public university', location: 'Paris, France', image: 'https://picsum.photos/seed/psl/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 6000 },
-      { name: 'University of Paris', type: 'Public university', location: 'Paris, France', image: 'https://picsum.photos/seed/uparis/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 5500 },
-      { name: 'Sciences Po', type: 'Public university', location: 'Paris, France', image: 'https://picsum.photos/seed/sciencespo/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 12000 },
-      { name: 'ENS Paris', type: 'Public university', location: 'Paris, France', image: 'https://picsum.photos/seed/ens/800/600', minGpa: 3.7, minIelts: 7.0, tuition: 5500 },
-      { name: 'University of Strasbourg', type: 'Public university', location: 'Strasbourg, France', image: 'https://picsum.photos/seed/strasbourg/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 5000 },
-      { name: 'University of Lyon', type: 'Public university', location: 'Lyon, France', image: 'https://picsum.photos/seed/lyon/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 5000 },
-    ],
-    Netherlands: [
-      { name: 'University of Amsterdam', type: 'Public university', location: 'Amsterdam, Netherlands', image: 'https://picsum.photos/seed/uva/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 12000 },
-      { name: 'Delft University', type: 'Public university', location: 'Delft, Netherlands', image: 'https://picsum.photos/seed/delft/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 12500 },
-      { name: 'Utrecht University', type: 'Public university', location: 'Utrecht, Netherlands', image: 'https://picsum.photos/seed/utrecht/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 11000 },
-      { name: 'Leiden University', type: 'Public university', location: 'Leiden, Netherlands', image: 'https://picsum.photos/seed/leiden/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 11000 },
-      { name: 'Erasmus University', type: 'Public university', location: 'Rotterdam, Netherlands', image: 'https://picsum.photos/seed/erasmus/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 11500 },
-      { name: 'Wageningen University', type: 'Public university', location: 'Wageningen, Netherlands', image: 'https://picsum.photos/seed/wageningen/800/600', minGpa: 3.3, minIelts: 6.0, tuition: 11000 },
-      { name: 'Groningen University', type: 'Public university', location: 'Groningen, Netherlands', image: 'https://picsum.photos/seed/groningen/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 10500 },
-      { name: 'Maastricht University', type: 'Public university', location: 'Maastricht, Netherlands', image: 'https://picsum.photos/seed/maastricht/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 10500 },
-    ],
-    Sweden: [
-      { name: 'Lund University', type: 'Public university', location: 'Lund, Sweden', image: 'https://picsum.photos/seed/lund/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 14000 },
-      { name: 'Uppsala University', type: 'Public university', location: 'Uppsala, Sweden', image: 'https://picsum.photos/seed/uppsala/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 14000 },
-      { name: 'KTH Royal Institute', type: 'Public university', location: 'Stockholm, Sweden', image: 'https://picsum.photos/seed/kth/800/600', minGpa: 3.4, minIelts: 6.5, tuition: 15000 },
-      { name: 'Stockholm University', type: 'Public university', location: 'Stockholm, Sweden', image: 'https://picsum.photos/seed/su/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 13000 },
-      { name: 'Gothenburg University', type: 'Public university', location: 'Gothenburg, Sweden', image: 'https://picsum.photos/seed/gothenburg/800/600', minGpa: 3.2, minIelts: 6.0, tuition: 13000 },
-      { name: 'Karolinska Institute', type: 'Public university', location: 'Stockholm, Sweden', image: 'https://picsum.photos/seed/karolinska/800/600', minGpa: 3.5, minIelts: 6.5, tuition: 16000 },
-      { name: 'Linköping University', type: 'Public university', location: 'Linköping, Sweden', image: 'https://picsum.photos/seed/linkoping/800/600', minGpa: 3.1, minIelts: 6.0, tuition: 12500 },
-      { name: 'Chalmers University', type: 'Public university', location: 'Gothenburg, Sweden', image: 'https://picsum.photos/seed/chalmers/800/600', minGpa: 3.3, minIelts: 6.5, tuition: 14500 },
-    ],
-  };
+  useEffect(() => {
+    let isMounted = true;
+    const loadUniversities = async () => {
+      setIsUniversitiesLoading(true);
+      try {
+        const response = await fetch("/api/universities?page=1&pageSize=200&includeInactive=false", { cache: "no-store" });
+        if (!response.ok) throw new Error("Failed to load universities");
+        const result = (await response.json()) as {
+          data?: Array<{ id: string; name: string; type: string; country: string; city?: string; location?: string; bannerImageUrl?: string | null; logoUrl?: string | null; minGpa?: number | null; minIelts?: number | null; tuition?: number | null; }>;
+        };
+        const parsed = (result.data ?? []).filter((item) => item.country.toLowerCase() !== "bangladesh").map((item) => ({
+          id: item.id, name: item.name, type: formatUniversityType(item.type), country: item.country, location: item.location ?? `${item.city ?? ""}, ${item.country}`,
+          image: item.bannerImageUrl || item.logoUrl || "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop",
+          minGpa: typeof item.minGpa === "number" ? item.minGpa : 0, minIelts: typeof item.minIelts === "number" ? item.minIelts : 0, tuition: typeof item.tuition === "number" ? item.tuition : 0,
+        }));
+        if (isMounted) setAllRemoteUniversities(parsed);
+      } catch {
+        if (isMounted) setAllRemoteUniversities([]);
+      } finally {
+        if (isMounted) setIsUniversitiesLoading(false);
+      }
+    };
+    void loadUniversities();
+    return () => { isMounted = false; };
+  }, []);
 
-  // Filter universities based on criteria
-  const allUniversities = universitiesByCountry[selectedCountry] || [];
-  const filteredUniversities = allUniversities.filter(uni => {
-    const userGpa = parseFloat(gpa) || 0;
-    const userIelts = parseFloat(ielts) || 0;
-    
-    // If no filters applied, return all
+  const countries = useMemo(() => {
+    return Array.from(new Set(allRemoteUniversities.map((item) => item.country))).map((name) => ({
+      name, code: COUNTRY_FLAG_CODES[name] ?? name.slice(0, 2).toLowerCase(),
+    }));
+  }, [allRemoteUniversities]);
+
+  useEffect(() => {
+    if (!countries.length) return;
+    if (!countries.some((country) => country.name === selectedCountry)) {
+      setSelectedCountry(countries[0].name);
+    }
+  }, [countries, selectedCountry]);
+
+  const allUniversities = useMemo(() => allRemoteUniversities.filter((u) => u.country === selectedCountry), [allRemoteUniversities, selectedCountry]);
+  const filteredUniversities = useMemo(() => allUniversities.filter((uni) => {
+    const userGpa = Number.parseFloat(gpa) || 0;
+    const userIelts = Number.parseFloat(ielts) || 0;
     if (!isFiltering) return true;
-    
-    // Check if user meets requirements
-    const meetsGpa = gpa === '' || userGpa >= uni.minGpa;
-    const meetsIelts = ielts === '' || userIelts >= uni.minIelts;
-    const meetsTuition = uni.tuition <= tuitionRange[1];
-    
-    return meetsGpa && meetsIelts && meetsTuition;
-  });
+    return (gpa === "" || userGpa >= uni.minGpa) && (ielts === "" || userIelts >= uni.minIelts) && (uni.tuition <= tuitionRange[1]);
+  }), [allUniversities, gpa, ielts, isFiltering, tuitionRange]);
 
-  // Limit to 2 universities when filtering
-  const universities = isFiltering ? filteredUniversities.slice(0, 2) : allUniversities;
+  const universitiesDisplay = isFiltering ? filteredUniversities.slice(0, 2) : allUniversities;
   const hasMoreResults = isFiltering && filteredUniversities.length > 2;
 
-  // Hero section search handler
-  const handleHeroSearch = () => {
-    // Filter universities based on hero section inputs
-    let filtered = allUniversities;
-
-    // Filter by location if specified
-    if (heroLocation) {
-      filtered = filtered.filter(uni => 
-        uni.location.toLowerCase().includes(heroLocation.toLowerCase())
-      );
-    }
-
-    // Filter by test score if specified
-    if (heroTestScore) {
-      const score = parseFloat(heroTestScore);
-      filtered = filtered.filter(uni => uni.minIelts <= score);
-    }
-
-    // Show modal with first 2 results
-    setModalResults(filtered.slice(0, 2));
-    setShowModal(true);
-  };
   return (
-    <div className="">
+    <div className="overflow-x-hidden">
       <style jsx>{`
-        @keyframes marquee {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-        .marquee-container {
-          display: flex;
-        }
-        .marquee-content {
-          display: flex;
-          animation: marquee 20s linear infinite;
-        }
-        .marquee-container:hover .marquee-content {
-          animation-play-state: paused;
-        }
-        input[type='range']::-webkit-slider-thumb {
-          appearance: none;
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: #E3572B;
-          cursor: pointer;
-          border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3);
-        }
-        input[type='range']::-moz-range-thumb {
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: #E3572B;
-          cursor: pointer;
-          border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3);
-        }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee-content { display: flex; animation: marquee 25s linear infinite; }
+        .marquee-container:hover .marquee-content { animation-play-state: paused; }
       `}</style>
-      
-      {/* Hero Section - Full Width */}
-      <div className="relative w-full">
-        {/* Background Image */}
-        <div className="relative h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px]">
-          <Image
-            src="/hero/internationl_banner.png"
-            alt="National University Banner"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-[#0000000a]"></div>
-          <div className="flex justify-end relative right-5 top-5">
-            <p className='font-pacifico text-[22px] text-[rgba(227,87,43,1)] font-normal leading-[39px] tracking-[0%] text-center'>
-              "Your dream university is just a click away no stress, no mess, just success!
-              <br />Apply smart, not hard  we make admissions easy."
+
+      {/* Hero Section */}
+      <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12 ">
+        <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden  h-[550px] md:h-[750px] lg:h-[850px]">
+          <Image src="/hero/international_banner.jpeg" alt="International Banner" fill className="object-cover brightess-75" priority />
+          
+          <div className="absolute top-10 right-10 max-w-lg hidden lg:block">
+            <p className="font-pacifico text-3xl text-orange-400 text-right leading-relaxed drop-shadow-lg">
+              &quot;Your dream university is just a click away — no stress, no mess, just success!&quot;
             </p>
           </div>
-        
         </div>
-        
 
-        {/* Content Overlay */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end px-4 md:px-6 text-center bottom-10">
-          {/* Filter Tabs */}
-          <div className="flex flex-wrap gap-3 md:gap-4  justify-center">
-            <button className="px-6 md:px-8 py-1  rounded-t-[35px] bg-[#e67609] text-white font-outfit font-semibold text-sm md:text-base hover:bg-[#e67609] transition-all">
-              Public University
-            </button>
-            <button className="px-6  md:px-8 py-1 rounded-t-[35px] bg-white text-gray-700 font-outfit font-semibold text-sm md:text-base hover:bg-gray-100 transition-all">
-              <span className='text-[#e3572b] text-sm'>For address</span><br />
-              <span className='text-[#e3572b]'>Search for details</span>
-            </button>
-          </div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 md:px-6 text-center pt-20">
+          <ScrollReveal direction="down">
+            <h1 className="text-white text-5xl md:text-7xl font-jakarta font-extrabold mb-6 tracking-tight drop-shadow-xl">
+              FLY TO YOUR <span className="text-orange-500">DREAM</span>
+            </h1>
+          </ScrollReveal>
 
-          {/* Search/Filter Card */}
-          <div className="bg-[#dcdcdc70] backdrop-blur-[70px] rounded-2xl md:rounded-3xl p-4 md:p-6 w-full max-w-6xl mx-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 items-end">
-              {/* Location */}
-              <div className="flex flex-col text-left">
-                <label className="font-outfit font-bold text-gray-900 text-sm md:text-base mb-2">Location</label>
-                <input
-                  type="text"
-                  placeholder="Search destination"
-                  value={heroLocation}
-                  onChange={(e) => setHeroLocation(e.target.value)}
-                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#E3572B] bg-white/80"
-                />
+          <ScrollReveal delay={0.2}>
+            <p className="text-black/90 font-outfit text-lg md:text-2xl mb-12 max-w-3xl mx-auto font-medium mt-12">
+              Explore thousands of international universities and find your perfect academic home abroad.
+            </p>
+          </ScrollReveal>
+
+          <ScrollReveal direction="up" delay={0.4} className="bg-white/10 backdrop-blur-xl rounded-[40px] p-6 md:p-8 w-full max-w-6xl mx-auto border border-white/20 shadow-2xl">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5 md:gap-8 items-end">
+              <div className="flex flex-col text-left group">
+                <label className="font-outfit font-bold text-white text-sm mb-2 ml-1">Location</label>
+                <input type="text" placeholder="Country / City" value={heroLocation} onChange={(e) => setHeroLocation(e.target.value)} className="px-4 py-3 rounded-2xl bg-white/20 text-white placeholder-white/50 border border-white/30 outline-none focus:bg-white/30 transition-all text-sm" />
               </div>
-
-              {/* Application Date */}
-              <div className="flex flex-col text-left">
-                <label className="font-outfit font-bold text-gray-900 text-sm md:text-base mb-2">Application date</label>
-                <input
-                  type="date"
-                  value={heroDate}
-                  onChange={(e) => setHeroDate(e.target.value)}
-                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#E3572B] bg-white/80"
-                />
+              <div className="flex flex-col text-left group">
+                <label className="font-outfit font-bold text-white text-sm mb-2 ml-1">Date</label>
+                <input type="date" value={heroDate} onChange={(e) => setHeroDate(e.target.value)} className="px-4 py-3 rounded-2xl bg-white/20 text-white border border-white/30 outline-none focus:bg-white/30 transition-all text-sm" />
               </div>
-
-              {/* Application Process */}
-              <div className="flex flex-col text-left">
-                <label className="font-outfit font-bold text-gray-900 text-sm md:text-base mb-2">Process</label>
-                <select
-                  value={heroProcess}
-                  onChange={(e) => setHeroProcess(e.target.value)}
-                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#E3572B] bg-white/80"
-                >
-                  <option value="">View process</option>
-                  <option value="direct">Direct Application</option>
-                  <option value="agent">Through Agent</option>
-                  <option value="transfer">Transfer</option>
+              <div className="flex flex-col text-left group">
+                <label className="font-outfit font-bold text-white text-sm mb-2 ml-1">Process</label>
+                <select value={heroProcess} onChange={(e) => setHeroProcess(e.target.value)} className="px-4 py-3 rounded-2xl bg-white/20 text-white border border-white/30 outline-none focus:bg-white/30 transition-all text-sm">
+                  <option value="" className="text-gray-900">View process</option>
+                  <option value="direct" className="text-gray-900">Direct</option>
+                  <option value="agent" className="text-gray-900">Agent</option>
                 </select>
               </div>
-
-              {/* Criteria */}
-              <div className="flex flex-col text-left">
-                <label className="font-outfit font-bold text-gray-900 text-sm md:text-base mb-2">Criteria</label>
-                <select
-                  value={heroCriteria}
-                  onChange={(e) => setHeroCriteria(e.target.value)}
-                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#E3572B] bg-white/80"
-                >
-                  <option value="">See all info</option>
-                  <option value="gpa">GPA Based</option>
-                  <option value="test">Test Score</option>
-                  <option value="portfolio">Portfolio</option>
+              <div className="flex flex-col text-left group">
+                <label className="font-outfit font-bold text-white text-sm mb-2 ml-1">Criteria</label>
+                <select value={heroCriteria} onChange={(e) => setHeroCriteria(e.target.value)} className="px-4 py-3 rounded-2xl bg-white/20 text-white border border-white/30 outline-none focus:bg-white/30 transition-all text-sm">
+                  <option value="" className="text-gray-900">See all info</option>
+                  <option value="gpa" className="text-gray-900">GPA Based</option>
+                  <option value="ielts" className="text-gray-900">IELTS</option>
                 </select>
               </div>
-
-              {/* Test Score */}
-              <div className="flex flex-col text-left">
-                <label className="font-outfit font-bold text-gray-900 text-sm md:text-base mb-2">IELTS/GRE</label>
-                <input
-                  type="number"
-                  placeholder="Score"
-                  value={heroTestScore}
-                  onChange={(e) => setHeroTestScore(e.target.value)}
-                  step="0.5"
-                  min="0"
-                  max="9"
-                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#E3572B] bg-white/80"
-                />
+              <div className="flex flex-col text-left group">
+                <label className="font-outfit font-bold text-white text-sm mb-2 ml-1">Test Score</label>
+                <input type="number" placeholder="Score" value={heroTestScore} onChange={(e) => setHeroTestScore(e.target.value)} className="px-4 py-3 rounded-2xl bg-white/20 text-white placeholder-white/50 border border-white/30 outline-none focus:bg-white/30 transition-all text-sm" />
               </div>
-
-              {/* Search Button */}
-              <div className="flex flex-col text-left">
-                <button
-                  onClick={handleHeroSearch}
-                  className="px-6 py-2 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm hover:bg-[#d95d39] transition-all"
-                >
-                  Search
-                </button>
-              </div>
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-6 py-3.5 rounded-2xl bg-[#E3572B] text-white font-outfit font-bold text-base shadow-xl shadow-orange-600/20">Search Now</motion.button>
             </div>
+          </ScrollReveal>
+        </div>
+      </div>
+
+      {/* Services Section */}
+      <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-20 lg:py-32">
+        <ScrollReveal direction="up" className="text-center mb-20">
+          <h2 className="text-4xl md:text-6xl font-bold font-rubik text-[#e3572b] mb-6">Services we will provide</h2>
+          <p className="text-gray-500 text-lg uppercase tracking-widest font-jakarta font-semibold">Simplifying Your Global Education Journey</p>
+        </ScrollReveal>
+
+        <StaggerReveal className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {[
+            { title: "One-Click Multi-University Application", icon: "/icons/application-icon.png", desc: "Apply to multiple universities worldwide with a single, smart profile." },
+            { title: "Smart Document Management", icon: "/icons/document-icon.png", desc: "Upload and reuse your credentials securely for every application." },
+            { title: "Real-Time Application Tracking", icon: "/icons/tracking-icon.png", desc: "Know exactly where your application stands at every moment." }
+          ].map((s, i) => (
+            <motion.div key={i} whileHover={{ y: -12 }} className="card-hover-glow bg-[#fff4ea] rounded-[40px] p-10 text-center border border-orange-100/50">
+              <h3 className="font-bold text-2xl mb-6 text-gray-900 leading-tight">{s.title}</h3>
+              <p className="text-gray-600 mb-10 leading-relaxed text-lg">{s.desc}</p>
+              <motion.div whileHover={{ scale: 1.15, rotate: 5 }} className="w-24 h-24 mx-auto bg-white rounded-3xl flex items-center justify-center shadow-lg"><Image src={s.icon} width={80} height={80} alt={s.title} /></motion.div>
+            </motion.div>
+          ))}
+        </StaggerReveal>
+      </div>
+
+      {/* Partners Section */}
+      <div className="bg-[#FFF4EA] py-20">
+        <div className="max-w-[1320px] mx-auto px-4 md:px-6">
+          <ScrollReveal className="flex flex-col md:flex-row justify-between items-center mb-16 gap-8 text-center md:text-left">
+            <div>
+              <h2 className="font-poppins font-bold text-4xl md:text-6xl mb-4">Partners in Success</h2>
+              <p className="text-gray-600 text-xl">Trusted by over 50+ Global Consultants & Institutes</p>
+            </div>
+            <motion.button whileHover={{ scale: 1.05 }} className="px-10 py-4 rounded-full bg-[#E3572B] text-white font-outfit font-bold text-lg shadow-xl shadow-orange-500/20">View Global Network</motion.button>
+          </ScrollReveal>
+          <StaggerReveal staggerDelay={0.06} className="grid grid-cols-2 md:grid-cols-5 gap-10">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <motion.div key={n} whileHover={{ scale: 1.15 }} className="flex items-center justify-center opacity-70 hover:opacity-100 transition-all"><Image src={`/partners/company${n}.png`} width={160} height={160} alt="" /></motion.div>
+            ))}
+          </StaggerReveal>
+        </div>
+      </div>
+
+      {/* University Explorer Grid */}
+      <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-24">
+        <ScrollReveal className="text-center mb-20">
+          <h2 className="text-4xl md:text-6xl font-bold font-outfit mb-6 text-gray-900">
+            <span className="text-orange-500">Universities</span> We Represent
+          </h2>
+          <p className="text-gray-500 text-xl max-w-2xl mx-auto">Discover top-tier institutions across the globe and find where you belong.</p>
+        </ScrollReveal>
+
+        {/* Marquee Banner */}
+        <ScrollReveal className="relative overflow-hidden mb-16 px-4 py-8 rounded-[40px] bg-white shadow-xl border border-gray-100 marquee-container">
+          <div className="marquee-content gap-4">
+            {[...countries, ...countries].map((c, i) => (
+              <motion.button key={i} onClick={() => setSelectedCountry(c.name)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                className={`flex items-center gap-3 px-8 py-3 rounded-full font-bold text-lg transition-all border whitespace-nowrap shadow-sm ${selectedCountry === c.name ? 'bg-orange-500 text-white border-orange-500 shadow-orange-400/30' : 'bg-white text-gray-700 border-gray-200 hover:border-orange-500'}`}
+              >
+                <span className={`fi fi-${c.code} text-2xl fis rounded-full shadow-sm`}></span>
+                {c.name}
+              </motion.button>
+            ))}
+          </div>
+        </ScrollReveal>
+
+        {/* Refine Your Search */}
+        <ScrollReveal direction="up" className="bg-white rounded-[40px] shadow-2xl p-10 md:p-14 mb-20 border border-gray-50/50">
+          <h3 className="text-3xl font-bold text-gray-900 mb-10 font-outfit">Refine Your Search</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+            <div>
+              <label className="block text-gray-900 font-bold mb-4 text-lg">Your GPA (0.0 - 4.0)</label>
+              <input type="number" placeholder="e.g., 3.8" value={gpa} onChange={(e) => setGpa(e.target.value)} min="0" max="4" step="0.1" className="w-full px-6 py-4 border-2 border-gray-100 rounded-2xl font-outfit focus:border-orange-400 outline-none transition-all placeholder:text-gray-300" />
+            </div>
+            <div>
+              <label className="block text-gray-900 font-bold mb-4 text-lg">Your IELTS Score (0.0 - 9.0)</label>
+              <input type="number" placeholder="e.g., 7.5" value={ielts} onChange={(e) => setIelts(e.target.value)} min="0" max="9" step="0.5" className="w-full px-6 py-4 border-2 border-gray-100 rounded-2xl font-outfit focus:border-orange-400 outline-none transition-all placeholder:text-gray-300" />
+            </div>
+          </div>
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <label className="text-gray-900 font-bold text-lg">Tuition Fee Range</label>
+              <span className="text-orange-500 font-extrabold text-2xl">${tuitionRange[1].toLocaleString()}</span>
+            </div>
+            <input type="range" min="0" max="60000" step="1000" value={tuitionRange[1]} onChange={(e) => setTuitionRange([tuitionRange[0], parseInt(e.target.value)])} className="w-full h-3 bg-gray-100 rounded-full appearance-none cursor-pointer accent-orange-500" />
+          </div>
+        </ScrollReveal>
+
+        <StaggerReveal key={selectedCountry} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          {universitiesDisplay.length ? universitiesDisplay.map((uni) => (
+            <motion.div key={uni.id} whileHover={{ y: -10 }} className="card-hover-glow bg-white rounded-[32px] overflow-hidden shadow-lg border border-transparent flex flex-col">
+              <div className="relative h-[200px] flex-shrink-0 group overflow-hidden">
+                <Image src={uni.image} alt={uni.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" unoptimized />
+                <button className="absolute top-4 right-4 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all"><Heart size={22} className="text-gray-600" /></button>
+              </div>
+              <div className="p-6 flex flex-col flex-1">
+                <h3 className="font-bold text-lg mb-2 text-gray-900 line-clamp-2 min-h-[3.25rem]">{uni.name}</h3>
+                <p className="text-orange-500 font-bold text-sm mb-1">{uni.type}</p>
+                <p className="text-gray-500 text-sm mb-5 flex-1">{uni.location}</p>
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full py-3 rounded-2xl bg-[#E3572B] text-white font-bold text-sm flex items-center justify-center gap-2">Apply Now <ArrowUpRight size={16} /></motion.button>
+              </div>
+            </motion.div>
+          )) : isUniversitiesLoading ? <div className="col-span-full py-20 text-center text-gray-400 text-xl font-medium">Crunching university data...</div> : <div className="col-span-full py-20 text-center text-gray-400 text-xl font-medium">No results match your criteria.</div>}
+        </StaggerReveal>
+
+        <div className="text-center">
+          <motion.button whileHover={{ scale: 1.05 }} className="px-14 py-5 rounded-3xl bg-[#E3572B] text-white font-bold text-xl shadow-2xl shadow-orange-600/30">
+            {hasMoreResults ? `See More Results (${filteredUniversities.length - 2} more)` : "Start Global Application Now"}
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Applying Process */}
+      <div className="py-24 bg-[#FFF4EA]/40 border-y border-orange-100/30">
+        <div className="max-w-[1320px] mx-auto px-4 md:px-6">
+          <ScrollReveal direction="up" className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl text-orange-500 font-bold mb-6 uppercase tracking-tight">Applying Process</h2>
+            <p className="text-gray-600 text-xl max-w-2xl mx-auto">From selection to acceptance — we guide you through every milestone.</p>
+          </ScrollReveal>
+          <div className="flex flex-col lg:flex-row items-start justify-center gap-12 lg:gap-0">
+            {[ { icon: "/icons/location.png", title: "Choose University", desc: "Select from over 1000+ top institutions globally." }, { icon: "/icons/doc.png", title: "Upload Info", desc: "Securely submit your transcripts and test scores." }, { icon: "/icons/payment.png", title: "One-time Payment", desc: "Pay once and track unlimited applications easily." }, { icon: "/icons/car.png", title: "Start Applying", desc: "Receive admission and start your visa process." } ].map((s, i) => (
+              <React.Fragment key={i}>
+                <ScrollReveal direction="up" delay={i * 0.15} className="flex-1 flex flex-col items-center text-center max-w-[280px] mx-auto">
+                  <motion.div whileHover={{ scale: 1.15, rotate: -5 }} className="mb-8 p-6 bg-white rounded-[32px] shadow-lg"><Image src={s.icon} width={80} height={80} alt="" /></motion.div>
+                  <h3 className="font-bold text-2xl mb-4 text-[#E3572B]">{s.title}</h3>
+                  <p className="text-gray-600 leading-relaxed text-sm">{s.desc}</p>
+                </ScrollReveal>
+                {i < 3 && <div className="hidden lg:flex pt-16 opacity-30 px-4"><Image src="/icons/connector.png" width={160} height={60} alt="" /></div>}
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Services We Will Provide Section */}
-      <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
-              {/* Section Title */}
-              <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold font-rubik text-center mb-4 text-[#e3572b]">
-                Services we will provide
-              </h2>
-              
-              <p className="text-center text-[#1a202c] text-sm md:text-base mb-12 md:mb-16 mt-12 font-jakarta font-normal">
-                What We Offer to Simplify Your University Application Journey
-              </p>
-      
-              {/* Three Service Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-                {/* Card 1 - One-Click Multi-University Application */}
-                <div className="bg-[#fff4ea] rounded-[10px] p-6 md:p-8 text-center hover:shadow-lg transition-shadow border border-[#e3572b]">
-                  
-                  <h3 className="font-rubik font-bold text-lg md:text-xl lg:text-2xl mb-4 text-gray-900">
-                    One-Click Multi-University<br />Application
-                  </h3>
-                  <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-                    Apply to multiple national universities through a single, streamlined submission process.
-                  </p>
-                  <div className="mt-3">
-                    <div className="w-[117px] h-16 md:w-[117px] md:h-20 mx-auto rounded-2xl flex items-center justify-center">
-                      <Image 
-                        src="/icons/application-icon.png" 
-                        width={117} 
-                        height={62} 
-                        alt="Application icon"
-                        
-                        
-                      />
-                    </div>
-                  </div>
-                </div>
-      
-                {/* Card 2 - Smart Document Management */}
-                <div className="bg-[#fff4ea] rounded-[10px] p-6 md:p-8 text-center hover:shadow-lg transition-shadow border border-[#e3572b]">
-                  
-                  <h3 className="font-rubik font-bold text-lg md:text-xl lg:text-2xl mb-4 text-gray-900">
-                    Smart Document<br />Management
-                  </h3>
-                  <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-                    Easily upload, manage, and reuse your academic documents for all applications in one secure place.
-                  </p>
-                  <div className="mt-3">
-                    <div className=" mx-auto bg-[#FFF4EA] rounded-2xl flex items-center justify-center">
-                      <Image 
-                        src="/icons/document-icon.png" 
-                        width={85} 
-                        height={65} 
-                        alt="Document icon"
-                      />
-                    </div>
-                  </div>
-                </div>
-      
-                {/* Card 3 - Real-Time Application Tracking */}
-                <div className="bg-[#FFF4EA] rounded-[10px] p-6 md:p-8 text-center hover:shadow-lg transition-shadow border border-[#e3572b]">
-                  
-                  <h3 className="font-rubik font-bold text-lg md:text-xl lg:text-2xl mb-4 text-gray-900">
-                    Real-Time Application<br />Tracking
-                  </h3>
-                  <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-                    Track the status of your applications, get deadline reminders, and stay informed every step of the way.
-                  </p>
-                  <div className="mt-3">
-                    <div className=" mx-auto  rounded-2xl flex items-center justify-center">
-                      <Image 
-                        src="/icons/tracking-icon.png" 
-                        width={87} 
-                        height={72} 
-                        alt="Tracking icon"
-                        
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-      {/* Partners in Success Section */}
-      <div className="bg-[#FFF4EA] py-12 md:py-16">
+      {/* ── Help ── */}
+            <div className="py-24 bg-white border-t border-gray-100">
               <div className="max-w-[1320px] mx-auto px-4 md:px-6">
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 md:mb-12">
-                  <div>
-                    <h2 className="font-poppins font-semibold text-3xl md:text-4xl lg:text-6xl  mb-2">
-                      Partners in Success
-                    </h2>
-                    <p className="text-black font-outfit font-normal text-sm md:text-base">
-                      Trusted by over top 50+ consultant & Institute 
-                    </p>
-                  </div>
-                  <button className="mt-4 sm:mt-0 px-6 py-2.5 rounded-full bg-[#E3572B] text-white font-outfit font-semibold text-sm md:text-base hover:bg-orange-800 transition-all">
-                     View All
-                  </button>
-                </div>
+                <ScrollReveal direction="up" className="text-center mb-20">
+                  <h2 className="text-4xl md:text-5xl font-bold font-jakarta text-[#E3572B] mb-6">Need help with application?</h2>
+                  <p className="text-gray-500 text-lg max-w-2xl mx-auto">We offer dedicated support to ensure your application journey is as smooth as possible.</p>
+                </ScrollReveal>
       
-                {/* Partner Icons */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-6">
-                  <div className="">
-                    <Image
-                      src="/partners/company1.png"
-                      width={160}
-                      height={160}
-                      alt=''
-                      />
-                  </div>
-      
-                  <div className="">
-                    <Image
-                      src="/partners/company2.png"
-                      width={160}
-                      height={160}
-                      alt=''
-                      />
-                  </div>
-      
-                  <div className="">
-                    <Image
-                      src="/partners/company3.png"
-                      width={160}
-                      height={160}
-                      alt=''
-                      />
-                  </div>
-      
-                  <div className="">
-                    <Image
-                      src="/partners/company4.png"
-                      width={160}
-                      height={160}
-                      alt=''
-                      />
-                  </div>
-      
-                  <div className="">
-                    <Image
-                      src="/partners/company5.png"
-                      width={160}
-                      height={160}
-                      alt=''
-                      />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-      {/* University We Are Working With Section */}
-      <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
-              {/* Section Title */}
-              <h2 className="text-3xl md:text-4xl lg:text-5xl  text-center mb-3 font-outfit font-bold">
-          <span className="text-[#E3572B]">University</span> we are working with
-        </h2>
-              
-              <p className="text-center text-gray-600 text-sm md:text-base mb-8 md:mb-12">
-                Trusted by Top National Universities to Simplify Admissions and Empower<br className="hidden sm:block" /> Student Application Experience.
-              </p>
-      
-              {/* Country Filter Buttons with Marquee */}
-        <div className="relative overflow-hidden mb-12 px-4">
-          <div className="marquee-container">
-            <div className="marquee-content">
-              {/* First set of countries */}
-              {countries.map((country, index) => (
-                <button
-                  key={`${country.name}-1-${index}`}
-                  onClick={() => setSelectedCountry(country.name)}
-                  className={`flex justify-center items-center gap-2 px-4 md:px-6 py-2 rounded-full font-outfit font-semibold text-sm md:text-base transition-all border mx-2 flex-shrink-0 ${selectedCountry === country.name
-                      ? 'bg-[#d95d39] text-white border-[#d95d39]'
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'
-                    }`}
-                >
-                  <span className={`fi fi-${country.code} text-xl fis rounded-full`}></span>
-                  {country.name}
-                </button>
-              ))}
-              {/* Duplicate set for seamless loop */}
-              {countries.map((country, index) => (
-                <button
-                  key={`${country.name}-2-${index}`}
-                  onClick={() => setSelectedCountry(country.name)}
-                  className={`flex justify-center items-center gap-2 px-4 md:px-6 py-2 rounded-full font-outfit font-semibold text-sm md:text-base transition-all border mx-2 flex-shrink-0 ${selectedCountry === country.name
-                      ? 'bg-[#d95d39] text-white border-[#d95d39]'
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'
-                    }`}
-                >
-                  <span className={`fi fi-${country.code} text-xl fis rounded-full`}></span>
-                  {country.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      
-              {/* Refine Your Search Filter Section */}
-              <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8 mb-12 border border-gray-100 max-w-[1320px] mx-auto">
-                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 font-outfit">
-                  Refine Your Search
-                </h3>
-                
-                {/* GPA and IELTS Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  {/* GPA Input */}
-                  <div>
-                    <label className="block text-gray-900 font-semibold mb-3 font-outfit text-sm md:text-base">
-                      Your GPA (0.0 - 4.0)
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="e.g., 3.5"
-                      value={gpa}
-                      onChange={(e) => setGpa(e.target.value)}
-                      min="0"
-                      max="4"
-                      step="0.1"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit focus:outline-none focus:border-[#E3572B] transition-colors text-gray-700 placeholder:text-gray-400"
-                    />
-                  </div>
-
-                  {/* IELTS Input */}
-                  <div>
-                    <label className="block text-gray-900 font-semibold mb-3 font-outfit text-sm md:text-base">
-                      Your IELTS Score (0.0 - 9.0)
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="e.g., 7.0"
-                      value={ielts}
-                      onChange={(e) => setIelts(e.target.value)}
-                      min="0"
-                      max="9"
-                      step="0.5"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit focus:outline-none focus:border-[#E3572B] transition-colors text-gray-700 placeholder:text-gray-400"
-                    />
-                  </div>
-                </div>
-
-                {/* Tuition Fee Range */}
-                <div>
-                  <div className="flex justify-between items-center mb-3">
-                    <label className="text-gray-900 font-semibold font-outfit text-sm md:text-base">
-                      Tuition Fee Range
-                    </label>
-                    <span className="text-[#E3572B] font-bold font-outfit text-sm md:text-base">
-                      ${tuitionRange[0].toLocaleString()} - ${tuitionRange[1].toLocaleString()}
-                    </span>
-                  </div>
-                  
-                  {/* Range Slider */}
-                  <div className="relative">
-                    <input
-                      type="range"
-                      min="0"
-                      max="60000"
-                      step="1000"
-                      value={tuitionRange[1]}
-                      onChange={(e) => setTuitionRange([tuitionRange[0], parseInt(e.target.value)])}
-                      className="w-full h-2 bg-gradient-to-r from-[#E3572B] to-[#FF8B22] rounded-lg appearance-none cursor-pointer"
-                      style={{
-                        background: `linear-gradient(to right, #E3572B 0%, #FF8B22 ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb 100%)`
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-      
-              {/* University Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {universities.map((university, index) => (
-                  <div key={index} className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-                    <div className="relative h-48">
-                      <Image
-                        src={university.image}
-                        alt={university.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-bold text-lg mb-1">{university.name}</h3>
-                      <p className="text-[#F88210] text-sm font-semibold mb-1">{university.type}</p>
-                      <p className="text-gray-500 text-sm mb-4">{university.location}</p>
-                      <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm">
-                        Application Form open
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-      
-              {/* Buttons - Show "See More" when filtering, otherwise show "Start Application" */}
-              <div className="flex justify-center">
-                {hasMoreResults ? (
-                  <button 
-                    onClick={() => router.push('/sign-in')}
-                    className="px-8 py-3.5 rounded-xl bg-[#E3572B] text-white font-outfit font-bold text-base md:text-lg hover:bg-[#e67609] transition-all flex items-center gap-3 shadow-lg"
-                  >
-                    See More Results ({filteredUniversities.length - 2} more)
-                  </button>
-                ) : (
-                  <button className="px-8 py-3.5 rounded-xl bg-[#E3572B] text-white font-outfit font-bold text-base md:text-lg hover:bg-[#e67609] transition-all flex items-center gap-3 shadow-lg border border-black">
-                    Start Application now
-                  </button>
-                )}
-              </div>
-            </div>
-
-      {/* Applying Process Section */}
-            <div className=" py-12 md:py-16">
-                    <div className="max-w-[1320px] mx-auto px-4 md:px-6">
-                      {/* Section Title */}
-                      <h2 className="text-3xl md:text-4xl lg:text-5xl  text-center mb-3 text-[#E3572B] font-jakarta font-medium">
-                        Applying Process
-                      </h2>
-                      <p className="text-center text-gray-600 text-sm md:text-base mb-12 md:mb-16">
-                        University Application Sign-Up Form: Contact National University Database With All<br className="hidden sm:block" /> the Information Anyone Can Search Specific.
-                      </p>
-            
-                      {/* Process Steps */}
-                      <div className="relative">
-                        {/* Steps with Icons and Descriptions */}
-                        <div className="flex flex-col lg:flex-row items-start justify-center gap-8 lg:gap-0">
-                          {/* Step 1 */}
-                          <div className="flex-1 flex flex-col items-center text-center max-w-xs">
-                            <div className="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center mb-6">
-                              <Image
-                                src="/icons/location.png"
-                                width={78}
-                                height={78}
-                                alt="Location Icon"
-                              />
-                            </div>
-                            <h3 className="font-semibold text-lg md:text-xl mb-2 text-[#E3572B] font-jakarta">Choose University</h3>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                              Apply to each university through a simple, streamlined application form.
-                            </p>
-                          </div>
-            
-                          {/* Connector 1 */}
-                          <div className="hidden lg:flex items-start justify-center pt-8 flex-shrink-0">
-                            <Image
-                              src="/icons/connector.png"
-                              width={180}
-                              height={60}
-                              alt="Connector"
-                              className="object-contain"
-                            />
-                          </div>
-            
-                          {/* Step 2 */}
-                          <div className="flex-1 flex flex-col items-center text-center max-w-xs">
-                            <div className="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center mb-6">
-                              <Image
-                                src="/icons/doc.png"
-                                width={78}
-                                height={78}
-                                alt="Document Icon"
-                              />
-                            </div>
-                            <h3 className="font-semibold text-lg md:text-xl mb-2 text-[#E3572B] font-jakarta">Upload Documents</h3>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                              Upload your identification, High school transcripts, CV, and all other required documents for complete application.
-                            </p>
-                          </div>
-            
-                          {/* Connector 2 */}
-                          <div className="hidden lg:flex items-start justify-center pt-8 flex-shrink-0">
-                            <Image
-                              src="/icons/connector.png"
-                              width={180}
-                              height={60}
-                              alt="Connector"
-                              className="object-contain"
-                            />
-                          </div>
-            
-                          {/* Step 3 */}
-                          <div className="flex-1 flex flex-col items-center text-center max-w-xs">
-                            <div className="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center mb-6">
-                              <Image
-                                src="/icons/payment.png"
-                                width={78}
-                                height={78}
-                                alt="Payment Icon"
-                              />
-                            </div>
-                            <h3 className="font-semibold text-lg md:text-xl mb-2 text-[#E3572B] font-jakarta">One-time payment</h3>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                              From admissions to visa dates, whether you're joining spring, winter, or fall term - track them all
-                            </p>
-                          </div>
-            
-                          {/* Connector 3 */}
-                          <div className="hidden lg:flex items-start justify-center pt-8 flex-shrink-0">
-                            <Image
-                              src="/icons/connector.png"
-                              width={180}
-                              height={60}
-                              alt="Connector"
-                              className="object-contain"
-                            />
-                          </div>
-            
-                          {/* Step 4 */}
-                          <div className="flex-1 flex flex-col items-center text-center max-w-xs">
-                            <div className="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center mb-6">
-                              <Image
-                                src="/icons/car.png"
-                                width={78}
-                                height={78}
-                                alt="Car Icon"
-                              />
-                            </div>
-                            <h3 className="font-semibold text-lg md:text-xl mb-2 text-[#E3572B] font-jakarta">Start Applying</h3>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                              Your University is not far away. Get ready to fly to your dream University Life.
-                            </p>
-                          </div>
-                        </div>
+                <StaggerReveal className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {helpCards.map((card, i) => (
+                    <motion.div
+                      key={i}
+                      whileHover={{ y: -10 }}
+                      className="bg-[#FFF4EA] rounded-[40px] p-10 text-center border border-white h-full shadow-sm hover:shadow-xl transition-all"
+                    >
+                      <div className="w-20 h-20 mx-auto mb-8 bg-white rounded-full flex items-center justify-center shadow-md">
+                        <Image src={card.icon} width={45} height={45} alt={card.title} />
                       </div>
-                    </div>
-                  </div>
-      
-            {/* News and Updates Section */}
-            <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
-                          {/* Section Header */}
-                          <div className="mb-12 font-normal font-poppins">
-                            <h2 className="text-3xl md:text-4xl lg:text-5xl  mb-2">News and Updates</h2>
-                            <p className="text-gray-600 text-base md:text-lg">Stay up to date with us</p>
-                          </div>
-                  
-                          {/* News Cards */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            {/* News Card 1 */}
-                            <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                              <div className="relative h-[160px] overflow-hidden">
-                                <Image
-                                  src="/news/news1.png"
-                                  alt="Aga Khan Foundation Scholarship"
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="p-4">
-                                <h3 className="font-bold text-base mb-2 line-clamp-2">
-                                  Aga Khan Foundation International Scholarship Programme
-                                </h3>
-                                <p className="text-gray-600 text-sm mb-3 line-clamp-3">
-                                  These programmes offer funding and support opportunities for students interested in pursuing education...
-                                </p>
-                                <p className="text-gray-400 text-xs">14k views</p>
-                              </div>
-                            </div>
-                  
-                            {/* News Card 2 */}
-                            <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                              <div className="relative h-[160px] overflow-hidden">
-                                <Image
-                                  src="/news/news2.png"
-                                  alt="World Bank Scholarship"
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="p-4">
-                                <h3 className="font-bold text-base mb-2 line-clamp-2">
-                                  the World Bank Scholarship
-                                </h3>
-                                <p className="text-gray-600 text-sm mb-3 line-clamp-3">
-                                  Several universities in Australia offer full scholarships for Bangladeshi and other students to study in a...
-                                </p>
-                                <p className="text-gray-400 text-xs">14k views</p>
-                              </div>
-                            </div>
-                  
-                            {/* News Card 3 */}
-                            <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                              <div className="relative h-[160px] overflow-hidden">
-                                <Image
-                                  src="/news/news3.png"
-                                  alt="Mastercard Foundation Scholarship"
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="p-4">
-                                <h3 className="font-bold text-base mb-2 line-clamp-2">
-                                  the Mastercard Foundation Scholarship
-                                </h3>
-                                <p className="text-gray-600 text-sm mb-3 line-clamp-3">
-                                  Many programs exist, funding and support varies by institution and criteria set by institution...
-                                </p>
-                                <p className="text-gray-400 text-xs">14k views</p>
-                              </div>
-                            </div>
-                  
-                            {/* News Card 4 */}
-                            <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                              <div className="relative h-[160px] overflow-hidden">
-                                <Image
-                                  src="/news/news4.png"
-                                  alt="Ulster University Scholarships"
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="p-4">
-                                <h3 className="font-bold text-base mb-2 line-clamp-2">
-                                  Ulster University Scholarships
-                                </h3>
-                                <p className="text-gray-600 text-sm mb-3 line-clamp-3">
-                                  It can provide some details about Ulster University's programs and scholarship opportunities...
-                                </p>
-                                <p className="text-gray-400 text-xs">14k views</p>
-                              </div>
-                            </div>
-                          </div>
-                  
-                          {/* Explore More Button */}
-                          <div className="text-center">
-                            <Link href="/news-updates">
-                              <button className="font-outfit font-semibold text-white text-2xl py-5 px-8 bg-[#E3572B] rounded-[40px] hover:bg-[#c24d2b] transition-all">
-                                Explore More News
-                              </button>
-                            </Link>
-                          </div>
-                        </div>
-      
-            {/* Need Help Section */}
-                  <div className=" py-12 md:py-16 mb-25">
-                    <div className="max-w-[1320px] mx-auto px-4 md:px-6">
-                      {/* Section Title */}
-                      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 font-jakarta text-[#E3572B]">
-                        Need help with application?
-                      </h2>
-                      <p className="text-center text-gray-600 text-sm md:text-base mb-12 mt-12 md:mb-16">
-                        Let the right one in. This platform supports students with what they want, and<br className="hidden sm:block" /> we are here for ease of admission for students.
-                      </p>
-            
-                      {/* Help Cards Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-                        {/* Card 1 - Customer Support */}
-                        <div className="bg-[#FFF4EA] rounded-3xl p-6 md:p-8 text-center hover:shadow-xl transition-shadow">
-                          <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 bg-[#FFF4EA] rounded-full flex items-center justify-center">
-                            <Image
-                              src="/icons/support.png"
-                              width={51}
-                              height={51}
-                              alt="Support Icon"
-                            />
-                          </div>
-                          <h3 className=" text-xl md:text-2xl mb-3 text-[#1a202c] font-jakarta font-semibold">Customer Support</h3>
-                          <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-6">
-                            Aliquam erat volutpat. Integer malesuada turpis id fringilla suscipit. Maecenas ultrices.
-                          </p>
-                          
-                        </div>
-            
-                        {/* Card 2 - One-on-One Consultation */}
-                        <div className="bg-[#FFF4EA] rounded-3xl p-6 md:p-8 text-center hover:shadow-xl transition-shadow">
-                          <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 bg-[#FFF4EA] rounded-full flex items-center justify-center">
-                            <Image
-                              src="/icons/onetime.png"
-                              width={51}
-                              height={51}
-                              alt="Support Icon"
-                            />
-                          </div>
-                          <h3 className=" text-xl md:text-2xl mb-3 text-[#1a202c] font-jakarta font-semibold">One time Payment process</h3>
-                          <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-6">
-                            Aliquam erat volutpat. Integer malesuada turpis id fringilla suscipit. Maecenas ultrices.
-                          </p>
-                          
-                        </div>
-            
-                        {/* Card 3 - Campus Visit */}
-                        <div className="bg-[#FFF4EA] rounded-3xl p-6 md:p-8 text-center hover:shadow-xl transition-shadow">
-                          <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 bg-[#FFF4EA] rounded-full flex items-center justify-center">
-                            <Image
-                              src="/icons/consult.png"
-                              width={51}
-                              height={51}
-                              alt="Support Icon"
-                            />
-                          </div>
-                          <h3 className=" text-xl md:text-2xl mb-3 text-[#1a202c] font-jakarta font-semibold">Consult with us in our office</h3>
-                          <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-6">
-                            Aliquam erat volutpat. Integer malesuada turpis id fringilla suscipit. Maecenas ultrices.
-                          </p>
-                          
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-      {/* Results Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8" onClick={(e) => e.stopPropagation()}>
-            {/* Modal Header */}
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 font-outfit">Search Results</h3>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Results Count */}
-            <p className="text-gray-600 mb-6">
-              Found {modalResults.length} universities matching your criteria
-            </p>
-
-            {/* University Cards */}
-            {modalResults.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {modalResults.map((university, index) => (
-                  <div key={index} className="bg-[#fff4ea] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow p-5">
-                    <div className="relative h-48">
-                      <Image
-                        src={university.image}
-                        alt={university.name}
-                        fill
-                        className="object-cover rounded-xl"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-bold text-lg mb-1">{university.name}</h3>
-                      <p className="text-[#F88210] text-sm font-semibold mb-1">{university.type}</p>
-                      <p className="text-gray-500 text-sm mb-2">{university.location}</p>
-                      <div className="text-xs text-gray-600 mb-3">
-                        <p>Min GPA: {university.minGpa} • IELTS: {university.minIelts}</p>
-                        <p>Tuition: ${university.tuition.toLocaleString()}/year</p>
-                      </div>
-                      <button className="w-full px-4 py-2.5 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold text-sm hover:bg-[#d95d39] transition-all">
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                      <h3 className="text-2xl font-bold text-gray-900 mb-4 font-jakarta">{card.title}</h3>
+                      <p className="text-gray-600 text-base leading-relaxed">{card.desc}</p>
+                    </motion.div>
+                  ))}
+                </StaggerReveal>
               </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No universities found matching your criteria. Try adjusting your filters.</p>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-8 py-3 rounded-lg border-2 border-[#E3572B] text-[#E3572B] font-outfit font-semibold hover:bg-[#E3572B] hover:text-white transition-all"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => router.push('/sign-in')}
-                className="px-8 py-3 rounded-lg bg-[#E3572B] text-white font-outfit font-semibold hover:bg-[#d95d39] transition-all"
-              >
-                See More Results
-              </button>
             </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default Page;
+export default InternationalUniversityPage;

@@ -1,11 +1,29 @@
 "use client";
 
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, SlidersHorizontal, CircleDollarSign, Clock, X, ChevronDown } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import DashboardHeader from "@/components/layout/DashboardHeader";
+
+type PublicUniversityCard = {
+  id: string;
+  programId: string | null;
+  name: string;
+  location: string;
+  image: string;
+  price: string;
+  duration: string;
+};
+
+function formatPrice(value: number | null | undefined) {
+  if (typeof value !== "number") {
+    return "Tuition not set";
+  }
+
+  return `$${value.toLocaleString()}/year`;
+}
 
 const PublicUniversityPageContent = () => {
   const router = useRouter();
@@ -17,6 +35,8 @@ const PublicUniversityPageContent = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(shouldAutoOpenFinder);
   const [currentStep, setCurrentStep] = useState(1);
+  const [universities, setUniversities] = useState<PublicUniversityCard[]>([]);
+  const [isUniversitiesLoading, setIsUniversitiesLoading] = useState(true);
   const [finderFormData, setFinderFormData] = useState({
     university: "",
     group: "",
@@ -35,72 +55,89 @@ const PublicUniversityPageContent = () => {
     }
   }, [pathname, router, shouldAutoOpenFinder]);
 
-  const universities = [
-    {
-      id: 1,
-      name: "University of Chittagong",
-      location: "Chittagong",
-      image: "/universities/chittagong.png",
-      price: "$21,090/year",
-      duration: "24 months",
-    },
-    {
-      id: 2,
-      name: "University of Chittagong",
-      location: "Chittagong",
-      image: "/universities/chittagong.png",
-      price: "$21,090/year",
-      duration: "24 months",
-    },
-    {
-      id: 3,
-      name: "University of Chittagong",
-      location: "Chittagong",
-      image: "/universities/chittagong.png",
-      price: "$21,090/year",
-      duration: "24 months",
-    },
-    {
-      id: 4,
-      name: "University of Chittagong",
-      location: "Chittagong",
-      image: "/universities/chittagong.png",
-      price: "$21,090/year",
-      duration: "24 months",
-    },
-    {
-      id: 5,
-      name: "University of Chittagong",
-      location: "Chittagong",
-      image: "/universities/chittagong.png",
-      price: "$21,090/year",
-      duration: "24 months",
-    },
-    {
-      id: 6,
-      name: "University of Chittagong",
-      location: "Chittagong",
-      image: "/universities/chittagong.png",
-      price: "$21,090/year",
-      duration: "24 months",
-    },
-    {
-      id: 7,
-      name: "University of Chittagong",
-      location: "Chittagong",
-      image: "/universities/chittagong.png",
-      price: "$21,090/year",
-      duration: "24 months",
-    },
-    {
-      id: 8,
-      name: "University of Chittagong",
-      location: "Chittagong",
-      image: "/universities/chittagong.png",
-      price: "$21,090/year",
-      duration: "24 months",
-    },
-  ];
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadUniversities = async () => {
+      setIsUniversitiesLoading(true);
+
+      try {
+        const response = await fetch("/api/universities?page=1&pageSize=200&includeInactive=false", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to load universities");
+        }
+
+        const result = (await response.json()) as {
+          data?: Array<{
+            id: string;
+            name: string;
+            type: string;
+            country: string;
+            city: string;
+            bannerImageUrl?: string | null;
+            logoUrl?: string | null;
+            tuition?: number | null;
+            durationMonths?: number | null;
+            primaryProgramId?: string | null;
+          }>;
+        };
+
+        const parsed = (result.data ?? [])
+          .filter((item) => item.country.toLowerCase() === "bangladesh")
+          .filter((item) => item.type === "PUBLIC" || item.type === "NATIONAL")
+          .map((item) => ({
+            id: item.id,
+            programId: item.primaryProgramId ?? null,
+            name: item.name,
+            location: item.city,
+            image: item.bannerImageUrl || item.logoUrl || "/universities/chittagong.png",
+            price: formatPrice(item.tuition),
+            duration:
+              typeof item.durationMonths === "number"
+                ? `${item.durationMonths} months`
+                : "Duration not set",
+          }));
+
+        if (isMounted) {
+          setUniversities(parsed);
+        }
+      } catch {
+        if (isMounted) {
+          setUniversities([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsUniversitiesLoading(false);
+        }
+      }
+    };
+
+    void loadUniversities();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const filteredUniversities = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return universities;
+
+    return universities.filter((university) =>
+      `${university.name} ${university.location}`.toLowerCase().includes(query),
+    );
+  }, [searchQuery, universities]);
+
+  const createApplyHref = (university: PublicUniversityCard) => {
+    const query = new URLSearchParams({ universityId: university.id });
+    if (university.programId) {
+      query.set("programId", university.programId);
+    }
+    return `/national-university/public-university/my-application?${query.toString()}`;
+  };
 
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
@@ -166,7 +203,7 @@ const PublicUniversityPageContent = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {universities.map((university) => (
+          {filteredUniversities.map((university) => (
             <div key={university.id} className="bg-white rounded-t-[32px] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <div className="relative h-[366px] w-full overflow-hidden">
                 <Image
@@ -174,6 +211,7 @@ const PublicUniversityPageContent = () => {
                   alt={university.name}
                   width={550}
                   height={366}
+                  unoptimized
                   className="object-cover w-full h-full"
                 />
               </div>
@@ -202,7 +240,7 @@ const PublicUniversityPageContent = () => {
 
                 <div className="flex items-center gap-3">
                   <Link
-                    href="/national-university/public-university/my-application"
+                    href={createApplyHref(university)}
                     className="flex-1 py-3 text-[#E3572B] text-sm font-semibold font-outfit rounded-full hover:bg-gray-50 transition-colors text-center"
                     style={{ border: "1px solid rgba(0, 0, 0, 0.1)" }}
                   >
@@ -219,6 +257,16 @@ const PublicUniversityPageContent = () => {
               </div>
             </div>
           ))}
+          {isUniversitiesLoading ? (
+            <div className="col-span-full rounded-3xl border border-dashed border-[#E3572B]/40 bg-white p-8 text-center text-gray-600">
+              Loading universities...
+            </div>
+          ) : null}
+          {!isUniversitiesLoading && !filteredUniversities.length ? (
+            <div className="col-span-full rounded-3xl border border-dashed border-[#E3572B]/40 bg-white p-8 text-center text-gray-600">
+              No universities found.
+            </div>
+          ) : null}
         </div>
 
         <div

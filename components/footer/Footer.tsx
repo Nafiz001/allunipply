@@ -1,107 +1,193 @@
-import Image from 'next/image'
-import React from 'react'
-import { Twitter, Facebook, Instagram, Youtube, Linkedin } from 'lucide-react'
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Share2,
+  Twitter,
+  Youtube,
+} from "lucide-react";
+
+const companyLinks = [
+  { label: "Home Page", href: "#" },
+  { label: "About us", href: "#" },
+  { label: "Listing", href: "#" },
+  { label: "Agents", href: "#" },
+];
+
+const supportLinks = [
+  { label: "Contact us", href: "#" },
+  { label: "Help", href: "#" },
+];
+
+const socialLinks = [
+  {
+    label: "Twitter",
+    href: "#",
+    icon: Twitter,
+    className: "bg-[#1DA1F2] hover:bg-[#1a8cd8]",
+  },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/iniastratech",
+    icon: Facebook,
+    className: "bg-[#1877F2] hover:bg-[#145dbf]",
+  },
+  {
+    label: "Instagram",
+    href: "#",
+    icon: Instagram,
+    className:
+      "bg-[linear-gradient(135deg,#833AB4_0%,#FD1D1D_55%,#FCAF45_100%)]",
+  },
+  {
+    label: "YouTube",
+    href: "#",
+    icon: Youtube,
+    className: "bg-[#FF0000] hover:bg-[#cc0000]",
+  },
+  {
+    label: "LinkedIn",
+    href: "#",
+    icon: Linkedin,
+    className: "bg-[#0A66C2] hover:bg-[#084d94]",
+  },
+];
 
 export default function Footer() {
   return (
-          <footer className="bg-[#fff4ea] pt-12 pb-6">
-        <div className="max-w-full mx-auto px-4 md:px-6 font-outfit font-normal">
-          {/* Footer Content */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
-            {/* Company Info */}
-            <div className='col-span-2'>
-              <div className="mb-4">
-                <Image src="/icons/logo.png" alt="allunipply logo" width={150} height={50} className="object-contain" />
-              </div>
-              <p className="text-black text-sm leading-relaxed">
-                iniAstra Tech is creating a simple, efficient, <br /> and affordable e-commerce platform for small entrepreneurs, helping <br /> them grow their businesses and improve their livelihoods.
-              </p>
-            </div>
+    <footer className="bg-[#fff4ea] px-4 pb-6 pt-14 md:px-6">
+      <div className="mx-auto max-w-7xl font-outfit">
+        <div className="flex flex-col items-center text-center">
+          <Link href="/" className="mb-6 inline-flex">
+            <Image
+              src="/icons/logo.png"
+              alt="allunipply logo"
+              width={185}
+              height={60}
+              className="h-auto w-[150px] object-contain md:w-[185px]"
+            />
+          </Link>
 
-            {/* Company Links */}
-            <div>
-              <h4 className="font-bold text-lg mb-4">COMPANY</h4>
-              <ul className="space-y-3">
-                <li>
-                  <a href="#" className="text-black hover:text-[#d95d39] hover:translate-x-1 transition-all duration-300 text-sm inline-block group">
-                    <span className="border-b border-transparent group-hover:border-[#d95d39] transition-all">Home Page</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-black hover:text-[#d95d39] hover:translate-x-1 transition-all duration-300 text-sm inline-block group">
-                    <span className="border-b border-transparent group-hover:border-[#d95d39] transition-all">About us</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-black hover:text-[#d95d39] hover:translate-x-1 transition-all duration-300 text-sm inline-block group">
-                    <span className="border-b border-transparent group-hover:border-[#d95d39] transition-all">Listing</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-black hover:text-[#d95d39] hover:translate-x-1 transition-all duration-300 text-sm inline-block group">
-                    <span className="border-b border-transparent group-hover:border-[#d95d39] transition-all">Agents</span>
-                  </a>
-                </li>
+          <p className="max-w-3xl text-sm leading-7 text-[#596273] md:text-[17px]">
+            iniAstra Tech is creating a simple, efficient, and affordable
+            e-commerce platform for small entrepreneurs, helping them grow
+            their businesses and improve their livelihoods.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-6 lg:grid-cols-[1.5fr_1.2fr_1.35fr]">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <section className=" ">
+              <h4 className="mb-4 text-[15px] font-semibold uppercase tracking-[0.18em] text-[#1f2a44]">
+                Company
+              </h4>
+              <ul className="space-y-3 text-[15px] text-[#596273]">
+                {companyLinks.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="inline-flex items-center gap-2 transition hover:text-[#1f2a44]"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#f08f4f]" />
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
-            </div>
+            </section>
 
-            {/* Support Links */}
-            <div>
-              <h4 className="font-bold text-lg mb-4">SUPPORT</h4>
-              <ul className="space-y-3">
-                <li>
-                  <a href="#" className="text-black hover:text-[#d95d39] hover:translate-x-1 transition-all duration-300 text-sm inline-block group">
-                    <span className="border-b border-transparent group-hover:border-[#d95d39] transition-all">Contact us</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-black hover:text-[#d95d39] hover:translate-x-1 transition-all duration-300 text-sm inline-block group">
-                    <span className="border-b border-transparent group-hover:border-[#d95d39] transition-all">Help</span>
-                  </a>
-                </li>
+            <section className="">
+              <h4 className="mb-4 text-[15px] font-semibold uppercase tracking-[0.18em] text-[#1f2a44]">
+                Support
+              </h4>
+              <ul className="space-y-3 text-[15px] text-[#596273]">
+                {supportLinks.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="inline-flex items-center gap-2 transition hover:text-[#1f2a44]"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#f08f4f]" />
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
-            </div>
-
-            {/* Social Links */}
-            <div>
-              <h4 className="font-bold text-lg mb-4">SOCIAL</h4>
-              <div className="flex gap-3">
-                <a href="#" className="w-10 h-10 bg-[#1DA1F2] text-white rounded-lg flex items-center justify-center hover:bg-[#1a8cd8] hover:scale-110 hover:-rotate-6 transition-all duration-300 shadow-md hover:shadow-lg">
-                  <Twitter className="w-5 h-5" />
-                </a>
-                <a href="https://www.facebook.com/iniastratech" className="w-10 h-10 bg-[#1877F2] text-white rounded-lg flex items-center justify-center hover:bg-[#145dbf] hover:scale-110 hover:rotate-6 transition-all duration-300 shadow-md hover:shadow-lg" target='_blank>
-                  <Facebook className="w-5 h-5" />
-                </a>
-                <a href="#" className="w-10 h-10 bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCAF45] text-white rounded-lg flex items-center justify-center hover:scale-110 hover:-rotate-6 transition-all duration-300 shadow-md hover:shadow-lg">
-                  <Instagram className="w-5 h-5" />
-                </a>
-                <a href="#" className="w-10 h-10 bg-[#FF0000] text-white rounded-lg flex items-center justify-center hover:bg-[#cc0000] hover:scale-110 hover:rotate-6 transition-all duration-300 shadow-md hover:shadow-lg">
-                  <Youtube className="w-5 h-5" />
-                </a>
-                <a href="#" className="w-10 h-10 bg-[#0A66C2] text-white rounded-lg flex items-center justify-center hover:bg-[#084d94] hover:scale-110 hover:-rotate-6 transition-all duration-300 shadow-md hover:shadow-lg">
-                  <Linkedin className="w-5 h-5" />
-                </a>
-              </div>
-            </div>
+            </section>
           </div>
 
-          {/* Footer Bottom */}
-          <div className="border-t border-gray-300 pt-6">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-black text-sm">© 2026 All Rights Reserved to iniAstra Tech</p>
-              <div className="flex gap-6">
-                <a href="#" className="text-black hover:text-[#d95d39] transition-all duration-300 text-sm relative group">
-                  Privacy Policy
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#d95d39] group-hover:w-full transition-all duration-300"></span>
-                </a>
-                <a href="#" className="text-black hover:text-[#d95d39] transition-all duration-300 text-sm relative group">
-                  Terms and condition
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#d95d39] group-hover:w-full transition-all duration-300"></span>
-                </a>
+          <section className="">
+            <div className="mb-5 flex items-center gap-3 text-[#1f2a44]">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#eef2ff] text-[#2a459a]">
+                <Share2 className="h-5 w-5" />
+              </span>
+              <div>
+                <h4 className="text-xl font-semibold">Connect &amp; Follow</h4>
+                <p className="text-sm text-[#7a8597]">
+                  Stay updated with our latest news and product updates.
+                </p>
               </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              {socialLinks.map((social) => {
+                const Icon = social.icon;
+
+                return (
+                  <Link
+                    key={social.label}
+                    href={social.href}
+                    target={social.href.startsWith("http") ? "_blank" : undefined}
+                    rel={
+                      social.href.startsWith("http")
+                        ? "noopener noreferrer"
+                        : undefined
+                    }
+                    aria-label={social.label}
+                    className={`flex h-12 w-12 items-center justify-center rounded-full text-white shadow-[0_10px_24px_rgba(31,42,68,0.18)] transition duration-300 hover:-translate-y-1 ${social.className}`}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="overflow-hidden">
+            <div className="flex h-full flex-col justify-center  gap-6">
+              
+
+             
+
+              <Link
+                href="/national-university/start-applying"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#2a459a] px-6 py-4 text-base font-semibold text-white  transition duration-300 hover:-translate-y-0.5 hover:bg-[#223b83] sm:w-auto"
+              >
+                Start Your Application
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </section>
+        </div>
+
+        <div className="mt-10 border-t border-[#ded6cc] pt-5">
+          <div className="flex flex-col gap-4 text-sm text-[#7a8597] md:flex-row md:items-center md:justify-between">
+            <p>&copy; 2026 All Rights Reserved to iniAstra Tech</p>
+
+            <div className="flex flex-wrap items-center gap-6">
+              <Link href="#" className="transition hover:text-[#1f2a44]">
+                Privacy Policy
+              </Link>
+              <Link href="#" className="transition hover:text-[#1f2a44]">
+                Terms and condition
+              </Link>
             </div>
           </div>
         </div>
-      </footer>
-  )
+      </div>
+    </footer>
+  );
 }

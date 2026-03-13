@@ -5,6 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { signIn } from "next-auth/react";
+
+const slides = ['/icons/laptop.png', '/icons/slider2.png', '/icons/slider3.png'];
 
 const SignUpPage = () => {
   const router = useRouter();
@@ -15,9 +18,11 @@ const SignUpPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleAvailable, setIsGoogleAvailable] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [nextDestination, setNextDestination] = useState("/dashboard?openFilter=true");
-  const slides = ['/icons/laptop.png', '/icons/slider2.png', '/icons/slider3.png'];
   const signInHref = `/sign-in?next=${encodeURIComponent(nextDestination)}`;
 
   useEffect(() => {
@@ -34,9 +39,83 @@ const SignUpPage = () => {
     }
   }, []);
 
-  const handleCreateAccount = () => {
-    // Validate form fields here if needed
-    router.push(`/otp-verification?next=${encodeURIComponent(nextDestination)}`);
+  useEffect(() => {
+    const checkProviders = async () => {
+      try {
+        const response = await fetch("/api/auth/providers", { cache: "no-store" });
+        if (!response.ok) return;
+        const providers = (await response.json()) as Record<string, unknown>;
+        setIsGoogleAvailable(Boolean(providers.google));
+      } catch {
+        setIsGoogleAvailable(false);
+      }
+    };
+
+    void checkProviders();
+  }, []);
+
+  const handleCreateAccount = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    setAuthError("");
+
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setAuthError("Name, email and password are required.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setAuthError("Password and confirm password do not match.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/auth/sign-up", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: name,
+          email,
+          password,
+        }),
+      });
+
+      if (!response.ok) {
+        const result = (await response.json()) as { error?: string };
+        setAuthError(result.error ?? "Unable to create account. Please try again.");
+        return;
+      }
+
+      const loginResult = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl: nextDestination,
+      });
+
+      if (!loginResult || loginResult.error) {
+        setAuthError("Account created, but auto sign-in failed. Please sign in manually.");
+        router.push(signInHref);
+        return;
+      }
+
+      router.push(loginResult.url ?? nextDestination);
+      router.refresh();
+    } catch {
+      setAuthError("Network error. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    setAuthError("");
+    await signIn("google", {
+      callbackUrl: nextDestination,
+    });
   };
 
   return (
@@ -147,16 +226,28 @@ const SignUpPage = () => {
             </div>
 
             {/* Create Account Button */}
+            {authError ? (
+              <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-outfit text-red-700">
+                {authError}
+              </p>
+            ) : null}
+
             <button 
               type="button"
               onClick={handleCreateAccount}
+              disabled={isSubmitting}
               className="w-full py-4 bg-[#E3572B] text-white rounded-full font-outfit font-semibold text-lg hover:bg-[#c24d2b] transition-all mb-6"
             >
-              Create Account
+              {isSubmitting ? "Creating Account..." : "Create Account"}
             </button>
 
             {/* Google Sign Up */}
-            <button className="w-full py-3 border-2 border-gray-200 rounded-full font-outfit font-semibold text-gray-700 hover:border-[#E3572B] transition-all flex items-center justify-center gap-3 mb-8">
+            <button
+              type="button"
+              onClick={handleGoogleSignUp}
+              disabled={isSubmitting || !isGoogleAvailable}
+              className="w-full py-3 border-2 border-gray-200 rounded-full font-outfit font-semibold text-gray-700 hover:border-[#E3572B] transition-all flex items-center justify-center gap-3 mb-8 disabled:opacity-70"
+            >
               <Image src="/icons/google.png" alt="Google" width={20} height={20} />
               Google
             </button>

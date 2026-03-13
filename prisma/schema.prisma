@@ -1,0 +1,322 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  STUDENT
+  COUNSELOR
+  ADMIN
+}
+
+enum UniversityType {
+  PUBLIC
+  PRIVATE
+  NATIONAL
+  INTERNATIONAL
+}
+
+enum ProgramLevel {
+  BACHELORS
+  MASTERS
+  PHD
+  DIPLOMA
+  CERTIFICATE
+}
+
+enum ProgramDeliveryMode {
+  ONSITE
+  ONLINE
+  HYBRID
+}
+
+enum ScholarshipType {
+  MERIT
+  NEED_BASED
+  ATHLETIC
+  RESEARCH
+  DIVERSITY
+  GOVERNMENT
+  OTHER
+}
+
+enum ScholarshipAmountType {
+  FULL_TUITION
+  PARTIAL_TUITION
+  FIXED_AMOUNT
+  PERCENTAGE
+  STIPEND
+}
+
+enum NewsCategory {
+  INTERNATIONAL
+  NATIONAL
+  SCHOLARSHIP
+  ADMISSION
+  SYSTEM
+  OTHER
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ApplicationStatus {
+  DRAFT
+  IN_PROGRESS
+  SUBMITTED
+  UNDER_REVIEW
+  OFFERED
+  REJECTED
+  WAITLISTED
+  WITHDRAWN
+}
+
+enum ApplicationSectionType {
+  PERSONAL_INFORMATION
+  ACADEMIC_HISTORY
+  SUPPORTING_INFORMATION
+  PROGRAM_MATERIALS
+  REVIEW_AND_SUBMIT
+}
+
+enum SectionStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+enum DocumentType {
+  CV_RESUME
+  PERSONAL_STATEMENT
+  TRANSCRIPT
+  TEST_SCORE
+  PASSPORT
+  ID_CARD
+  CERTIFICATE
+  RECOMMENDATION
+  OTHER
+}
+
+enum DocumentVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum NotificationType {
+  SYSTEM
+  APPLICATION
+  DEADLINE
+  PAYMENT
+  PROMOTION
+}
+
+model User {
+  id              String         @id @default(cuid())
+  email           String         @unique
+  passwordHash    String?
+  fullName        String
+  phone           String?
+  avatarUrl       String?
+  role            UserRole       @default(STUDENT)
+  isActive        Boolean        @default(true)
+  emailVerifiedAt DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  applications    Application[]
+  documents       Document[]
+  notifications   Notification[]
+  authoredNews    News[]         @relation("NewsAuthor")
+
+  @@index([role])
+}
+
+model University {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  name           String
+  type           UniversityType
+  country        String
+  city           String
+  state          String?
+  description    String?
+  websiteUrl     String?
+  logoUrl        String?
+  bannerImageUrl String?
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  programs       Program[]
+  scholarships   Scholarship[]
+  newsArticles   News[]
+  applications   Application[]
+
+  @@index([country, city])
+  @@index([type])
+}
+
+model Program {
+  id                  String              @id @default(cuid())
+  universityId        String
+  slug                String
+  name                String
+  level               ProgramLevel
+  discipline          String?
+  deliveryMode        ProgramDeliveryMode @default(ONSITE)
+  durationMonths      Int?
+  intakeTerm          String?
+  intakeYear          Int?
+  applicationDeadline DateTime?
+  tuitionAnnualUsd    Decimal?            @db.Decimal(12, 2)
+  minGpa              Decimal?            @db.Decimal(3, 2)
+  minIelts            Decimal?            @db.Decimal(3, 1)
+  description         String?
+  isActive            Boolean             @default(true)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  university          University          @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  scholarships        Scholarship[]
+  applications        Application[]
+
+  @@unique([universityId, slug])
+  @@index([name])
+  @@index([level, deliveryMode])
+  @@index([applicationDeadline])
+}
+
+model Scholarship {
+  id                  String                @id @default(cuid())
+  universityId        String
+  programId           String?
+  slug                String                @unique
+  title               String
+  type                ScholarshipType
+  amountType          ScholarshipAmountType
+  amountValue         Decimal?              @db.Decimal(12, 2)
+  currency            String                @default("USD")
+  eligibilityCriteria String?
+  description         String?
+  deadline            DateTime?
+  isActive            Boolean               @default(true)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  university          University            @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  program             Program?              @relation(fields: [programId], references: [id], onDelete: SetNull)
+
+  @@index([universityId])
+  @@index([programId])
+  @@index([deadline])
+}
+
+model News {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  title         String
+  excerpt       String?
+  content       String
+  category      NewsCategory  @default(OTHER)
+  status        ContentStatus @default(DRAFT)
+  coverImageUrl String?
+  publishedAt   DateTime?
+  universityId  String?
+  authorId      String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  university    University?   @relation(fields: [universityId], references: [id], onDelete: SetNull)
+  author        User?         @relation("NewsAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([category, status])
+  @@index([publishedAt])
+}
+
+model Application {
+  id           String               @id @default(cuid())
+  userId       String
+  universityId String
+  programId    String
+  intakeTerm   String?
+  intakeYear   Int?
+  status       ApplicationStatus    @default(DRAFT)
+  progress     Int                  @default(0)
+  submittedAt  DateTime?
+  decisionAt   DateTime?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  university   University           @relation(fields: [universityId], references: [id], onDelete: Restrict)
+  program      Program              @relation(fields: [programId], references: [id], onDelete: Restrict)
+  sections     ApplicationSection[]
+  documents    Document[]
+
+  @@index([userId, status])
+  @@index([programId])
+  @@index([submittedAt])
+}
+
+model ApplicationSection {
+  id            String                 @id @default(cuid())
+  applicationId String
+  type          ApplicationSectionType
+  status        SectionStatus          @default(NOT_STARTED)
+  progress      Int                    @default(0)
+  data          Json?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  application   Application            @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  documents     Document[]
+
+  @@unique([applicationId, type])
+  @@index([status])
+}
+
+model Document {
+  id                 String                     @id @default(cuid())
+  userId             String
+  applicationId      String?
+  sectionId          String?
+  type               DocumentType
+  label              String?
+  fileName           String
+  fileUrl            String
+  mimeType           String
+  sizeBytes          Int
+  verificationStatus DocumentVerificationStatus @default(PENDING)
+  rejectionReason    String?
+  uploadedAt         DateTime                   @default(now())
+  verifiedAt         DateTime?
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+  user               User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application        Application?               @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  section            ApplicationSection?        @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, type])
+  @@index([applicationId])
+  @@index([sectionId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType @default(SYSTEM)
+  title     String
+  message   String
+  payload   Json?
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([type])
+}

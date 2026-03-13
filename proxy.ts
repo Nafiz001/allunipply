@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const AUTH_COOKIE = "allunipply_auth";
+import { getToken } from "next-auth/jwt";
 
 const isProtectedRoute = (pathname: string) => {
   return (
@@ -11,21 +10,25 @@ const isProtectedRoute = (pathname: string) => {
   );
 };
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   if (!isProtectedRoute(pathname)) {
     return NextResponse.next();
   }
 
-  const isAuthenticated = request.cookies.get(AUTH_COOKIE)?.value === "1";
+  const session = await getToken({
+    req: request,
+    secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  });
 
-  if (isAuthenticated) {
+  if (session) {
     return NextResponse.next();
   }
 
   const signInUrl = new URL("/sign-in", request.url);
   signInUrl.searchParams.set("next", `${pathname}${search}`);
+
   return NextResponse.redirect(signInUrl);
 }
 

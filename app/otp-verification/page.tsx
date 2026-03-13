@@ -3,27 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
+const slides = ['/icons/laptop.png', '/icons/slider2.png', '/icons/slider3.png'];
 
 const OTPVerificationPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [otp, setOtp] = useState(['', '', '', '']);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const slides = ['/icons/laptop.png', '/icons/slider2.png', '/icons/slider3.png'];
-  const [nextDestination, setNextDestination] = useState("/dashboard?openFilter=true");
+  const rawNext = searchParams.get("next");
+  const nextDestination =
+    rawNext && rawNext.startsWith("/") ? rawNext : "/dashboard?openFilter=true";
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 3000); // Change slide every 3 seconds
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const rawNext = new URLSearchParams(window.location.search).get("next");
-    if (rawNext && rawNext.startsWith("/")) {
-      setNextDestination(rawNext);
-    }
   }, []);
 
   const handleOtpChange = (index: number, value: string) => {
@@ -51,10 +48,7 @@ const OTPVerificationPage = () => {
 
   const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();
-    const otpValue = otp.join('');
-    console.log('OTP submitted:', otpValue);
-    document.cookie = "allunipply_auth=1; path=/; max-age=2592000; samesite=lax";
-    router.push(nextDestination);
+    router.push(`/sign-in?next=${encodeURIComponent(nextDestination)}`);
   };
 
   return (

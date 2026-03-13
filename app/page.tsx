@@ -1,17 +1,79 @@
 "use client";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Plus, Minus, Heart, ArrowUpRight, Star, Mail, Phone, MapPin, Link as LinkIcon } from "lucide-react";
+import { Plus, Minus, Heart, ArrowUpRight, Star, Mail, Phone, MapPin } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import ScrollReveal from "@/components/animations/ScrollReveal";
+import StaggerReveal from "@/components/animations/StaggerReveal";
 import { useRouter } from "next/navigation";
 
 let hasHandledScholarModalEntry = false;
 
+type HomeUniversity = {
+  id: string;
+  name: string;
+  type: string;
+  country: string;
+  location: string;
+  image: string;
+  minGpa: number;
+  minIelts: number;
+  tuition: number;
+};
+
+type HomeNews = {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  meta: string;
+};
+
+const COUNTRY_FLAG_CODES: Record<string, string> = {
+  USA: "us",
+  UK: "gb",
+  Australia: "au",
+  Canada: "ca",
+  China: "cn",
+  Japan: "jp",
+  Italy: "it",
+  Spain: "es",
+  Germany: "de",
+  France: "fr",
+  Netherlands: "nl",
+  Sweden: "se",
+  Bangladesh: "bd",
+};
+
+function formatUniversityType(type: string) {
+  const lower = type.toLowerCase();
+
+  if (lower === "public") return "Public university";
+  if (lower === "private") return "Private university";
+  if (lower === "national") return "National university";
+  if (lower === "international") return "International university";
+
+  return `${type.charAt(0)}${type.slice(1).toLowerCase()} university`;
+}
+
+function formatDateMeta(dateValue: string | null) {
+  if (!dateValue) return "Latest update";
+
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return "Latest update";
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export default function Home() {
-  // Start with true directly to prevent the homepage from flashing
   const [showScholarModal, setShowScholarModal] = useState(true);
+  const [isFlashExiting, setIsFlashExiting] = useState(false);
   const [scholarBarWidth, setScholarBarWidth] = useState(100);
-  const [universityType, setUniversityType] = useState<'national' | 'international'>('national');
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
   const [selectedCountry, setSelectedCountry] = useState('Canada');
   const [nationalType, setNationalType] = useState<'public' | 'private'>('public');
@@ -20,9 +82,11 @@ export default function Home() {
   const [ielts, setIelts] = useState('');
   const [tuitionRange, setTuitionRange] = useState([0, 60000]);
   const [isFiltering, setIsFiltering] = useState(false);
+  const [homeUniversities, setHomeUniversities] = useState<HomeUniversity[]>([]);
+  const [homeNews, setHomeNews] = useState<HomeNews[]>([]);
+  const [isHomeDataLoading, setIsHomeDataLoading] = useState(true);
   const router = useRouter();
 
-  // Run only once on mount to verify if we SHOULD keep showing it
   useEffect(() => {
     if (hasHandledScholarModalEntry) {
       setShowScholarModal(false);
@@ -31,7 +95,6 @@ export default function Home() {
 
     hasHandledScholarModalEntry = true;
 
-    // We check navigation type mostly to respect client-side transitions
     const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
     const navType = navEntry?.type;
 
@@ -47,7 +110,6 @@ export default function Home() {
     const shouldOpen = initialPath === "/" && (navType === "reload" || navType === "navigate" || !navType);
 
     if (!shouldOpen) {
-      // If we aren't supposed to open the modal (e.g. from internal client transition), close it quickly.
       setShowScholarModal(false);
     }
   }, []);
@@ -59,329 +121,141 @@ export default function Home() {
 
     setScholarBarWidth(100);
     const animateTimer = window.setTimeout(() => setScholarBarWidth(0), 30);
-    // Auto-close after 8 seconds
-    const closeTimer = window.setTimeout(() => setShowScholarModal(false), 8000);
+    const exitTimer = window.setTimeout(() => setIsFlashExiting(true), 3500);
+    const closeTimer = window.setTimeout(() => setShowScholarModal(false), 4200);
 
     return () => {
       window.clearTimeout(animateTimer);
+      window.clearTimeout(exitTimer);
       window.clearTimeout(closeTimer);
     };
   }, [showScholarModal]);
 
-  // Check if any filter is active
   useEffect(() => {
     setIsFiltering(gpa !== '' || ielts !== '' || tuitionRange[1] < 60000);
   }, [gpa, ielts, tuitionRange]);
 
-  // Reset failed images when country changes
   useEffect(() => {
     setFailedImages(new Set());
   }, [selectedCountry]);
 
-  const countries = [
-    { name: 'USA', code: 'us' },
-    { name: 'UK', code: 'gb' },
-    { name: 'Australia', code: 'au' },
-    { name: 'Canada', code: 'ca' },
-    { name: 'China', code: 'cn' },
-    { name: 'Japan', code: 'jp' },
-    { name: 'Italy', code: 'it' },
-    { name: 'Spain', code: 'es' },
-    { name: 'Germany', code: 'de' },
-    { name: 'France', code: 'fr' },
-    { name: 'Netherlands', code: 'nl' },
-    { name: 'Sweden', code: 'se' },
-  ];
+  useEffect(() => {
+    let isMounted = true;
 
-  const universitiesByCountry: { [key: string]: any[] } = {
-    'USA': [
-      {
-        name: 'Harvard University',
-        type: 'Private university',
-        location: 'Cambridge, USA',
-        image: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop',
-        minGpa: 3.8,
-        minIelts: 7.5,
-        tuition: 55000,
-      },
-      {
-        name: 'Stanford University',
-        type: 'Private university',
-        location: 'Stanford, USA',
-        image: 'https://images.unsplash.com/photo-1607237138185-eedd9c632b0b?w=800&auto=format&fit=crop',
-        minGpa: 3.7,
-        minIelts: 7.0,
-        tuition: 52000,
-      },
-      {
-        name: 'MIT',
-        type: 'Private university',
-        location: 'Cambridge, USA',
-        image: 'https://images.unsplash.com/photo-1564981797816-1043664bf78d?w=800&auto=format&fit=crop',
-        minGpa: 3.9,
-        minIelts: 7.5,
-        tuition: 54000,
-      },
-    ],
-    'UK': [
-      {
-        name: 'University of Oxford',
-        type: 'Public university',
-        location: 'Oxford, UK',
-        image: 'https://images.unsplash.com/photo-1587556930796-68d5dbe01b43?w=800&auto=format&fit=crop',
-        minGpa: 3.8,
-        minIelts: 7.5,
-        tuition: 32000,
-      },
-      {
-        name: 'University of Cambridge',
-        type: 'Public university',
-        location: 'Cambridge, UK',
-        image: 'https://images.unsplash.com/photo-1606750370219-fcd054c53f02?w=800&auto=format&fit=crop',
-        minGpa: 3.7,
-        minIelts: 7.0,
-        tuition: 30000,
-      },
-      {
-        name: 'Imperial College London',
-        type: 'Public university',
-        location: 'London, UK',
-        image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&auto=format&fit=crop',
-        minGpa: 3.6,
-        minIelts: 7.0,
-        tuition: 35000,
-      },
-    ],
-    'Australia': [
-      {
-        name: 'University of Melbourne',
-        type: 'Public university',
-        location: 'Melbourne, Australia',
-        image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop',
-        minGpa: 3.5,
-        minIelts: 6.5,
-        tuition: 28000,
-      },
-      {
-        name: 'University of Sydney',
-        type: 'Public university',
-        location: 'Sydney, Australia',
-        image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&auto=format&fit=crop',
-        minGpa: 3.4,
-        minIelts: 6.5,
-        tuition: 27000,
-      },
-      {
-        name: 'Australian National University',
-        type: 'Public university',
-        location: 'Canberra, Australia',
-        image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=800&auto=format&fit=crop',
-        minGpa: 3.6,
-        minIelts: 6.5,
-        tuition: 29000,
-      },
-    ],
-    'Canada': [
-      {
-        name: 'University of Toronto',
-        type: 'Public university',
-        location: 'Toronto, Canada',
-        image: 'https://images.unsplash.com/photo-1568515387631-8b650bbcdb90?w=800&auto=format&fit=crop',
-        minGpa: 3.5,
-        minIelts: 6.5,
-        tuition: 25000,
-      },
-      {
-        name: 'University of British Columbia',
-        type: 'Public university',
-        location: 'Vancouver, Canada',
-        image: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop',
-        minGpa: 3.3,
-        minIelts: 6.5,
-        tuition: 24000,
-      },
-      {
-        name: 'McGill University',
-        type: 'Public university',
-        location: 'Montreal, Canada',
-        image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=800&auto=format&fit=crop',
-        minGpa: 3.4,
-        minIelts: 6.5,
-        tuition: 22000,
-      },
-    ],
-    'China': [
-      {
-        name: 'Tsinghua University',
-        type: 'Public university',
-        location: 'Beijing, China',
-        image: 'https://images.unsplash.com/photo-1576495199011-eb94736d05d6?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Peking University',
-        type: 'Public university',
-        location: 'Beijing, China',
-        image: 'https://images.unsplash.com/photo-1535982330050-f1c2fb79ff78?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Fudan University',
-        type: 'Public university',
-        location: 'Shanghai, China',
-        image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop',
-      },
-    ],
-    'Japan': [
-      {
-        name: 'University of Tokyo',
-        type: 'Public university',
-        location: 'Tokyo, Japan',
-        image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Kyoto University',
-        type: 'Public university',
-        location: 'Kyoto, Japan',
-        image: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Osaka University',
-        type: 'Public university',
-        location: 'Osaka, Japan',
-        image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&auto=format&fit=crop',
-      },
-    ],
-    'Italy': [
-      {
-        name: 'University of Bologna',
-        type: 'Public university',
-        location: 'Bologna, Italy',
-        image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Sapienza University of Rome',
-        type: 'Public university',
-        location: 'Rome, Italy',
-        image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'University of Milan',
-        type: 'Public university',
-        location: 'Milan, Italy',
-        image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&auto=format&fit=crop',
-      },
-    ],
-    'Spain': [
-      {
-        name: 'University of Barcelona',
-        type: 'Public university',
-        location: 'Barcelona, Spain',
-        image: 'https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Complutense University of Madrid',
-        type: 'Public university',
-        location: 'Madrid, Spain',
-        image: 'https://images.unsplash.com/photo-1564981797816-1043664bf78d?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Autonomous University of Barcelona',
-        type: 'Public university',
-        location: 'Barcelona, Spain',
-        image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=800&auto=format&fit=crop',
-      },
-    ],
-    'Germany': [
-      {
-        name: 'Technical University of Munich',
-        type: 'Public university',
-        location: 'Munich, Germany',
-        image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Ludwig Maximilian University',
-        type: 'Public university',
-        location: 'Munich, Germany',
-        image: 'https://images.unsplash.com/photo-1587556930796-68d5dbe01b43?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Heidelberg University',
-        type: 'Public university',
-        location: 'Heidelberg, Germany',
-        image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop',
-      },
-    ],
-    'France': [
-      {
-        name: 'Sorbonne University',
-        type: 'Public university',
-        location: 'Paris, France',
-        image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'École Polytechnique',
-        type: 'Public university',
-        location: 'Palaiseau, France',
-        image: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Paris Sciences et Lettres',
-        type: 'Public university',
-        location: 'Paris, France',
-        image: 'https://images.unsplash.com/photo-1431274172761-fca41d930114?w=800&auto=format&fit=crop',
-      },
-    ],
-    'Netherlands': [
-      {
-        name: 'University of Amsterdam',
-        type: 'Public university',
-        location: 'Amsterdam, Netherlands',
-        image: 'https://images.unsplash.com/photo-1459679749680-18eb1eb37418?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Delft University of Technology',
-        type: 'Public university',
-        location: 'Delft, Netherlands',
-        image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Utrecht University',
-        type: 'Public university',
-        location: 'Utrecht, Netherlands',
-        image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=800&auto=format&fit=crop',
-      },
-    ],
-    'Sweden': [
-      {
-        name: 'Lund University',
-        type: 'Public university',
-        location: 'Lund, Sweden',
-        image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'Uppsala University',
-        type: 'Public university',
-        location: 'Uppsala, Sweden',
-        image: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop',
-      },
-      {
-        name: 'KTH Royal Institute of Technology',
-        type: 'Public university',
-        location: 'Stockholm, Sweden',
-        image: 'https://images.unsplash.com/photo-1564981797816-1043664bf78d?w=800&auto=format&fit=crop',
-      },
-    ],
-  };
+    const loadHomeData = async () => {
+      setIsHomeDataLoading(true);
 
-  // Filter universities based on criteria
-  const allUniversities = universitiesByCountry[selectedCountry] || [];
+      try {
+        const [universitiesResponse, newsResponse] = await Promise.all([
+          fetch("/api/universities?page=1&pageSize=200&includeInactive=false", {
+            cache: "no-store",
+          }),
+          fetch("/api/news?page=1&pageSize=4&status=PUBLISHED", {
+            cache: "no-store",
+          }),
+        ]);
+
+        if (universitiesResponse.ok) {
+          const result = (await universitiesResponse.json()) as {
+            data?: Array<{
+              id: string;
+              name: string;
+              type: string;
+              country: string;
+              location?: string;
+              city?: string;
+              bannerImageUrl?: string | null;
+              logoUrl?: string | null;
+              minGpa?: number | null;
+              minIelts?: number | null;
+              tuition?: number | null;
+            }>;
+          };
+
+          const parsedUniversities = (result.data ?? []).map((item) => ({
+            id: item.id,
+            name: item.name,
+            type: formatUniversityType(item.type),
+            country: item.country,
+            location: item.location ?? `${item.city ?? ""}, ${item.country}`,
+            image:
+              item.bannerImageUrl ||
+              item.logoUrl ||
+              "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop",
+            minGpa: typeof item.minGpa === "number" ? item.minGpa : 0,
+            minIelts: typeof item.minIelts === "number" ? item.minIelts : 0,
+            tuition: typeof item.tuition === "number" ? item.tuition : 0,
+          }));
+
+          if (isMounted) {
+            setHomeUniversities(parsedUniversities);
+          }
+        }
+
+        if (newsResponse.ok) {
+          const result = (await newsResponse.json()) as {
+            data?: Array<{
+              id: string;
+              title: string;
+              excerpt?: string | null;
+              coverImageUrl?: string | null;
+              publishedAt?: string | null;
+            }>;
+          };
+
+          const parsedNews = (result.data ?? []).map((item) => ({
+            id: item.id,
+            title: item.title,
+            description: item.excerpt ?? "Stay up to date with the latest university updates.",
+            image: item.coverImageUrl ?? "/news/news1.png",
+            meta: formatDateMeta(item.publishedAt ?? null),
+          }));
+
+          if (isMounted) {
+            setHomeNews(parsedNews);
+          }
+        }
+      } catch {
+        if (isMounted) {
+          setHomeUniversities([]);
+          setHomeNews([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsHomeDataLoading(false);
+        }
+      }
+    };
+
+    void loadHomeData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const countries = Array.from(new Set(homeUniversities.map((item) => item.country))).map((name) => ({
+    name,
+    code: COUNTRY_FLAG_CODES[name] ?? name.slice(0, 2).toLowerCase(),
+  }));
+
+  useEffect(() => {
+    if (!countries.length) {
+      return;
+    }
+
+    if (!countries.some((country) => country.name === selectedCountry)) {
+      setSelectedCountry(countries[0].name);
+    }
+  }, [countries, selectedCountry]);
+
+  const allUniversities = homeUniversities.filter((university) => university.country === selectedCountry);
   const filteredUniversities = allUniversities.filter(uni => {
     const userGpa = parseFloat(gpa) || 0;
     const userIelts = parseFloat(ielts) || 0;
 
-    // If no filters applied, return all
     if (!isFiltering) return true;
 
-    // Check if user meets requirements
     const meetsGpa = gpa === '' || userGpa >= uni.minGpa;
     const meetsIelts = ielts === '' || userIelts >= uni.minIelts;
     const meetsTuition = uni.tuition <= tuitionRange[1];
@@ -389,203 +263,175 @@ export default function Home() {
     return meetsGpa && meetsIelts && meetsTuition;
   });
 
-  // Limit to 2 universities when filtering
   const universities = isFiltering ? filteredUniversities.slice(0, 2) : allUniversities;
   const hasMoreResults = isFiltering && filteredUniversities.length > 2;
 
-  const nationalUniversities = [
-    {
-      name: 'Dhaka University',
-      type: 'Public university',
-      location: 'Dhaka, Bangladesh',
-      image: '/universities/dhaka.jpg',
-    },
-    {
-      name: 'Jahangir Nagar University',
-      type: 'Public university',
-      location: 'Dhaka, Bangladesh',
-      image: '/universities/jahangir.jpg',
-    },
-    {
-      name: 'Jahangirnagar University',
-      type: 'Public university',
-      location: 'Dhaka, Bangladesh',
-      image: '/universities/jahangirnagar.jpg',
-    },
-  ];
+  const nationalUniversities = homeUniversities
+    .filter((university) => {
+      const type = university.type.toLowerCase();
+      return nationalType === "public" ? type.includes("public") : type.includes("private");
+    })
+    .slice(0, 3);
+  const newsCards = homeNews.slice(0, 4);
 
   return (
-    <div className="">
+    <div className="overflow-x-hidden">
+      {/* Flash Screen — 4-Strip Horizontal Curtain Exit */}
       {showScholarModal ? (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-gray-900/60 backdrop-blur-md transition-all duration-500"
-            onClick={() => setShowScholarModal(false)}
-          />
+        <div className="fixed inset-0 z-[9999]">
+          <button
+            type="button"
+            onClick={() => setIsFlashExiting(true)}
+            aria-label="Skip flash screen"
+            className={`fixed top-5 right-5 z-[10001] h-12 w-12 flex items-center justify-center rounded-full bg-white/90 border border-[#E3572B]/30 text-gray-500 hover:text-[#E3572B] hover:bg-white hover:scale-110 hover:rotate-90 hover:shadow-xl shadow-md transition-all duration-300 backdrop-blur-sm ${
+              isFlashExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            }`}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
 
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 sm:p-6 pointer-events-none">
-            <div className="relative w-full max-w-xl rounded-[40px] bg-white backdrop-blur-2xl border border-white/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-10 md:p-14 text-center pointer-events-auto overflow-hidden flex flex-col items-center">
-
-              {/* Decorative background gradients */}
-              <div className="absolute -top-32 -right-32 w-72 h-72 bg-[#E3572B]/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-32 -left-32 w-72 h-72 bg-[#F88210]/10 rounded-full blur-3xl pointer-events-none" />
-
-              <button
-                type="button"
-                onClick={() => setShowScholarModal(false)}
-                className="absolute top-6 right-6 h-10 w-10 flex items-center justify-center rounded-full bg-white/60 border border-white text-gray-500 hover:text-gray-900 hover:bg-white hover:scale-110 transition-all shadow-sm z-20"
-                aria-label="Close modal"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-
-              {/* Progress bar placed elegantly at the top */}
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/50">
-                <div
-                  className="h-full rounded-r-full"
-                  style={{
-                    width: `${scholarBarWidth}%`,
-                    transition: "width 8s linear",
-                    background: "linear-gradient(90deg, #E3572B 0%, #F88210 100%)",
-                  }}
-                />
-              </div>
-
-              {/* Logo Area */}
-              <div className="relative flex justify-center items-center mt-2 mb-8 w-full z-10">
-                {/* Glowing backdrop for logo */}
-                <div className="absolute w-40 h-40 md:w-56 md:h-56 bg-orange-400/20 rounded-full blur-3xl animate-pulse delay-75" />
-                <div className="relative w-56 h-56 md:w-72 md:h-72 transform hover:scale-105 transition-transform duration-500">
+          <div className={`absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none ${
+            isFlashExiting ? 'curtain-content-exit' : ''
+          }`}>
+            <div className="relative z-10 flex flex-col items-center text-center px-4 w-full max-w-xl">
+              <div className="relative flex justify-center items-center mb-6">
+                <div className="absolute w-44 h-44 bg-white rounded-full blur-[60px] animate-[pulse_3s_ease-in-out_infinite]" />
+                <div className="relative w-48 h-48 md:w-64 md:h-64">
                   <Image
-                    src="/icons/s-genie-logo.png"
+                    src="/icons/s-genie-logo-new.png"
                     alt="S-Genie Logo"
                     fill
-                    className="object-contain scale-[1.3] drop-shadow-2xl"
+                    className="object-contain scale-[1.5] animate-[bounce_4s_ease-in-out_infinite]"
                     priority
                   />
                 </div>
               </div>
 
-              <div className="relative z-10 space-y-2">
-                <h2 className="font-outfit font-extrabold text-4xl md:text-5xl lg:text-6xl text-black bg-clip-text bg-gradient-to-r from-gray-900 to-gray-700 tracking-tight">
-                  S-Genie
-                </h2>
-                <p className="font-outfit font-medium text-lg md:text-xl text-gray-500 tracking-wider uppercase text-sm md:text-base mt-2">
-                  will soon be on board
-                </p>
-              </div>
-            </div>
+              <h2 className="font-outfit font-extrabold text-5xl md:text-6xl lg:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-[#E3572B] to-gray-800 tracking-tight mb-3">
+                S-Genie
+              </h2>
+              <p className="font-outfit font-bold text-xl md:text-2xl text-gray-500 tracking-[0.2em] uppercase mb-8">
+                will soon be on board
+              </p>
 
-            {/* Button below modal */}
-            <div className="mt-8 pointer-events-auto z-50">
               <button
                 type="button"
-                onClick={() => {
-                  setShowScholarModal(false);
-                  
-                }}
-                className="group relative inline-flex items-center justify-center px-8 md:px-12 py-4 font-outfit font-bold text-lg text-white transition-all duration-300 transform hover:-translate-y-1"
+                onClick={() => setIsFlashExiting(true)}
+                className={`pointer-events-auto group relative inline-flex items-center justify-center px-12 py-4 font-outfit font-bold text-lg text-white focus:outline-none hover:-translate-y-1 transition-transform duration-300 ${
+                  isFlashExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                }`}
               >
-                <div className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-r from-[#E3572B] to-[#F88210] shadow-[0_8px_30px_rgba(227,87,43,0.4)] group-hover:shadow-[0_12px_40px_rgba(227,87,43,0.6)] transition-all duration-300" />
-                <div className="absolute inset-0 w-full h-full rounded-full border border-white/20" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#E3572B] via-[#F88210] to-[#E3572B] bg-[length:200%_auto] animate-[gradient_3s_linear_infinite] shadow-[0_10px_40px_rgba(227,87,43,0.45)] group-hover:shadow-[0_14px_50px_rgba(227,87,43,0.65)] transition-shadow duration-300" />
+                <div className="absolute inset-0 rounded-full border border-white/20" />
                 <span className="relative flex items-center gap-3">
-                  Explore S-genie
-                  <svg className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  Explore Now
+                  <svg className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
                 </span>
               </button>
             </div>
           </div>
-        </>
+
+          <div
+            className={`absolute top-0 left-0 w-full h-1/4 bg-[#fffbf7] ${
+              isFlashExiting ? 'curtain-strip curtain-strip-1' : ''
+            }`}
+            style={{ borderBottom: '1px solid rgba(227,87,43,0.08)' }}
+          />
+          <div
+            className={`absolute top-1/4 left-0 w-full h-1/4 bg-[#fef8f3] ${
+              isFlashExiting ? 'curtain-strip curtain-strip-2' : ''
+            }`}
+            style={{ borderBottom: '1px solid rgba(227,87,43,0.06)' }}
+          />
+          <div
+            className={`absolute top-2/4 left-0 w-full h-1/4 bg-[#fffbf7] ${
+              isFlashExiting ? 'curtain-strip curtain-strip-3' : ''
+            }`}
+            style={{ borderBottom: '1px solid rgba(227,87,43,0.06)' }}
+          />
+          <div
+            className={`absolute top-3/4 left-0 w-full h-1/4 bg-[#fef8f3] ${
+              isFlashExiting ? 'curtain-strip curtain-strip-4' : ''
+            }`}
+          />
+        </div>
       ) : null}
 
       {/* Hero Section */}
-      <div className="max-w-[1320px] mx-auto px-4 md:px-6 pt-6 md:pt-12">
+      <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12">
         <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden">
-          {/* Background Image with Overlay */}
           <div className="relative h-[700px] sm:h-[650px] md:h-[600px] lg:h-[700px]">
             <Image
-              src="/hero/banner.png"
+              src="/hero/banner.jpeg"
               alt="Students with backpacks"
               fill
-              className="object-cover"
+              className="object-cover brightness-75"
               priority
             />
-
           </div>
 
-          {/* Content Overlay */}
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 md:px-6 text-center">
-            {/* Hero Text */}
-            <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-outfit font-medium mb-3 md:mb-4 max-w-5xl leading-tight">
-              Let's fly to your{" "}
-              <span className="block mt-1 md:mt-2">
-                Dream <span className="font-playfair font-semibold">University</span>
-              </span>
-            </h1>
+            <ScrollReveal direction="down">
+              <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-outfit font-medium mb-3 md:mb-4 max-w-5xl leading-tight">
+                Let&apos;s fly to your{" "}
+                <span className="block mt-1 md:mt-2">
+                  Dream <span className="font-playfair font-semibold">University</span>
+                </span>
+              </h1>
+            </ScrollReveal>
 
-            <p className="text-white font-outfit font-normal text-sm sm:text-base md:text-lg lg:text-xl max-w-3xl mb-6 md:mb-12 leading-relaxed px-4">
-              "Your dream university is just a click away — no stress, no mess, just success!<br />
-              Apply smart, not hard — we make admissions easy."
-            </p>
+            <ScrollReveal delay={0.2}>
+              <p className="text-white font-outfit font-normal text-sm sm:text-base md:text-lg lg:text-xl max-w-3xl mb-6 md:mb-12 leading-relaxed px-4">
+                Your dream university is just a click away - no stress, no mess, just success!<br />
+                Apply smart, not hard - we make admissions easy.
+              </p>
+            </ScrollReveal>
 
-            {/* University Type Toggles */}
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4  w-full max-w-xl px-4">
-
-              <Link href="/national-university">
-                <button
-                  className="flex items-center justify-center gap-2 md:gap-3 px-4 py-3 md:py-4 rounded-t-2xl font-outfit font-extrabold text-sm md:text-lg transition-all bg-white text-gray-700 hover:bg-[#F88210] w-full"
-                >
-                  <span><Image src="/icons/bd-flag.png" width={25} height={25} alt="Bangladesh flag"></Image></span>National University
+            <div className="grid grid-cols-2 gap-3 w-full max-w-xl px-4 z-10">
+              <Link href="/national-university" className="col-span-1">
+                <button className="group flex items-center justify-center gap-2 w-full h-[52px] md:h-[60px] rounded-xl md:rounded-2xl font-outfit font-extrabold text-sm md:text-base transition-all duration-300 bg-white/95 backdrop-blur-sm text-gray-800 hover:bg-[#F88210] hover:text-white hover:shadow-[0_10px_30px_rgba(248,130,16,0.35)] hover:-translate-y-1 border border-white/40">
+                  <span className="group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                    <Image src="/icons/bd-flag.png" width={22} height={22} alt="Bangladesh flag" className="drop-shadow-sm" />
+                  </span>
+                  <span className="truncate">National University</span>
                 </button>
               </Link>
 
-
-              <Link href="/international-university">
-                <button
-                  className="flex items-center justify-center gap-2 md:gap-3 px-4 py-3 md:py-4 rounded-t-2xl font-outfit font-extrabold text-sm md:text-lg transition-all bg-white text-gray-700 hover:bg-[#F88210] w-full"
-                >
-                  <span><Image src="/icons/worldmap.png" width={25} height={25} alt="Bangladesh flag"></Image></span>
-                  International University
+              <Link href="/international-university" className="col-span-1">
+                <button className="group flex items-center justify-center gap-2 w-full h-[52px] md:h-[60px] rounded-xl md:rounded-2xl font-outfit font-extrabold text-sm md:text-base transition-all duration-300 bg-white/95 backdrop-blur-sm text-gray-800 hover:bg-[#F88210] hover:text-white hover:shadow-[0_10px_30px_rgba(248,130,16,0.35)] hover:-translate-y-1 border border-white/40">
+                  <span className="group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                    <Image src="/icons/worldmap.png" width={22} height={22} alt="World Map" className="drop-shadow-sm" />
+                  </span>
+                  <span className="truncate">International University</span>
                 </button>
               </Link>
             </div>
 
-            {/* Search/Filter Card */}
-            <div className="bg-[#ffffff3d] backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 w-full max-w-6xl mx-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-                {/* Location */}
-                <div className="flex flex-col border-r border-white pr-4 md:pr-6">
-                  <h3 className="font-outfit font-normal text-white text-sm md:text-2xl mb-1 md:mb-2">Location</h3>
-                  <p className="text-[#ffffff99] font-outfit font-normal  text-xs md:text-lg">Search destination</p>
+            <div className="bg-white/10 backdrop-blur-md hover:bg-white/15 transition-colors duration-500 rounded-2xl md:rounded-[32px] p-6 lg:p-8 w-full max-w-6xl mx-4 mt-6 md:mt-8 border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] z-10 relative overflow-hidden group cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 divide-x divide-white/20">
+                <div className="flex flex-col px-4 first:pl-0 last:pr-0 group/item transition-transform duration-300 hover:scale-[1.02]">
+                  <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Location</h3>
+                  <p className="text-white/70 font-outfit font-normal text-xs md:text-base">Search destination</p>
                 </div>
-
-                {/* Application Date */}
-                <div className="flex flex-col border-r border-white pr-4 md:pr-6">
-                  <h3 className="font-outfit font-normal text-white text-sm md:text-2xl mb-1 md:mb-2">Application<br /> date</h3>
-
+                <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
+                  <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Application<br /> date</h3>
                 </div>
-
-                {/* Application Process */}
-                <div className="flex flex-col border-r border-white pr-4 md:pr-6">
-                  <h3 className="font-outfit font-normal text-white text-sm md:text-2xl mb-1 md:mb-2">Application<br /> Process</h3>
-
+                <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
+                  <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Application<br /> Process</h3>
                 </div>
-
-                {/* Criteria */}
-                <div className="flex flex-col border-r border-white pr-4 md:pr-6">
-                  <h3 className="font-outfit font-normal text-white text-sm md:text-2xl mb-1 md:mb-2">Criteria</h3>
-                  <p className="text-[#ffffff99] font-outfit font-normal  text-xs md:text-lg">See all info</p>
+                <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
+                  <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Criteria</h3>
+                  <p className="text-white/70 font-outfit font-normal text-xs md:text-base">See all info</p>
                 </div>
-
-                {/* IELTS, GRE */}
-                <div className="flex flex-col">
-                  <h3 className="font-outfit font-normal text-white text-sm md:text-2xl mb-1 md:mb-2">IELTS, GRE</h3>
-                  <p className="text-[#ffffff99] font-outfit font-normal  text-xs md:text-lg">facilities Program</p>
+                <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
+                  <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">IELTS, GRE</h3>
+                  <p className="text-white/70 font-outfit font-normal text-xs md:text-base">facilities Program</p>
                 </div>
               </div>
             </div>
@@ -595,360 +441,128 @@ export default function Home() {
 
       {/* What We Offer Section */}
       <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
-        {/* Section Title */}
-        <h2 className="text-4xl md:text-5xl lg:text-[64px] font-extrabold  font-poppins text-center mb-12 md:mb-16">
-          What we <span className="text-[#E3572B]">offer</span>
-        </h2>
+        <ScrollReveal direction="up">
+          <h2 className="text-4xl md:text-5xl lg:text-[64px] font-extrabold  font-poppins text-center mb-12 md:mb-16">
+            What we <span className="text-[#E3572B]">offer</span>
+          </h2>
+        </ScrollReveal>
 
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* International University Column */}
-          <div className="bg-white rounded-3xl p-6 md:p-8">
-            <h3 className="text-2xl md:text-3xl font-outfit font-extrabold text-[#E3572B] mb-8">International University</h3>
-
-            <div className="space-y-6">
-              {/* Item 1 */}
-              <div className="border-b border-gray-200 pb-6">
-                <button
-                  onClick={() => setExpandedItems({ ...expandedItems, 'int-1': !expandedItems['int-1'] })}
-                  className="w-full flex items-start justify-between gap-4 text-left"
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#fff4ea] flex items-center justify-center flex-shrink-0">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d95d39" strokeWidth="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                      </svg>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 w-full max-w-[1280px] mx-auto">
+          <ScrollReveal direction="left" className="bg-white hover:bg-orange-50/20 transition-colors duration-500 rounded-[32px] p-6 md:p-10 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_20px_40px_rgba(227,87,43,0.08)] transform hover:-translate-y-1 group">
+            <h3 className="text-3xl md:text-4xl font-outfit font-extrabold text-[#E3572B] mb-10 tracking-tight group-hover:scale-[1.02] transition-transform origin-left">International University</h3>
+            <div className="space-y-4">
+              {['int-1', 'int-2', 'int-3', 'int-4'].map((id, idx) => (
+                <div key={id} className={`border-gray-100 pb-2 ${idx !== 3 ? 'border-b' : ''}`}>
+                  <button
+                    onClick={() => setExpandedItems({ ...expandedItems, [id]: !expandedItems[id] })}
+                    className="w-full flex items-start justify-between gap-4 text-left py-4 px-2 rounded-2xl hover:bg-orange-50/70 transition-all duration-300 group/btn outline-none focus-visible:ring-2 focus-visible:ring-orange-200">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="w-12 h-12 rounded-full bg-[#fff4ea] group-hover/btn:bg-[#E3572B] group-hover/btn:shadow-md transition-all duration-300 flex items-center justify-center flex-shrink-0">
+                        {idx === 0 && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="stroke-[#d95d39] group-hover/btn:stroke-white transition-colors duration-300" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>}
+                        {idx === 1 && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="stroke-[#d95d39] group-hover/btn:stroke-white transition-colors duration-300" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>}
+                        {idx === 2 && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="stroke-[#d95d39] group-hover/btn:stroke-white transition-colors duration-300" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>}
+                        {idx === 3 && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="stroke-[#d95d39] group-hover/btn:stroke-white transition-colors duration-300" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-xl md:text-2xl text-gray-900 group-hover/btn:text-[#E3572B] transition-colors duration-300">
+                          {idx === 0 && "Luxury Architecture and Technology"}
+                          {idx === 1 && "Expert Counseling & Visa Support"}
+                          {idx === 2 && "Scholarship & Loan Assistance"}
+                          {idx === 3 && "Track All Applications in One Place"}
+                        </h4>
+                        <div className={`grid transition-all duration-300 ease-in-out ${expandedItems[id] ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0"}`}>
+                          <div className="overflow-hidden">
+                            <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                              Lorem ipsum dolor sit amet consectetur. Pharetra gravida posuere malesuada gravida mi.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg md:text-xl text-gray-900">Luxury Architecture and Technology</h4>
-                      {expandedItems['int-1'] && (
-                        <p className="text-gray-600 text-sm md:text-base mt-3">
-                          Lorem ipsum dolor sit amet consectetur. Pharetra gravida posuere malesuada gravida mi.
-                        </p>
-                      )}
+                    <div className="flex-shrink-0 mt-3 bg-white p-1 rounded-full shadow-sm group-hover/btn:shadow transition-shadow">
+                      {expandedItems[id] ? <Minus className="text-[#d95d39]" size={20} strokeWidth={3} /> : <Plus className="text-[#d95d39]" size={20} strokeWidth={3} />}
                     </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {expandedItems['int-1'] ? (
-                      <Minus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    ) : (
-                      <Plus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    )}
-                  </div>
-                </button>
-              </div>
-
-              {/* Item 2 */}
-              <div className="border-b border-gray-200 pb-6">
-                <button
-                  onClick={() => setExpandedItems({ ...expandedItems, 'int-2': !expandedItems['int-2'] })}
-                  className="w-full flex items-start justify-between gap-4 text-left"
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#fff4ea] flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d95d39" strokeWidth="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg md:text-xl text-gray-900">Expert Counseling & Visa Support</h4>
-                      {expandedItems['int-2'] && (
-                        <p className="text-gray-600 text-sm md:text-base mt-3">
-                          Lorem ipsum dolor sit amet consectetur. Pharetra gravida posuere malesuada gravida mi.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {expandedItems['int-2'] ? (
-                      <Minus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    ) : (
-                      <Plus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    )}
-                  </div>
-                </button>
-              </div>
-
-              {/* Item 3 */}
-              <div className="border-b border-gray-200 pb-6">
-                <button
-                  onClick={() => setExpandedItems({ ...expandedItems, 'int-3': !expandedItems['int-3'] })}
-                  className="w-full flex items-center justify-between gap-4 text-left"
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#fff4ea] flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d95d39" strokeWidth="2">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                        <line x1="1" y1="10" x2="23" y2="10"></line>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg md:text-xl text-gray-900">Scholarship & Loan Assistance</h4>
-                      {expandedItems['int-3'] && (
-                        <p className="text-gray-600 text-sm md:text-base mt-3">
-                          Lorem ipsum dolor sit amet consectetur. Pharetra gravida posuere malesuada gravida mi.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {expandedItems['int-3'] ? (
-                      <Minus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    ) : (
-                      <Plus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    )}
-                  </div>
-                </button>
-              </div>
-
-              {/* Item 4 */}
-              <div className="pb-6">
-                <button
-                  onClick={() => setExpandedItems({ ...expandedItems, 'int-4': !expandedItems['int-4'] })}
-                  className="w-full flex items-center justify-between gap-4 text-left"
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#fff4ea] flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d95d39" strokeWidth="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg md:text-xl text-gray-900">Track All Applications in One Place</h4>
-                      {expandedItems['int-4'] && (
-                        <p className="text-gray-600 text-sm md:text-base mt-3">
-                          Lorem ipsum dolor sit amet consectetur. Pharetra gravida posuere malesuada gravida mi.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {expandedItems['int-4'] ? (
-                      <Minus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    ) : (
-                      <Plus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    )}
-                  </div>
-                </button>
-              </div>
+                  </button>
+                </div>
+              ))}
             </div>
-
-            {/* Start Application Button */}
-            <div className="text-center">
-              <button className="w-[280px] mx-auto mt-8 px-8 py-4 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-outfit font-extrabold text-xl hover:bg-[#d95d39] hover:text-white transition-all">
-                Start Application
+            <div className="text-center mt-10">
+              <button className="group relative w-[280px] mx-auto px-8 py-4 bg-white border-2 border-[#E3572B] text-[#E3572B] rounded-full font-outfit font-extrabold text-xl overflow-hidden shadow-[0_4px_15px_rgba(227,87,43,0.1)] hover:shadow-[0_8px_25px_rgba(227,87,43,0.25)] transition-all duration-300">
+                <span className="relative z-10 group-hover:text-white transition-colors duration-300">Start Application</span>
+                <div className="absolute inset-0 bg-[#E3572B] scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-500 ease-out" />
               </button>
             </div>
-          </div>
+          </ScrollReveal>
 
-          {/* National University Column */}
-          <div className="bg-white rounded-3xl p-6 md:p-8">
-            <h3 className="text-2xl md:text-3xl font-outfit font-extrabold text-[#E3572B] mb-8">National University</h3>
-
-            <div className="space-y-6">
-              {/* Item 1 */}
-              <div className="border-b border-gray-200 pb-6">
-                <button
-                  onClick={() => setExpandedItems({ ...expandedItems, 'nat-1': !expandedItems['nat-1'] })}
-                  className="w-full flex items-center justify-between gap-4 text-left"
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#fff4ea] flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d95d39" strokeWidth="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                      </svg>
+          <ScrollReveal direction="right" className="bg-white hover:bg-orange-50/20 transition-colors duration-500 rounded-[32px] p-6 md:p-10 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_20px_40px_rgba(227,87,43,0.08)] transform hover:-translate-y-1 group">
+            <h3 className="text-3xl md:text-4xl font-outfit font-extrabold text-[#E3572B] mb-10 tracking-tight group-hover:scale-[1.02] transition-transform origin-left">National University</h3>
+            <div className="space-y-4">
+              {['nat-1', 'nat-2', 'nat-3', 'nat-4'].map((id, idx) => (
+                <div key={id} className={`border-gray-100 pb-2 ${idx !== 3 ? 'border-b' : ''}`}>
+                  <button
+                    onClick={() => setExpandedItems({ ...expandedItems, [id]: !expandedItems[id] })}
+                    className="w-full flex items-start justify-between gap-4 text-left py-4 px-2 rounded-2xl hover:bg-orange-50/70 transition-all duration-300 group/btn outline-none focus-visible:ring-2 focus-visible:ring-orange-200">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="w-12 h-12 rounded-full bg-[#fff4ea] group-hover/btn:bg-[#E3572B] group-hover/btn:shadow-md transition-all duration-300 flex items-center justify-center flex-shrink-0">
+                        {idx === 0 && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="stroke-[#d95d39] group-hover/btn:stroke-white transition-colors duration-300" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>}
+                        {idx === 1 && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="stroke-[#d95d39] group-hover/btn:stroke-white transition-colors duration-300" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>}
+                        {idx === 2 && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="stroke-[#d95d39] group-hover/btn:stroke-white transition-colors duration-300" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>}
+                        {idx === 3 && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="stroke-[#d95d39] group-hover/btn:stroke-white transition-colors duration-300" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-xl md:text-2xl text-gray-900 group-hover/btn:text-[#E3572B] transition-colors duration-300">
+                          {idx === 0 && "Luxury Architecture and Technology"}
+                          {idx === 1 && "Expert Counseling & Visa Support"}
+                          {idx === 2 && "Scholarship & Loan Assistance"}
+                          {idx === 3 && "Track All Applications in One Place"}
+                        </h4>
+                        <div className={`grid transition-all duration-300 ease-in-out ${expandedItems[id] ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0"}`}>
+                          <div className="overflow-hidden">
+                            <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                              Lorem ipsum dolor sit amet consectetur. Pharetra gravida posuere malesuada gravida mi.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg md:text-xl text-gray-900">Luxury Architecture and Technology</h4>
-                      {expandedItems['nat-1'] && (
-                        <p className="text-gray-600 text-sm md:text-base mt-3">
-                          Lorem ipsum dolor sit amet consectetur. Pharetra gravida posuere malesuada gravida mi.
-                        </p>
-                      )}
+                    <div className="flex-shrink-0 mt-3 bg-white p-1 rounded-full shadow-sm group-hover/btn:shadow transition-shadow">
+                      {expandedItems[id] ? <Minus className="text-[#d95d39]" size={20} strokeWidth={3} /> : <Plus className="text-[#d95d39]" size={20} strokeWidth={3} />}
                     </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {expandedItems['nat-1'] ? (
-                      <Minus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    ) : (
-                      <Plus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    )}
-                  </div>
-                </button>
-              </div>
-
-              {/* Item 2 */}
-              <div className="border-b border-gray-200 pb-6">
-                <button
-                  onClick={() => setExpandedItems({ ...expandedItems, 'nat-2': !expandedItems['nat-2'] })}
-                  className="w-full flex items-center justify-between gap-4 text-left"
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#fff4ea] flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d95d39" strokeWidth="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="12" y1="18" x2="12" y2="12"></line>
-                        <line x1="9" y1="15" x2="15" y2="15"></line>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg md:text-xl text-gray-900">Easy application process</h4>
-                      {expandedItems['nat-2'] && (
-                        <p className="text-gray-600 text-sm md:text-base mt-3">
-                          Lorem ipsum dolor sit amet consectetur. Pharetra gravida posuere malesuada gravida mi.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {expandedItems['nat-2'] ? (
-                      <Minus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    ) : (
-                      <Plus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    )}
-                  </div>
-                </button>
-              </div>
-
-              {/* Item 3 */}
-              <div className="border-b border-gray-200 pb-6">
-                <button
-                  onClick={() => setExpandedItems({ ...expandedItems, 'nat-3': !expandedItems['nat-3'] })}
-                  className="w-full flex items-center justify-between gap-4 text-left"
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#fff4ea] flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d95d39" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg md:text-xl text-gray-900">Application date & criteria</h4>
-                      {expandedItems['nat-3'] && (
-                        <p className="text-gray-600 text-sm md:text-base mt-3">
-                          Lorem ipsum dolor sit amet consectetur. Pharetra gravida posuere malesuada gravida mi.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {expandedItems['nat-3'] ? (
-                      <Minus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    ) : (
-                      <Plus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    )}
-                  </div>
-                </button>
-              </div>
-
-              {/* Item 4 */}
-              <div className="pb-6">
-                <button
-                  onClick={() => setExpandedItems({ ...expandedItems, 'nat-4': !expandedItems['nat-4'] })}
-                  className="w-full flex items-center justify-between gap-4 text-left"
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-[#fff4ea] flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d95d39" strokeWidth="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg md:text-xl text-gray-900">Track All Applications in One Place</h4>
-                      {expandedItems['nat-4'] && (
-                        <p className="text-gray-600 text-sm md:text-base mt-3">
-                          Lorem ipsum dolor sit amet consectetur. Pharetra gravida posuere malesuada gravida mi.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {expandedItems['nat-4'] ? (
-                      <Minus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    ) : (
-                      <Plus className="text-[#d95d39]" size={24} strokeWidth={2.5} />
-                    )}
-                  </div>
-                </button>
-              </div>
+                  </button>
+                </div>
+              ))}
             </div>
-
-            {/* Start Application Button */}
-            <div className="text-center">
-              <button className="w-[280px] mx-auto mt-8 px-8 py-4 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-outfit font-extrabold text-xl hover:bg-[#d95d39] hover:text-white transition-all">
-                Start Application
+            <div className="text-center mt-10">
+              <button className="group relative w-[280px] mx-auto px-8 py-4 bg-white border-2 border-[#E3572B] text-[#E3572B] rounded-full font-outfit font-extrabold text-xl overflow-hidden shadow-[0_4px_15px_rgba(227,87,43,0.1)] hover:shadow-[0_8px_25px_rgba(227,87,43,0.25)] transition-all duration-300">
+                <span className="relative z-10 group-hover:text-white transition-colors duration-300">Start Application</span>
+                <div className="absolute inset-0 bg-[#E3572B] scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-500 ease-out" />
               </button>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
 
       {/* Trusted by Institutes Worldwide Section */}
       <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
-        {/* Section Title */}
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold font-outfit text-center mb-8 md:mb-12">
-          Trusted by <span className="text-[#E3572B]">Institutes<br />Worldwide</span>
-        </h2>
+        <ScrollReveal direction="up">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold font-outfit text-center mb-8 md:mb-12">
+            Trusted by <span className="text-[#E3572B]"> Institutes <br /> Worldwide</span>
+          </h2>
+        </ScrollReveal>
 
-        {/* Country Filter Buttons - Marquee */}
         <div className="relative overflow-hidden mb-12">
           <style jsx>{`
-            @keyframes marquee {
-              0% {
-                transform: translateX(0);
-              }
-              100% {
-                transform: translateX(-50%);
-              }
-            }
-            .marquee-container {
-              display: flex;
-              animation: marquee 20s linear infinite;
-            }
-            .marquee-container:hover {
-              animation-play-state: paused;
-            }
+            @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+            .marquee-container { display: flex; animation: marquee 20s linear infinite; }
+            .marquee-container:hover { animation-play-state: paused; }
           `}</style>
-
           <div className="flex">
             <div className="marquee-container">
-              {/* First set */}
-              {countries.map((country) => (
+              {[...countries, ...countries].map((country, i) => (
                 <button
-                  key={`${country.name}-1`}
+                  key={`${country.name}-${i}`}
                   onClick={() => setSelectedCountry(country.name)}
-                  className={`flex justify-center items-center gap-2 px-4 md:px-6 py-2 rounded-full font-outfit font-semibold text-sm md:text-base transition-all border mx-2 whitespace-nowrap ${selectedCountry === country.name
-                    ? 'bg-[#d95d39] text-white border-[#d95d39]'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'
-                    }`}
-                >
-                  <span className={`fi fi-${country.code} text-xl fis rounded-full`}></span>
-                  {country.name}
-                </button>
-              ))}
-              {/* Second set for seamless loop */}
-              {countries.map((country) => (
-                <button
-                  key={`${country.name}-2`}
-                  onClick={() => setSelectedCountry(country.name)}
-                  className={`flex justify-center items-center gap-2 px-4 md:px-6 py-2 rounded-full font-outfit font-semibold text-sm md:text-base transition-all border mx-2 whitespace-nowrap ${selectedCountry === country.name
-                    ? 'bg-[#d95d39] text-white border-[#d95d39]'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'
-                    }`}
-                >
+                  className={`flex justify-center items-center gap-2 px-4 md:px-6 py-2 rounded-full font-outfit font-semibold text-sm md:text-base transition-all border mx-2 whitespace-nowrap ${selectedCountry === country.name ? 'bg-[#d95d39] text-white border-[#d95d39]' : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'}`}>
                   <span className={`fi fi-${country.code} text-xl fis rounded-full`}></span>
                   {country.name}
                 </button>
@@ -957,630 +571,224 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Refine Your Search Filter Section */}
-        <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8 mb-12 border border-gray-100">
-          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 font-outfit">
-            Refine Your Search
-          </h3>
-
-          {/* GPA and IELTS Row */}
+        <ScrollReveal className="bg-white rounded-3xl shadow-lg p-6 md:p-8 mb-12 border border-gray-100">
+          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 font-outfit">Refine Your Search</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* GPA Input */}
             <div>
-              <label className="block text-gray-900 font-semibold mb-3 font-outfit text-sm md:text-base">
-                Your GPA (0.0 - 4.0)
-              </label>
-              <input
-                type="number"
-                placeholder="e.g., 3.5"
-                value={gpa}
-                onChange={(e) => setGpa(e.target.value)}
-                min="0"
-                max="4"
-                step="0.1"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit focus:outline-none focus:border-[#E3572B] transition-colors text-gray-700 placeholder:text-gray-400"
-              />
+              <label className="block text-gray-900 font-semibold mb-3 font-outfit text-sm md:text-base">Your GPA (0.0 - 4.0)</label>
+              <input type="number" placeholder="e.g., 3.5" value={gpa} onChange={(e) => setGpa(e.target.value)} min="0" max="4" step="0.1" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit focus:outline-none focus:border-[#E3572B] transition-colors text-gray-700 placeholder:text-gray-400" />
             </div>
-
-            {/* IELTS Input */}
             <div>
-              <label className="block text-gray-900 font-semibold mb-3 font-outfit text-sm md:text-base">
-                Your IELTS Score (0.0 - 9.0)
-              </label>
-              <input
-                type="number"
-                placeholder="e.g., 7.0"
-                value={ielts}
-                onChange={(e) => setIelts(e.target.value)}
-                min="0"
-                max="9"
-                step="0.5"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit focus:outline-none focus:border-[#E3572B] transition-colors text-gray-700 placeholder:text-gray-400"
-              />
+              <label className="block text-gray-900 font-semibold mb-3 font-outfit text-sm md:text-base">Your IELTS Score (0.0 - 9.0)</label>
+              <input type="number" placeholder="e.g., 7.0" value={ielts} onChange={(e) => setIelts(e.target.value)} min="0" max="9" step="0.5" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit focus:outline-none focus:border-[#E3572B] transition-colors text-gray-700 placeholder:text-gray-400" />
             </div>
           </div>
-
-          {/* Tuition Fee Range */}
           <div>
             <div className="flex justify-between items-center mb-3">
-              <label className="text-gray-900 font-semibold font-outfit text-sm md:text-base">
-                Tuition Fee Range
-              </label>
-              <span className="text-[#E3572B] font-bold font-outfit text-sm md:text-base">
-                ${tuitionRange[0].toLocaleString()} - ${tuitionRange[1].toLocaleString()}
-              </span>
+              <label className="text-gray-900 font-semibold font-outfit text-sm md:text-base">Tuition Fee Range</label>
+              <span className="text-[#E3572B] font-bold font-outfit text-sm md:text-base">${tuitionRange[0].toLocaleString()} - ${tuitionRange[1].toLocaleString()}</span>
             </div>
-
-            {/* Range Slider */}
             <div className="relative">
-              <input
-                type="range"
-                min="0"
-                max="60000"
-                step="1000"
-                value={tuitionRange[1]}
-                onChange={(e) => setTuitionRange([tuitionRange[0], parseInt(e.target.value)])}
-                className="w-full h-2 bg-gradient-to-r from-[#E3572B] to-[#FF8B22] rounded-lg appearance-none cursor-pointer"
-                style={{
-                  background: `linear-gradient(to right, #E3572B 0%, #FF8B22 ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb 100%)`
-                }}
-              />
+              <input type="range" min="0" max="60000" step="1000" value={tuitionRange[1]} onChange={(e) => setTuitionRange([tuitionRange[0], parseInt(e.target.value)])} className="w-full h-2 bg-gradient-to-r from-[#E3572B] to-[#FF8B22] rounded-lg appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #E3572B 0%, #FF8B22 ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb 100%)` }} />
               <style jsx>{`
-                input[type='range']::-webkit-slider-thumb {
-                  appearance: none;
-                  width: 20px;
-                  height: 20px;
-                  border-radius: 50%;
-                  background: #E3572B;
-                  cursor: pointer;
-                  border: 3px solid white;
-                  box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3);
-                }
-                input[type='range']::-moz-range-thumb {
-                  width: 20px;
-                  height: 20px;
-                  border-radius: 50%;
-                  background: #E3572B;
-                  cursor: pointer;
-                  border: 3px solid white;
-                  box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3);
-                }
+                input[type='range']::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #E3572B; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3); }
+                input[type='range']::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #E3572B; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3); }
               `}</style>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
 
-        {/* University Cards Grid */}
-        <div className="relative">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {universities.map((university, index) => (
-              <div
-                key={index}
-                className="relative rounded-3xl overflow-hidden bg-white shadow-lg hover:shadow-xl transition-shadow"
-              >
-                {/* University Image */}
-                <div className="relative h-[280px] md:h-[320px] overflow-hidden">
-                  <Image
-                    src={failedImages.has(university.image) ? 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop' : university.image}
-                    alt={university.name}
-                    width={400}
-                    height={320}
-                    className="object-cover w-full h-full"
-                    onError={() => {
-                      setFailedImages(prev => new Set(prev).add(university.image));
-                    }}
-                  />
-                  {/* Heart Icon */}
-                  <button className="absolute top-4 right-4 w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md">
-                    <Heart size={20} strokeWidth={2} className="text-gray-600" />
-                  </button>
+        <StaggerReveal key={selectedCountry} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {universities.length ? (
+            universities.map((university, index) => (
+              <motion.div key={university.id || index} whileHover={{ y: -8 }} className="card-hover-glow relative rounded-3xl overflow-hidden bg-white shadow-md border border-transparent flex flex-col">
+                <div className="relative h-[220px] flex-shrink-0 overflow-hidden">
+                  <Image src={failedImages.has(university.image) ? 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop' : university.image} alt={university.name} fill className="object-cover transition-transform duration-500 hover:scale-110" onError={() => setFailedImages(prev => new Set(prev).add(university.image))} />
+                  <button className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md"><Heart size={20} strokeWidth={2} className="text-gray-600" /></button>
                 </div>
-
-                {/* University Info */}
-                <div className="p-6 bg-white">
-                  <div className="flex items-start justify-between gap-4">
+                <div className="p-6 bg-white flex flex-col flex-1">
+                  <div className="flex items-start justify-between gap-4 flex-1">
                     <div className="flex-1">
-                      <h3 className="text-xl md:text-2xl font-bold text-[#d95d39] mb-2">
-                        {university.name}
-                      </h3>
-                      <p className="text-gray-900 font-semibold mb-1">{university.type}</p>
+                      <h3 className="text-xl font-bold text-[#d95d39] mb-2 line-clamp-2 min-h-[3.25rem]">{university.name}</h3>
+                      <p className="text-gray-900 font-semibold mb-1 text-sm">{university.type}</p>
                       <p className="text-gray-600 text-sm">{university.location}</p>
                     </div>
-                    {/* Arrow Icon */}
-                    <button className="w-10 h-10 md:w-12 md:h-12 bg-[#d95d39] rounded-full flex items-center justify-center hover:bg-[#c24d2b] transition-colors flex-shrink-0">
-                      <ArrowUpRight size={20} strokeWidth={2.5} className="text-white" />
-                    </button>
+                    <button className="w-10 h-10 bg-[#d95d39] rounded-full flex items-center justify-center hover:bg-[#c24d2b] transition-colors flex-shrink-0 mt-1"><ArrowUpRight size={18} strokeWidth={2.5} className="text-white" /></button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Buttons - Show "See More" when filtering, otherwise show "Explore More" */}
-        <div className="mx-auto text-center mt-8">
-          {hasMoreResults ? (
-            <button
-              onClick={() => router.push('/sign-in')}
-              className="font-outfit font-semibold text-white text-xl md:text-2xl py-4 md:py-5 px-6 md:px-8 bg-[#E3572B] rounded-[40px] hover:bg-[#c24d2b] transition-all shadow-lg"
-            >
-              See More Results ({filteredUniversities.length - 2} more)
-            </button>
+              </motion.div>
+            ))
           ) : (
-            <button className="font-outfit font-semibold text-white text-xl md:text-2xl py-4 md:py-5 px-6 md:px-8 bg-[#E3572B] rounded-[40px] hover:bg-[#c24d2b] transition-all">
-              Explore More Institute
-            </button>
+            <div className="col-span-full rounded-2xl border border-dashed border-[#d95d39]/40 bg-white/70 p-8 text-center text-gray-600">
+              {isHomeDataLoading ? "Loading universities..." : "No universities found for the selected country."}
+            </div>
+          )}
+        </StaggerReveal>
+
+        <div className="text-center mt-8">
+          {hasMoreResults ? (
+            <button onClick={() => router.push('/sign-in')} className="font-outfit font-semibold text-white text-xl md:text-2xl py-4 md:py-5 px-6 md:px-8 bg-[#E3572B] rounded-[40px] hover:bg-[#c24d2b] transition-all shadow-lg">See More Results({filteredUniversities.length - 2} more)</button>
+          ) : (
+            <button className="font-outfit font-semibold text-white text-xl md:text-2xl py-4 md:py-5 px-6 md:px-8 bg-[#E3572B] rounded-[40px] hover:bg-[#c24d2b] transition-all">Explore More Institute</button>
           )}
         </div>
       </div>
 
-      {/* Trusted by National Institute's Section */}
+      {/* National Institute Section */}
       <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
-        {/* Section Title */}
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold font-outfit text-center mb-8 md:mb-12">
-          Trusted by <span className="text-[#E3572B]">National<br />Institute's</span>
-        </h2>
+        <ScrollReveal direction="up">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold font-outfit text-center mb-8 md:mb-12">
+            Trusted by <span className="text-[#E3572B]"> National <br /> Institute&apos;s</span>
+          </h2>
+        </ScrollReveal>
 
-        {/* Public/Private Toggle */}
         <div className="flex justify-center gap-4 mb-12">
-          <button
-            onClick={() => setNationalType('public')}
-            className={`px-14 py-1 rounded-[20px] font-outfit font-semibold text-base md:text-lg transition-all ${nationalType === 'public'
-              ? 'bg-[#d95d39] text-white'
-              : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#d95d39]'
-              }`}
-          >
-            Public University
-          </button>
-          <button
-            onClick={() => setNationalType('private')}
-            className={`px-14 py-1 rounded-[20px] font-outfit font-semibold text-base md:text-lg transition-all ${nationalType === 'private'
-              ? 'bg-[#d95d39] text-white'
-              : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#d95d39]'
-              }`}
-          >
-            Private University
-          </button>
-        </div>
-
-        {/* University Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {nationalUniversities.map((university, index) => (
-            <div
-              key={index}
-              className="relative rounded-3xl overflow-hidden bg-white shadow-lg hover:shadow-xl transition-shadow"
-            >
-              {/* University Image */}
-              <div className="relative h-[250px] overflow-hidden">
-                <Image
-                  src={university.image}
-                  alt={university.name}
-                  fill
-                  className="object-cover"
-                />
-                {/* Heart Icon */}
-                <button className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md">
-                  <Heart size={20} strokeWidth={2} className="text-gray-600" />
-                </button>
-              </div>
-
-              {/* University Info */}
-              <div className="p-6 bg-white">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl md:text-2xl font-bold text-[#d95d39] mb-2">
-                      {university.name}
-                    </h3>
-                    <p className="text-gray-900 font-semibold mb-1">{university.type}</p>
-                    <p className="text-gray-600 text-sm">{university.location}</p>
-                  </div>
-                  {/* Arrow Icon */}
-                  <button className="w-10 h-10 bg-[#d95d39] rounded-full flex items-center justify-center hover:bg-[#c24d2b] transition-colors flex-shrink-0">
-                    <ArrowUpRight size={20} strokeWidth={2.5} className="text-white" />
-                  </button>
-                </div>
-              </div>
-            </div>
+          {['public', 'private'].map((type) => (
+            <button key={type} onClick={() => setNationalType(type as any)} className={`px-14 py-1 rounded-[20px] font-outfit font-semibold text-base md:text-lg transition-all ${nationalType === type ? 'bg-[#d95d39] text-white' : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#d95d39]'}`}>
+              {type.charAt(0).toUpperCase() + type.slice(1)} University
+            </button>
           ))}
         </div>
 
-        {/* Explore More Button */}
-        <div className="text-center">
-          <button className="font-outfit font-semibold text-white text-2xl py-5 px-8 bg-[#E3572B] rounded-[40px]">
-            Explore More Institute
-          </button>
-        </div>
-      </div>
-
-      {/* Choose from Study Programs Section */}
-      <div className="relative bg-[#ff8b22] max-w-[1120px] mx-auto rounded-3xl overflow-hidden px-4 md:px-0">
-        <div className="max-w-full mx-auto relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 py-8 md:py-0">
-            {/* Left Girl Image */}
-            <div className="relative w-[120px] h-[150px] md:w-[200px] md:h-[280px] lg:w-[280px] lg:h-[350px] shrink-0 md:right-7">
-              <Image
-                src="/hero/girl1.png"
-                alt="Student with books"
-                fill
-                className="object-contain"
-              />
-            </div>
-
-            {/* Center Content */}
-            <div className="flex-1 text-center text-white max-w-2xl px-4 md:px-0">
-              <h2 className="text-lg md:text-2xl lg:text-3xl font-normal font-poppins mb-4 md:mb-6">
-                Choose from 12000 + study Program the phd funding, IELTS,GRE facilities
-              </h2>
-              <p className="text-sm md:text-base lg:text-lg mb-6 md:mb-8 opacity-90 font-normal font-poppins">
-                Stay informed with the latest news, insights, and updates delivered straight to your inbox
-              </p>
-
-              {/* Email Input */}
-              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 max-w-md mx-auto">
-                <div className="flex-1 relative">
-                  <input
-                    type="email"
-                    placeholder="✉ Email address"
-                    className="w-full px-4 md:px-6 py-3 md:py-4 text-gray-800 font-outfit focus:outline-none focus:ring-2 focus:ring-white border border-[rgba(255,255,255,0.4)] rounded-[80px] placeholder:text-[#ffffff99] text-sm md:text-base"
-                  />
+        <StaggerReveal key={nationalType} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {nationalUniversities.length ? (
+            nationalUniversities.map((university, index) => (
+              <motion.div key={university.id || index} whileHover={{ y: -8 }} className="card-hover-glow relative rounded-3xl overflow-hidden bg-white shadow-md border border-transparent flex flex-col">
+                <div className="relative h-[220px] flex-shrink-0 overflow-hidden">
+                  <Image src={university.image} alt={university.name} fill className="object-cover transition-transform duration-500 hover:scale-110" />
+                  <button className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md"><Heart size={20} strokeWidth={2} className="text-gray-600" /></button>
                 </div>
-                <button className="px-6 md:px-8 py-3 md:py-4 bg-white text-[#ff8b22] rounded-full font-outfit font-semibold text-base md:text-lg hover:bg-gray-100 transition-all">
-                  Submit
-                </button>
-              </div>
+                <div className="p-6 bg-white flex flex-col flex-1">
+                  <div className="flex items-start justify-between gap-4 flex-1">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-[#d95d39] mb-2 line-clamp-2 min-h-[3.25rem]">{university.name}</h3>
+                      <p className="text-gray-900 font-semibold mb-1 text-sm">{university.type}</p>
+                      <p className="text-gray-600 text-sm">{university.location}</p>
+                    </div>
+                    <button className="w-10 h-10 bg-[#d95d39] rounded-full flex items-center justify-center hover:bg-[#c24d2b] transition-colors flex-shrink-0 mt-1"><ArrowUpRight size={18} strokeWidth={2.5} className="text-white" /></button>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <div className="col-span-full rounded-2xl border border-dashed border-[#d95d39]/40 bg-white/70 p-8 text-center text-gray-600">
+              {isHomeDataLoading ? "Loading universities..." : "No universities found for this category."}
             </div>
+          )}
+        </StaggerReveal>
 
-            {/* Right Girl Image */}
-            <div className="relative w-[120px] h-[150px] md:w-[200px] md:h-[280px] lg:w-[280px] lg:h-[350px] shrink-0 md:left-11 md:top-2">
-              <Image
-                src="/hero/girl2.png"
-                alt="Student with backpack"
-                fill
-                className="object-contain"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* News and Updates Section */}
-      <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
-        {/* Section Header */}
-        <div className="mb-12 font-normal font-poppins">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl  mb-2">News and Updates</h2>
-          <p className="text-gray-600 text-base md:text-lg">Stay up to date with us</p>
-        </div>
-
-        {/* News Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* News Card 1 */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-            <div className="relative h-[160px] overflow-hidden">
-              <Image
-                src="/news/news1.png"
-                alt="Aga Khan Foundation Scholarship"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-base mb-2 line-clamp-2">
-                Aga Khan Foundation International Scholarship Programme
-              </h3>
-              <p className="text-gray-600 text-sm mb-3 line-clamp-3">
-                These programmes offer funding and support opportunities for students interested in pursuing education...
-              </p>
-              <p className="text-gray-400 text-xs">14k views</p>
-            </div>
-          </div>
-
-          {/* News Card 2 */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-            <div className="relative h-[160px] overflow-hidden">
-              <Image
-                src="/news/news2.png"
-                alt="World Bank Scholarship"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-base mb-2 line-clamp-2">
-                the World Bank Scholarship
-              </h3>
-              <p className="text-gray-600 text-sm mb-3 line-clamp-3">
-                Several universities in Australia offer full scholarships for Bangladeshi and other students to study in a...
-              </p>
-              <p className="text-gray-400 text-xs">14k views</p>
-            </div>
-          </div>
-
-          {/* News Card 3 */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-            <div className="relative h-[160px] overflow-hidden">
-              <Image
-                src="/news/news3.png"
-                alt="Mastercard Foundation Scholarship"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-base mb-2 line-clamp-2">
-                the Mastercard Foundation Scholarship
-              </h3>
-              <p className="text-gray-600 text-sm mb-3 line-clamp-3">
-                Many programs exist, funding and support varies by institution and criteria set by institution...
-              </p>
-              <p className="text-gray-400 text-xs">14k views</p>
-            </div>
-          </div>
-
-          {/* News Card 4 */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-            <div className="relative h-[160px] overflow-hidden">
-              <Image
-                src="/news/news4.png"
-                alt="Ulster University Scholarships"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-base mb-2 line-clamp-2">
-                Ulster University Scholarships
-              </h3>
-              <p className="text-gray-600 text-sm mb-3 line-clamp-3">
-                It can provide some details about Ulster University's programs and scholarship opportunities...
-              </p>
-              <p className="text-gray-400 text-xs">14k views</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Explore More Button */}
         <div className="text-center">
+          <button className="font-outfit font-semibold text-white text-2xl py-5 px-8 bg-[#E3572B] rounded-[40px]">Explore More Institute</button>
+        </div>
+      </div>
+
+      {/* Program Section */}
+      <ScrollReveal direction="up" className="relative bg-[#ff8b22] max-w-[1120px] mx-auto rounded-3xl overflow-hidden px-4 md:px-0">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 p-8 md:p-0">
+          <div className="relative w-[120px] h-[150px] md:w-[200px] md:h-[280px] lg:w-[280px] lg:h-[350px]"><Image src="/hero/girl1.png" alt="Student" fill className="object-contain" /></div>
+          <div className="flex-1 text-center text-white px-4">
+            <h2 className="text-lg md:text-2xl lg:text-3xl font-normal font-poppins mb-4">Choose from 12000+ study Program</h2>
+            <p className="text-sm md:text-base mb-6 opacity-90">Stay informed with the latest news delivered straight to your inbox</p>
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input type="email" placeholder="✉ Email address" className="w-full px-4 py-3 text-gray-800 bg-white/20 rounded-full border border-white/40 placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white" />
+              <button className="px-8 py-3 bg-white text-[#ff8b22] rounded-full font-semibold hover:bg-gray-100 transition-all">Submit</button>
+            </div>
+          </div>
+          <div className="relative w-[120px] h-[150px] md:w-[200px] md:h-[280px] lg:w-[280px] lg:h-[350px]"><Image src="/hero/girl2.png" alt="Student" fill className="object-contain" /></div>
+        </div>
+      </ScrollReveal>
+
+      {/* News Section */}
+      <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
+        <ScrollReveal direction="left" className="mb-12 font-normal font-poppins">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl mb-2">News and Updates</h2>
+          <p className="text-gray-600 text-base md:text-lg">Stay up to date with us</p>
+        </ScrollReveal>
+        <StaggerReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {newsCards.length ? (
+            newsCards.map((article) => (
+              <motion.div key={article.id} whileHover={{ y: -8 }} className="card-hover-glow bg-white rounded-2xl overflow-hidden shadow-sm border border-transparent cursor-pointer flex flex-col">
+                <div className="relative h-[180px] flex-shrink-0 overflow-hidden"><Image src={article.image} alt={article.title} fill className="object-cover transition-transform duration-500 hover:scale-110" /></div>
+                <div className="p-4 flex flex-col flex-1">
+                  <h3 className="font-bold text-base mb-2 line-clamp-2 min-h-[3rem]">{article.title}</h3>
+                  <p className="text-gray-600 text-sm mb-3 line-clamp-3 flex-1">{article.description}</p>
+                  <p className="text-gray-400 text-xs">{article.meta}</p>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <div className="col-span-full p-8 text-center text-gray-600">No published news yet.</div>
+          )}
+        </StaggerReveal>
+        <ScrollReveal direction="up" className="text-center">
           <Link href="/news-updates">
-            <button className="font-outfit font-semibold text-white text-2xl py-5 px-8 bg-[#E3572B] rounded-[40px] hover:bg-[#c24d2b] transition-all">
-              Explore More News
-            </button>
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="font-outfit font-semibold text-white text-2xl py-5 px-8 bg-[#E3572B] rounded-[40px]">Explore More News</motion.button>
           </Link>
-        </div>
+        </ScrollReveal>
       </div>
 
-      {/* Student Success Story Section */}
+      {/* Success Story Section */}
       <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
-        {/* Section Header */}
-        <div className="text-center mb-12 font-outfit font-normal">
+        <ScrollReveal direction="up" className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold mb-3">Student Success Story</h2>
-          <p className="text-[#00000099] text-base md:text-lg">
-            See how we've turned clients'  dreams into reality with <br /> exceptional service
-          </p>
-        </div>
-
-        {/* Testimonial Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-[1120px] mx-auto">
-          {/* Testimonial Card 1 */}
-          <div className="relative bg-[#FFF4EA] pt-12 px-8 pb-8 rounded-3xl shadow-sm hover:shadow-lg transition-shadow mt-8 md:col-span-2 max-w-[664px]">
-            <div className="absolute -top-8 left-8">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white">
-                <Image
-                  src="/testimonials/user1.png"
-                  alt="Jennifer Mendy"
-                  fill
-                  className="object-cover"
-                />
+          <p className="text-[#00000099] text-base md:text-lg">See how we&apos;ve turned dreams into reality</p>
+        </ScrollReveal>
+        <StaggerReveal className="grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-8 max-w-[1120px] mx-auto">
+          {[1, 2, 3, 4].map((i) => (
+            <motion.div 
+              key={i} 
+              whileHover={{ y: -10 }} 
+              className={`card-hover-glow relative bg-[#FFF4EA] p-8 pb-10 rounded-[32px] flex flex-col h-full ${
+                i === 1 || i === 4 ? 'md:col-span-2' : 'md:col-span-1'
+              } border border-transparent transition-all shadow-sm hover:shadow-xl`}
+            >
+              <div className="absolute -top-10 left-8 w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
+                <Image src={`/testimonials/user${i}.png`} alt={`Student ${i}`} fill className="object-cover" />
               </div>
-            </div>
-            <p className="text-gray-700 text-sm md:text-base mb-6 relative z-10">
-              Lorem ipsum dolor sit amet consectetur. Placerat gravida posuere malesuada gravida. Semper amet dignissim suspendisse vel bibendum in adipiscing orci. Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illo provident corporis quae ducimus quam quia velit, consequuntur rerum. Fuga eos sed adipisci amet distinctio dolorum a vel natus veritatis placeat!
-            </p>
-            <div>
-              <h4 className="font-bold text-lg mb-1">Jennifer Mendy</h4>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4].map((star) => (
-                  <Star key={star} size={18} className="fill-[#d95d39] text-[#d95d39]" />
-                ))}
-                <Star size={18} className="fill-gray-300 text-gray-300" />
+              <div className="pt-10 flex-1">
+                <p className="text-gray-700 text-base md:text-lg leading-relaxed mb-8 italic">
+                  &quot;The guidance I received here was life-changing. I managed to secure my spot at a top-tier university with a full scholarship. The process was seamless and the support was unmatched!&quot;
+                </p>
               </div>
-            </div>
-            <div className="absolute bottom-6 right-6 ">
-              <Image
-                src="/icons/quotation-marks.png"
-                alt="Quote"
-                width={64}
-                height={64}
-                className="object-contain"
-              />
-            </div>
-          </div>
-
-          {/* Testimonial Card 2 */}
-          <div className="relative bg-[#fff4ea] pt-12 px-8 pb-8 rounded-3xl shadow-sm hover:shadow-lg transition-shadow mt-8 md:col-span-1">
-            <div className="absolute -top-8 left-8">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white">
-                <Image
-                  src="/testimonials/user2.png"
-                  alt="John Walker"
-                  fill
-                  className="object-cover"
-                />
+              <div>
+                <h4 className="font-bold text-2xl text-gray-900 mb-2">Student Name {i}</h4>
+                <div className="flex gap-1 mb-2">
+                  {[1, 2, 3, 4, 5].map(s => <Star key={s} size={20} className="fill-[#d95d39] text-[#d95d39]" />)}
+                </div>
               </div>
-            </div>
-            <p className="text-gray-700 text-sm md:text-base mb-6 relative z-10">
-              Lorem ipsum dolor sit amet consectetur. Placerat gravida posuere malesuada gravida. Semper amet dignissim suspendisse vel bibendum in adipiscing orci.
-            </p>
-            <div>
-              <h4 className="font-bold text-lg mb-1">John Walker</h4>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} size={18} className="fill-[#d95d39] text-[#d95d39]" />
-                ))}
+              <div className="absolute bottom-8 right-8 opacity-20 w-16 h-16 pointer-events-none">
+                <Image src="/icons/quotation-marks.png" alt="Quote" fill className="object-contain" />
               </div>
-            </div>
-            <div className="absolute bottom-6 right-6">
-              <Image
-                src="/icons/quotation-marks.png"
-                alt="Quote"
-                width={64}
-                height={64}
-                className="object-contain"
-              />
-            </div>
-          </div>
-
-          {/* Testimonial Card 3 */}
-          <div className="relative bg-[#fff4ea] pt-12 px-8 pb-8 rounded-3xl shadow-sm hover:shadow-lg transition-shadow mt-8 md:col-span-1">
-            <div className="absolute -top-8 left-8">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white">
-                <Image
-                  src="/testimonials/user3.png"
-                  alt="Sharon Lee"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </div>
-            <p className="text-gray-700 text-sm md:text-base mb-6 relative z-10">
-              Lorem ipsum dolor sit amet consectetur. Placerat gravida posuere malesuada gravida. Semper amet dignissim
-            </p>
-            <div>
-              <h4 className="font-bold text-lg mb-1">Sharon Lee</h4>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4].map((star) => (
-                  <Star key={star} size={18} className="fill-[#d95d39] text-[#d95d39]" />
-                ))}
-                <Star size={18} className="fill-gray-300 text-gray-300" />
-              </div>
-            </div>
-            <div className="absolute bottom-6 right-6 ">
-              <Image
-                src="/icons/quotation-marks.png"
-                alt="Quote"
-                width={64}
-                height={64}
-                className="object-contain"
-              />
-            </div>
-          </div>
-
-          {/* Testimonial Card 4 */}
-          <div className="relative bg-[#fff4ea] pt-12 px-8 pb-8 rounded-3xl shadow-sm hover:shadow-lg transition-shadow mt-8 md:col-span-2 max-w-[664px] ml-auto ">
-            <div className="absolute -top-8 left-8">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white">
-                <Image
-                  src="/testimonials/user4.png"
-                  alt="Sinlter Monroe"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </div>
-            <p className="text-gray-700 text-sm md:text-base mb-6 relative z-10">
-              Lorem ipsum dolor sit amet consectetur. Placerat gravida posuere malesuada gravida. Semper amet dignissim suspendisse vel bibendum in adipiscing orci.
-            </p>
-            <div>
-              <h4 className="font-bold text-lg mb-1">Sinlter Monroe</h4>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} size={18} className="fill-[#d95d39] text-[#d95d39]" />
-                ))}
-              </div>
-            </div>
-            <div className="absolute bottom-6 right-6 ">
-              <Image
-                src="/icons/quotation-marks.png"
-                alt="Quote"
-                width={64}
-                height={64}
-                className="object-contain"
-              />
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          ))}
+        </StaggerReveal>
       </div>
 
-      {/* Do you have a question Section */}
-      <div className="max-w-[1120px] mx-auto my-5 px-4 md:px-6 relative">
-        <div className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-4 md:gap-0">
-          {/* Left Side - Text */}
-          <div className="text-center md:text-left">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal font-inter">
-              Do you have a question?
-            </h2>
-          </div>
-
-          {/* Right Side - Question image */}
-          <div className="relative h-[150px] w-[280px] sm:h-[200px] sm:w-[350px] md:h-[280px] md:w-[450px] lg:h-[381px] lg:w-[623px]">
-            <div className="relative w-full h-full">
-              <Image
-                src="/icons/question.png"
-                alt="Question"
-                fill
-                className="object-contain"
-              />
-
-            </div>
-          </div>
+      {/* Question Section */}
+      <ScrollReveal direction="up" className="max-w-[1120px] mx-auto my-5 px-4 md:px-6">
+        <div className="flex flex-col md:flex-row items-center justify-end gap-4">
+          <h2 className="text-2xl md:text-5xl font-inter">Do you have a question?</h2>
+          <div className="relative h-[150px] w-[280px] md:h-[300px] md:w-[600px]"><Image src="/icons/question.png" alt="Question" fill className="object-contain" /></div>
         </div>
-      </div>
+      </ScrollReveal>
 
-      {/* Contact Us Section */}
+      {/* Contact Section */}
       <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
-        {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl lg:text-6xl font-normal font-poppins  mb-3">Contact Us</h2>
-          <p className="text-[#00000066] text-base md:text-xl font-outfit font-normal ">
-            Contact us to start your university <br /> application journey today
-          </p>
-        </div>
-
-        {/* Contact Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {/* Email Card */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-            <div className="w-12 h-12 bg-[#fff4ea] rounded-full flex items-center justify-center mb-4">
-              <Mail className="text-[#d95d39]" size={24} strokeWidth={2} />
-            </div>
-            <h3 className="font-bold text-xl mb-2">Email</h3>
-            <p className="text-gray-600 mb-4">Office : hello@skyline.co</p>
-            <button className="px-6 py-2.5 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-outfit font-semibold text-sm hover:bg-[#d95d39] hover:text-white transition-all">
-              Contact us
-            </button>
-            <span className="text-[#00000066] text-xs ml-1">*available 24 hrs</span>
-          </div>
-
-          {/* Phone Card */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-            <div className="w-12 h-12 bg-[#fff4ea] rounded-full flex items-center justify-center mb-4">
-              <Phone className="text-[#d95d39]" size={24} strokeWidth={2} />
-            </div>
-            <h3 className="font-bold text-xl mb-2">Phone</h3>
-            <p className="text-gray-600 mb-4">Office : +91 8932-1151-22</p>
-            <button className="px-6 py-2.5 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-outfit font-semibold text-sm hover:bg-[#d95d39] hover:text-white transition-all">
-              Contact us
-            </button>
-            <span className="text-[#00000066] text-xs ml-1">*available 24 hrs</span>
-          </div>
-
-          {/* Location Card */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-            <div className="w-12 h-12 bg-[#fff4ea] rounded-full flex items-center justify-center mb-4">
-              <MapPin className="text-[#d95d39]" size={24} strokeWidth={2} />
-            </div>
-            <h3 className="font-bold text-xl mb-2">Location</h3>
-            <p className="text-gray-600 mb-4">Office : 123 Maple Street, Springfield</p>
-            <button className="px-6 py-2.5 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-outfit font-semibold text-sm hover:bg-[#d95d39] hover:text-white transition-all">
-              Contact us
-            </button>
-            <span className="text-[#00000066] text-xs ml-1">*available 24 hrs</span>
-          </div>
-        </div>
+        <ScrollReveal direction="up" className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl lg:text-6xl mb-3">Contact Us</h2>
+          <p className="text-gray-500">Start your university application journey today</p>
+        </ScrollReveal>
+        <StaggerReveal className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[{icon: Mail, title: 'Email', text: 'Office : hello@skyline.co'},{icon: Phone, title: 'Phone', text: 'Office : +91 8932-1151-22'},{icon: MapPin, title: 'Location', text: 'Office : 123 Maple Street'}].map((item, i) => (
+            <motion.div key={i} whileHover={{ y: -8 }} className="card-hover-glow bg-white rounded-3xl p-8 border border-gray-100/80">
+              <div className="w-12 h-12 bg-[#fff4ea] rounded-full flex items-center justify-center mb-4"><item.icon className="text-[#d95d39]" size={24} /></div>
+              <h3 className="font-bold text-xl mb-2">{item.title}</h3>
+              <p className="text-gray-600 mb-4">{item.text}</p>
+              <button className="px-6 py-2.5 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-semibold hover:bg-[#d95d39] hover:text-white transition-all">Contact us</button>
+            </motion.div>
+          ))}
+        </StaggerReveal>
       </div>
-
-
-
-
     </div>
   );
 }
