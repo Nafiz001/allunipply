@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const slides = ['/icons/laptop.png', '/icons/slider2.png', '/icons/slider3.png'];
 
-const OTPVerificationPage = () => {
+const OTPVerificationPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [otp, setOtp] = useState(['', '', '', '']);
@@ -203,6 +203,14 @@ const OTPVerificationPage = () => {
                 </div>
       </div>
     </div>
+  );
+};
+
+const OTPVerificationPage = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <OTPVerificationPageContent />
+    </Suspense>
   );
 };
 

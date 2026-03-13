@@ -142,8 +142,8 @@ const NationalUniversityPage = () => {
           <Image src="/hero/national_banner.jpeg" alt="National University Banner" fill className="object-cover brightness-75" priority />
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-          <ScrollReveal direction="down">
-            <h1 className="font-pacifico text-3xl text-orange-800 text-right leading-relaxed drop-shadow-lg absolute left-8 top-30">
+          <ScrollReveal direction="down" className="absolute left-8 top-30">
+            <h1 className="font-pacifico text-3xl text-orange-800 text-right leading-relaxed drop-shadow-lg">
               Streamline your university<br />applications – one submission,<br />multiple choices.
             </h1>
           </ScrollReveal>

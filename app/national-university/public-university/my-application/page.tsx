@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import DashboardHeader from "@/components/layout/DashboardHeader";
@@ -72,7 +72,7 @@ const sectionCardConfig: Array<{
   },
 ];
 
-const PublicUniversityMyApplicationPage = () => {
+const PublicUniversityMyApplicationContent = () => {
   const searchParams = useSearchParams();
   const searchParamsKey = searchParams.toString();
   const [applications, setApplications] = useState<ApiApplication[]>([]);
@@ -341,6 +341,14 @@ const PublicUniversityMyApplicationPage = () => {
         </div>
       </main>
     </div>
+  );
+};
+
+const PublicUniversityMyApplicationPage = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F5F5F5]" />}>
+      <PublicUniversityMyApplicationContent />
+    </Suspense>
   );
 };
 

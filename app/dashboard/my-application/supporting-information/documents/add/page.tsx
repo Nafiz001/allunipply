@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, CirclePlus } from "lucide-react";
 import SupportingInfoStepLayout from "@/components/dashboard/SupportingInfoStepLayout";
@@ -54,7 +54,7 @@ type ApiApplication = {
   id: string;
 };
 
-const AddSupportingDocumentPage = () => {
+const AddSupportingDocumentPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -267,6 +267,14 @@ const AddSupportingDocumentPage = () => {
         </div>
       </div>
     </SupportingInfoStepLayout>
+  );
+};
+
+const AddSupportingDocumentPage = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F5F5F5]" />}>
+      <AddSupportingDocumentPageContent />
+    </Suspense>
   );
 };
 
