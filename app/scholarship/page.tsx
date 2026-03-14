@@ -8,12 +8,16 @@ import DashboardHeader from "@/components/layout/DashboardHeader";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import StaggerReveal from "@/components/animations/StaggerReveal";
+import { fillGridRows } from "@/lib/grid-fill";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 type ScholarshipCard = {
   id: string;
   image: string;
   intake: string;
   tag: string;
+  universityName: string;
+  programName: string | null;
   description: string;
   title: string;
 };
@@ -36,8 +40,10 @@ const ScholarshipPageContent = () => {
   const searchParams = useSearchParams();
   const shouldAutoOpenFilter = searchParams.get("openFilter") === "true";
 
+  const { user, loading } = useCurrentUser();
+  const userName = user?.fullName?.split(" ")[0] || "Guest";
+
   const [isHydrated, setIsHydrated] = useState(false);
-  const [userName] = useState("Aklima");
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(shouldAutoOpenFilter);
   const [currentStep, setCurrentStep] = useState(1);
@@ -98,8 +104,12 @@ const ScholarshipPageContent = () => {
             description?: string | null;
             deadline?: string | null;
             university?: {
+              name?: string | null;
               bannerImageUrl?: string | null;
               logoUrl?: string | null;
+            } | null;
+            program?: {
+              name?: string | null;
             } | null;
           }>;
         };
@@ -110,6 +120,12 @@ const ScholarshipPageContent = () => {
             .replace(/_/g, " ")
             .replace(/^\w/, (char) => char.toUpperCase());
 
+          const normalizedDescription = item.description?.trim();
+          const fallbackDescription =
+            item.university?.name
+              ? `Available at ${item.university.name}`
+              : "Explore eligibility and benefits details.";
+
           return {
             id: item.id,
             image:
@@ -118,7 +134,11 @@ const ScholarshipPageContent = () => {
               "/universities/delaware.png",
             intake: formatDeadline(item.deadline),
             tag: formattedType,
-            description: item.description?.trim() || item.title,
+            universityName: item.university?.name || "University not specified",
+            programName: item.program?.name || null,
+            description: normalizedDescription && normalizedDescription !== item.title
+              ? normalizedDescription
+              : fallbackDescription,
             title: item.title,
           };
         });
@@ -153,6 +173,10 @@ const ScholarshipPageContent = () => {
     );
   }, [scholarships, searchQuery]);
 
+  const scholarshipsGrid = useMemo(() => {
+    return fillGridRows(filteredScholarships, scholarships, { columns: [1, 2, 3] });
+  }, [filteredScholarships, scholarships]);
+
   if (!isHydrated) {
     return <div className="min-h-screen bg-[#F5F5F5]" />;
   }
@@ -163,10 +187,14 @@ const ScholarshipPageContent = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <ScrollReveal direction="down">
-          <h1 className="text-4xl md:text-6xl font-medium text-[#E3572B] mb-2 font-outfit text-center">
-            Hello, {userName}!
+          <h1 className="text-3xl sm:text-4xl md:text-6xl leading-tight font-medium text-[#E3572B] mb-2 font-outfit text-center">
+            {loading ? (
+              <span className="inline-block w-48 h-10 md:h-14 bg-[#E3572B]/20 animate-pulse rounded-full align-middle"></span>
+            ) : (
+              `Hello, ${userName}!`
+            )}
           </h1>
-          <h2 className="text-xl md:text-3xl font-semibold mb-8 font-outfit text-center text-[#222]">
+          <h2 className="text-lg sm:text-xl md:text-3xl font-semibold mb-8 font-outfit text-center text-[#222] px-2">
             Here&apos;s your personalized list of Scholarship according to universities!
           </h2>
         </ScrollReveal>
@@ -174,7 +202,7 @@ const ScholarshipPageContent = () => {
         <ScrollReveal>
           <motion.div
             whileHover={{ scale: 1.01 }}
-            className="rounded-3xl p-8 md:p-10 mb-8 relative overflow-hidden shadow-lg border border-white/20"
+            className="rounded-3xl p-5 sm:p-8 md:p-10 mb-8 relative overflow-hidden shadow-lg border border-white/20"
             style={{
               background: "linear-gradient(90deg, rgba(255, 139, 34, 1) 0%, rgba(255, 182.29, 116.47, 1) 100%)",
             }}
@@ -183,7 +211,7 @@ const ScholarshipPageContent = () => {
             <div className="absolute bottom-4 right-32 w-24 h-24 bg-white opacity-10 rounded-full"></div>
             <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div className="max-w-2xl">
-                <h3 className="text-white text-2xl md:text-3xl font-bold mb-3 font-outfit">
+                <h3 className="text-white text-xl sm:text-2xl md:text-3xl font-bold mb-3 font-outfit leading-tight">
                   Your shortlist can make or break
                   <br />
                   your study abroad journey
@@ -230,9 +258,9 @@ const ScholarshipPageContent = () => {
         </ScrollReveal>
 
         <StaggerReveal key={isScholarshipsLoading ? "loading" : "loaded"} staggerDelay={0.1} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7 mb-12">
-          {filteredScholarships.map((scholarship) => (
+          {scholarshipsGrid.map((scholarship, index) => (
             <motion.article 
-              key={scholarship.id} 
+              key={`${scholarship.id}-${index}`} 
               whileHover={{ y: -8 }}
               className="card-hover-glow rounded-3xl border border-transparent bg-white overflow-hidden p-3"
             >
@@ -255,7 +283,14 @@ const ScholarshipPageContent = () => {
               </div>
 
               <div className="px-2 pb-2">
-                <p className="text-xl md:text-2xl leading-tight text-[#111] font-outfit font-bold mb-6 line-clamp-2">
+                <h3 className="text-xl md:text-2xl leading-tight text-[#111] font-outfit font-bold mb-2 line-clamp-2">
+                  {scholarship.title}
+                </h3>
+                <p className="text-sm font-semibold text-[#E3572B] mb-2 line-clamp-1">{scholarship.universityName}</p>
+                {scholarship.programName ? (
+                  <p className="text-xs text-gray-500 mb-3 line-clamp-1">Program: {scholarship.programName}</p>
+                ) : null}
+                <p className="text-base leading-relaxed text-gray-600 font-outfit mb-6 line-clamp-2">
                   {scholarship.description}
                 </p>
 
@@ -277,7 +312,7 @@ const ScholarshipPageContent = () => {
               Loading scholarships...
             </div>
           ) : null}
-          {!isScholarshipsLoading && !filteredScholarships.length ? (
+          {!isScholarshipsLoading && !scholarshipsGrid.length ? (
             <div className="col-span-full rounded-3xl border border-dashed border-[#E3572B]/40 bg-white p-8 text-center text-gray-600">
               No scholarships found.
             </div>

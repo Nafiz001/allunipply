@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,13 +8,53 @@ import { motion } from "framer-motion";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import StaggerReveal from "@/components/animations/StaggerReveal";
 import { Heart, ArrowUpRight } from "lucide-react";
+import { fillGridRows } from "@/lib/grid-fill";
 
-const newsItems = [
-  { id: 1, img: '/news/news1.png', alt: 'Aga Khan Foundation', title: 'Aga Khan Foundation International Scholarship Programme', desc: 'These programmes offer funding and support opportunities for students pursuing education globally.', views: '14k' },
-  { id: 2, img: '/news/news2.png', alt: 'World Bank', title: 'The World Bank Scholarship', desc: 'Full scholarships for Bangladeshi students to study in a world-class education system in Australia.', views: '14k' },
-  { id: 3, img: '/news/news3.png', alt: 'Mastercard', title: 'The Mastercard Foundation Scholarship', desc: 'Funding and support varies by institution and criteria set by institution for eligible students.', views: '14k' },
-  { id: 4, img: '/news/news4.png', alt: 'Ulster University', title: 'Ulster University Scholarships', desc: "Details about Ulster University's programs and scholarship opportunities for international students.", views: '14k' },
-];
+type ApiNewsArticle = {
+  id: string;
+  title: string;
+  excerpt: string | null;
+  content: string;
+  category: "INTERNATIONAL" | "NATIONAL" | "SCHOLARSHIP" | "ADMISSION" | "SYSTEM" | "OTHER";
+  coverImageUrl: string | null;
+  publishedAt: string | null;
+};
+
+type NewsCard = {
+  id: string;
+  img: string;
+  alt: string;
+  title: string;
+  desc: string;
+  dateLabel: string;
+};
+
+const GRID_TARGET_COUNT = 8;
+
+function formatRelativeDate(dateValue: string | null) {
+  if (!dateValue) return "Recently";
+
+  const date = new Date(dateValue);
+  const diffMs = Date.now() - date.getTime();
+  if (Number.isNaN(diffMs) || diffMs < 0) return "Recently";
+
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+
+  if (diffMs < hour) {
+    const mins = Math.max(1, Math.floor(diffMs / minute));
+    return `${mins}m ago`;
+  }
+
+  if (diffMs < day) {
+    const hours = Math.floor(diffMs / hour);
+    return `${hours}h ago`;
+  }
+
+  const days = Math.floor(diffMs / day);
+  return `${days}d ago`;
+}
 
 const processSteps = [
   { icon: '/icons/location.png', title: 'Choose University', desc: 'Apply to each university through a simple, streamlined application form.' },
@@ -36,65 +76,140 @@ const helpCards = [
 ];
 
 const universityTabs = ['public', 'private', 'agricultural', 'engineering'] as const;
-const tabLabels: Record<string, string> = {
+type UniversityTab = typeof universityTabs[number];
+
+type UniversityCard = {
+  id: string;
+  name: string;
+  type: string;
+  location: string;
+  image: string;
+};
+
+const tabLabels: Record<UniversityTab, string> = {
   public: 'Public University',
   private: 'Private University',
   agricultural: 'Agricultural University',
   engineering: 'Engineering University',
 };
 
-const universitiesByType: Record<string, Array<{ id: string; name: string; type: string; location: string; image: string }>> = {
-  public: [
-    { id: 'pub1', name: 'University of Dhaka', type: 'Public university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/university-of-dhaka/800/500' },
-    { id: 'pub2', name: 'Bangladesh University of Engineering and Technology', type: 'Public university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/buet-dhaka/800/500' },
-    { id: 'pub3', name: 'Jahangirnagar University', type: 'Public university', location: 'Savar, Bangladesh', image: 'https://picsum.photos/seed/jahangirnagar-university/800/500' },
-    { id: 'pub4', name: 'Rajshahi University', type: 'Public university', location: 'Rajshahi, Bangladesh', image: 'https://picsum.photos/seed/rajshahi-university/800/500' },
-    { id: 'pub5', name: 'Khulna University', type: 'Public university', location: 'Khulna, Bangladesh', image: 'https://picsum.photos/seed/khulna-university/800/500' },
-    { id: 'pub6', name: 'Shahjalal University of Science and Technology', type: 'Public university', location: 'Sylhet, Bangladesh', image: 'https://picsum.photos/seed/shahjalal-university-sust/800/500' },
-    { id: 'pub7', name: 'Comilla University', type: 'Public university', location: 'Comilla, Bangladesh', image: 'https://picsum.photos/seed/comilla-university/800/500' },
-    { id: 'pub8', name: 'Noakhali Science and Technology University', type: 'Public university', location: 'Noakhali, Bangladesh', image: 'https://picsum.photos/seed/noakhali-science-and-technology-university/800/500' },
-    { id: 'pub9', name: 'Mawlana Bhashani Science and Technology University', type: 'Public university', location: 'Tangail, Bangladesh', image: 'https://picsum.photos/seed/mbstu-tangail/800/500' },
-  ],
-  private: [
-    { id: 'priv1', name: 'North South University', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/north-south-university/800/500' },
-    { id: 'priv2', name: 'BRAC University', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/brac-university/800/500' },
-    { id: 'priv3', name: 'Independent University Bangladesh', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/independent-university-bangladesh/800/500' },
-    { id: 'priv4', name: 'East West University', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/east-west-university/800/500' },
-    { id: 'priv5', name: 'American International University-Bangladesh', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/aiub-dhaka/800/500' },
-    { id: 'priv6', name: 'Ahsanullah University of Science and Technology', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/ahsanullah-university-aust/800/500' },
-    { id: 'priv7', name: 'Daffodil International University', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/daffodil-international-university/800/500' },
-    { id: 'priv8', name: 'United International University', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/united-international-university/800/500' },
-    { id: 'priv9', name: 'Southeast University', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/southeast-university-dhaka/800/500' },
-    { id: 'priv10', name: 'University of Liberal Arts Bangladesh', type: 'Private university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/ulab-dhaka/800/500' },
-  ],
-  agricultural: [
-    { id: 'agri1', name: 'Bangladesh Agricultural University', type: 'Agricultural university', location: 'Mymensingh, Bangladesh', image: 'https://picsum.photos/seed/bangladesh-agricultural-university/800/500' },
-    { id: 'agri2', name: 'Sher-e-Bangla Agricultural University', type: 'Agricultural university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/sher-e-bangla-agricultural/800/500' },
-    { id: 'agri3', name: 'Sylhet Agricultural University', type: 'Agricultural university', location: 'Sylhet, Bangladesh', image: 'https://picsum.photos/seed/sylhet-agricultural-university/800/500' },
-    { id: 'agri4', name: 'Bangabandhu Sheikh Mujibur Rahman Agricultural University', type: 'Agricultural university', location: 'Gazipur, Bangladesh', image: 'https://picsum.photos/seed/bsmrau-gazipur/800/500' },
-    { id: 'agri5', name: 'Hajee Mohammad Danesh Science and Technology University', type: 'Agricultural university', location: 'Dinajpur, Bangladesh', image: 'https://picsum.photos/seed/hmdstu-dinajpur/800/500' },
-    { id: 'agri6', name: 'Patuakhali Science and Technology University', type: 'Agricultural university', location: 'Patuakhali, Bangladesh', image: 'https://picsum.photos/seed/pstu-patuakhali/800/500' },
-    { id: 'agri7', name: 'Chittagong Veterinary and Animal Sciences University', type: 'Agricultural university', location: 'Chittagong, Bangladesh', image: 'https://picsum.photos/seed/cvasu-chittagong/800/500' },
-    { id: 'agri8', name: 'Khulna Agricultural University', type: 'Agricultural university', location: 'Khulna, Bangladesh', image: 'https://picsum.photos/seed/khulna-agricultural-university/800/500' },
-  ],
-  engineering: [
-    { id: 'eng1', name: 'Bangladesh University of Engineering and Technology', type: 'Engineering university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/buet-dhaka/800/500' },
-    { id: 'eng2', name: 'Chittagong University of Engineering and Technology', type: 'Engineering university', location: 'Chittagong, Bangladesh', image: 'https://picsum.photos/seed/cuet-chittagong/800/500' },
-    { id: 'eng3', name: 'Rajshahi University of Engineering and Technology', type: 'Engineering university', location: 'Rajshahi, Bangladesh', image: 'https://picsum.photos/seed/ruet-rajshahi/800/500' },
-    { id: 'eng4', name: 'Khulna University of Engineering and Technology', type: 'Engineering university', location: 'Khulna, Bangladesh', image: 'https://picsum.photos/seed/kuet-khulna/800/500' },
-    { id: 'eng5', name: 'Dhaka University of Engineering and Technology', type: 'Engineering university', location: 'Gazipur, Bangladesh', image: 'https://picsum.photos/seed/duet-gazipur/800/500' },
-    { id: 'eng6', name: 'Military Institute of Science and Technology', type: 'Engineering university', location: 'Dhaka, Bangladesh', image: 'https://picsum.photos/seed/mist-dhaka/800/500' },
-    { id: 'eng7', name: 'Pabna University of Science and Technology', type: 'Engineering university', location: 'Pabna, Bangladesh', image: 'https://picsum.photos/seed/pust-pabna/800/500' },
-    { id: 'eng8', name: 'Jessore University of Science and Technology', type: 'Engineering university', location: 'Jessore, Bangladesh', image: 'https://picsum.photos/seed/just-jessore/800/500' },
-    { id: 'eng9', name: 'Mymensingh Engineering College', type: 'Engineering university', location: 'Mymensingh, Bangladesh', image: 'https://picsum.photos/seed/mec-mymensingh/800/500' },
-  ],
-};
+function toUniversityTab(type: string): UniversityTab | null {
+  if (type === "PUBLIC") return "public";
+  if (type === "PRIVATE") return "private";
+  return null;
+}
 
 const NationalUniversityPage = () => {
   const router = useRouter();
-  const [selectedUniversityType, setSelectedUniversityType] = useState<keyof typeof universitiesByType>('public');
+  const [selectedUniversityType, setSelectedUniversityType] = useState<UniversityTab>('public');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [newsItems, setNewsItems] = useState<NewsCard[]>([]);
+  const [isNewsLoading, setIsNewsLoading] = useState(true);
+  const [isUniversitiesLoading, setIsUniversitiesLoading] = useState(true);
+  const [universitiesByType, setUniversitiesByType] = useState<Record<UniversityTab, UniversityCard[]>>({
+    public: [],
+    private: [],
+    agricultural: [],
+    engineering: [],
+  });
   const publicUniversityTarget = "/national-university/public-university?openFinder=true";
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadNews = async () => {
+      setIsNewsLoading(true);
+      try {
+        const response = await fetch("/api/news?page=1&pageSize=12&status=PUBLISHED", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) throw new Error("Failed to load news.");
+
+        const result = (await response.json()) as { data?: ApiNewsArticle[] };
+        const mapped = (result.data ?? []).map((item) => ({
+          id: item.id,
+          img: item.coverImageUrl || "/news/news1.png",
+          alt: item.title,
+          title: item.title,
+          desc: item.excerpt || item.content.slice(0, 150),
+          dateLabel: formatRelativeDate(item.publishedAt),
+        }));
+
+        if (isMounted) setNewsItems(mapped);
+      } catch {
+        if (isMounted) setNewsItems([]);
+      } finally {
+        if (isMounted) setIsNewsLoading(false);
+      }
+    };
+
+    const loadUniversities = async () => {
+      setIsUniversitiesLoading(true);
+      try {
+        const response = await fetch("/api/universities?page=1&pageSize=120&includeInactive=false", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) throw new Error("Failed to load universities.");
+
+        const result = (await response.json()) as {
+          data?: Array<{
+            id: string;
+            name: string;
+            type: string;
+            location: string;
+            city: string;
+            country: string;
+            bannerImageUrl: string | null;
+            logoUrl: string | null;
+          }>;
+        };
+
+        const grouped: Record<UniversityTab, UniversityCard[]> = {
+          public: [],
+          private: [],
+          agricultural: [],
+          engineering: [],
+        };
+
+        for (const item of result.data ?? []) {
+          const byType = toUniversityTab(item.type);
+          const loweredName = item.name.toLowerCase();
+          const byKeyword = loweredName.includes("agri") || loweredName.includes("veterinary")
+            ? "agricultural"
+            : loweredName.includes("engineering") || loweredName.includes("technology")
+              ? "engineering"
+              : null;
+
+          const tab = byType || byKeyword;
+          if (!tab) continue;
+
+          grouped[tab].push({
+            id: item.id,
+            name: item.name,
+            type: tabLabels[tab],
+            location: item.location || `${item.city}, ${item.country}`,
+            image: item.bannerImageUrl || item.logoUrl || "/news/news1.png",
+          });
+        }
+
+        if (isMounted) setUniversitiesByType(grouped);
+      } catch {
+        if (isMounted) {
+          setUniversitiesByType({ public: [], private: [], agricultural: [], engineering: [] });
+        }
+      } finally {
+        if (isMounted) setIsUniversitiesLoading(false);
+      }
+    };
+
+    void Promise.all([loadNews(), loadUniversities()]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handlePublicUniversityClick = async () => {
     try {
@@ -105,6 +220,28 @@ const NationalUniversityPage = () => {
   };
 
   const universities = universitiesByType[selectedUniversityType] || [];
+  const allUniversitiesPool = useMemo(
+    () => Object.values(universitiesByType).flat(),
+    [universitiesByType],
+  );
+
+  const visibleUniversities = useMemo(
+    () =>
+      fillGridRows(universities, allUniversitiesPool, {
+        columns: [1, 2, 4],
+        minItems: GRID_TARGET_COUNT,
+      }).slice(0, GRID_TARGET_COUNT),
+    [universities, allUniversitiesPool],
+  );
+
+  const visibleNewsItems = useMemo(
+    () =>
+      fillGridRows(newsItems, newsItems, {
+        columns: [1, 2, 4],
+        minItems: GRID_TARGET_COUNT,
+      }).slice(0, GRID_TARGET_COUNT),
+    [newsItems],
+  );
 
   return (
     <div className="overflow-x-hidden">
@@ -138,12 +275,12 @@ const NationalUniversityPage = () => {
 
       {/* ── Hero ── */}
       <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12">
-        <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden h-[500px] sm:h-[600px] md:h-[650px] lg:h-[733px]">
+        <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden h-[560px] sm:h-[600px] md:h-[650px] lg:h-[733px]">
           <Image src="/hero/national_banner.jpeg" alt="National University Banner" fill className="object-cover brightness-75" priority />
         </div>
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-          <ScrollReveal direction="down" className="absolute left-8 top-30">
-            <h1 className="font-pacifico text-3xl text-orange-800 text-right leading-relaxed drop-shadow-lg">
+        <div className="absolute inset-0 flex flex-col items-center px-4 text-center">
+          <ScrollReveal direction="down" className="absolute left-1/2 top-14 w-[92%] -translate-x-1/2 md:left-8 md:top-30 md:w-auto md:translate-x-0">
+            <h1 className="font-pacifico text-2xl sm:text-3xl text-orange-800 text-center md:text-right leading-relaxed drop-shadow-lg">
               Streamline your university<br />applications – one submission,<br />multiple choices.
             </h1>
           </ScrollReveal>
@@ -155,12 +292,12 @@ const NationalUniversityPage = () => {
             </p>
           </ScrollReveal> */}
 
-          <div className="flex flex-wrap gap-4 justify-center mb-10 mt-100">
+          <div className="flex flex-col md:flex-row flex-wrap gap-3 sm:gap-4 justify-center mt-[280px] sm:mt-[320px] md:mt-100 mb-8">
             <motion.button
               onClick={handlePublicUniversityClick}
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 rounded-full bg-[#E3572B] text-white font-outfit font-bold text-lg shadow-xl shadow-orange-500/20 cursor-pointer"
+              className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#E3572B] text-white font-outfit font-bold text-base sm:text-lg shadow-xl shadow-orange-500/20 cursor-pointer"
             >
                Public University
             </motion.button>
@@ -168,14 +305,14 @@ const NationalUniversityPage = () => {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 rounded-full bg-white text-[#E3572B] font-outfit font-bold text-lg shadow-xl border-2 border-white/50 cursor-pointer"
+                className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-white text-[#E3572B] font-outfit font-bold text-base sm:text-lg shadow-xl border-2 border-white/50 cursor-pointer"
               >
                  Start Applying
               </motion.button>
             </Link>
           </div>
 
-          <ScrollReveal direction="up" delay={0.4} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 w-full max-w-5xl mx-4 border border-white/20">
+          <ScrollReveal direction="up" delay={0.4} className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 w-full max-w-5xl mx-2 sm:mx-4 border border-white/20">
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-6 items-center">
               {['Location', 'Date', 'Process', 'Criteria'].map((label) => (
                 <div key={label} className="flex flex-col text-center border-r border-white/20 last:border-0 pr-4">
@@ -271,9 +408,9 @@ const NationalUniversityPage = () => {
         </div>
 
         <StaggerReveal key={selectedUniversityType} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {universities.length > 0 ? universities.map((uni) => (
+          {visibleUniversities.length > 0 ? visibleUniversities.map((uni, index) => (
             <motion.div
-              key={uni.id}
+              key={`${uni.id}-${index}`}
               whileHover={{ y: -8 }}
               className="card-hover-glow rounded-[32px] overflow-hidden bg-white shadow-md border border-transparent flex flex-col"
             >
@@ -299,7 +436,7 @@ const NationalUniversityPage = () => {
             </motion.div>
           )) : (
             <div className="col-span-full rounded-2xl border border-dashed border-[#E3572B]/40 bg-white/70 p-8 text-center text-gray-600">
-              No universities found for this category.
+              {isUniversitiesLoading ? "Loading universities..." : "No universities found for this category."}
             </div>
           )}
         </StaggerReveal>
@@ -357,19 +494,31 @@ const NationalUniversityPage = () => {
         </ScrollReveal>
 
         <StaggerReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {newsItems.map((news) => (
-            <motion.div key={news.id} whileHover={{ y: -8 }} className="card-hover-glow bg-white rounded-3xl overflow-hidden shadow-sm border border-transparent cursor-pointer flex flex-col">
+          {visibleNewsItems.map((news, index) => (
+            <motion.div key={`${news.id}-${index}`} whileHover={{ y: -8 }} className="card-hover-glow bg-white rounded-3xl overflow-hidden shadow-sm border border-transparent cursor-pointer flex flex-col">
               <div className="relative h-[180px] flex-shrink-0 overflow-hidden">
                 <Image src={news.img} alt={news.alt} fill className="object-cover transition-transform duration-500 hover:scale-110" />
               </div>
               <div className="p-6 flex flex-col flex-1">
                 <h3 className="font-bold text-base mb-2 line-clamp-2 min-h-[3rem] font-outfit">{news.title}</h3>
                 <p className="text-gray-500 text-sm mb-4 line-clamp-3 leading-relaxed flex-1">{news.desc}</p>
-                <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{news.views} views</p>
+                <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{news.dateLabel}</p>
               </div>
             </motion.div>
           ))}
         </StaggerReveal>
+
+        {isNewsLoading ? (
+          <div className="rounded-2xl border border-dashed border-[#E3572B]/40 bg-white p-6 text-center text-gray-600 mb-8">
+            Loading news...
+          </div>
+        ) : null}
+
+        {!isNewsLoading && !visibleNewsItems.length ? (
+          <div className="rounded-2xl border border-dashed border-[#E3572B]/40 bg-white p-6 text-center text-gray-600 mb-8">
+            No published news available right now.
+          </div>
+        ) : null}
 
         <div className="text-center">
           <Link href="/news-updates">

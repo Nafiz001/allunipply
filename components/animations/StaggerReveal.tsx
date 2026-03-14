@@ -21,7 +21,7 @@ const StaggerReveal: React.FC<StaggerRevealProps> = ({
   once = true,
 }) => {
   const container: Variants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 1 },
     show: {
       opacity: 1,
       transition: {
@@ -33,7 +33,7 @@ const StaggerReveal: React.FC<StaggerRevealProps> = ({
 
   const item: Variants = {
     hidden: { 
-      opacity: 0, 
+      opacity: 1, 
       y: direction === "up" ? 30 : direction === "down" ? -30 : 0,
       x: direction === "left" ? 30 : direction === "right" ? -30 : 0,
     },
@@ -53,7 +53,7 @@ const StaggerReveal: React.FC<StaggerRevealProps> = ({
       variants={container}
       initial="hidden"
       whileInView="show"
-      viewport={{ once }}
+      viewport={{ once, amount: 0.1 }}
       className={className}
     >
       {React.Children.map(children, (child) => (

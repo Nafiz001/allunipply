@@ -24,7 +24,7 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
 }) => {
   const variants: Variants = {
     hidden: {
-      opacity: 0,
+      opacity: 1,
       x: direction === "left" ? distance : direction === "right" ? -distance : 0,
       y: direction === "up" ? distance : direction === "down" ? -distance : 0,
     },
@@ -45,7 +45,7 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
       variants={variants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once }}
+      viewport={{ once, amount: 0.12 }}
       className={className}
     >
       {children}

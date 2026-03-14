@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, CircleUserRound } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 type ProfileSection = "profile" | "privacy" | "payment" | "help";
 
@@ -44,6 +45,8 @@ const helpItems = [
 const ProfileContent = () => {
   const searchParams = useSearchParams();
   const [activeSection, setActiveSection] = useState<ProfileSection>("profile");
+  const { user, loading } = useCurrentUser();
+  const fullName = user?.fullName || "Guest";
 
   useEffect(() => {
     const section = searchParams.get("section") as ProfileSection | null;
@@ -88,7 +91,13 @@ const ProfileContent = () => {
             </div>
           </div>
 
-          <h3 className="font-outfit text-2xl font-semibold text-gray-900 mb-4">Aklima Tul Jannat</h3>
+          {loading ? (
+            <div className="flex justify-center mb-4">
+              <span className="inline-block w-32 h-8 bg-gray-200 animate-pulse rounded-lg align-middle"></span>
+            </div>
+          ) : (
+            <h3 className="font-outfit text-2xl font-semibold text-gray-900 mb-4">{fullName}</h3>
+          )}
 
           <div className="space-y-3">
             {sidebarItems.map((item) => (

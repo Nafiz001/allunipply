@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
+import WhatsAppButton from "@/components/layout/WhatsAppButton";
 
 export default function ConditionalLayout({
   children,
@@ -28,6 +29,7 @@ export default function ConditionalLayout({
     <>
       {!hideNavAndFooter && <Navbar />}
       {children}
+      <WhatsAppButton />
       {!hideNavAndFooter && <Footer />}
     </>
   );

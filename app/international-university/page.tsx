@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import StaggerReveal from "@/components/animations/StaggerReveal";
 import { Heart, ArrowUpRight } from "lucide-react";
+import { fillGridRows } from "@/lib/grid-fill";
 
 const helpCards = [
   { icon: '/icons/support.png', title: 'Customer Support', desc: 'Reach our 24/7 student support team for guidance on any part of your application journey.' },
@@ -119,7 +120,10 @@ const InternationalUniversityPage = () => {
     return (gpa === "" || userGpa >= uni.minGpa) && (ielts === "" || userIelts >= uni.minIelts) && (uni.tuition <= tuitionRange[1]);
   }), [allUniversities, gpa, ielts, isFiltering, tuitionRange]);
 
-  const universitiesDisplay = isFiltering ? filteredUniversities.slice(0, 2) : allUniversities;
+  const universitiesRaw = isFiltering ? filteredUniversities.slice(0, 2) : allUniversities;
+  const universitiesDisplay = useMemo(() => {
+    return fillGridRows(universitiesRaw, allUniversities, { columns: [1, 2, 4] });
+  }, [universitiesRaw, allUniversities]);
   const hasMoreResults = isFiltering && filteredUniversities.length > 2;
 
   return (
@@ -277,8 +281,8 @@ const InternationalUniversityPage = () => {
         </ScrollReveal>
 
         <StaggerReveal key={selectedCountry} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-          {universitiesDisplay.length ? universitiesDisplay.map((uni) => (
-            <motion.div key={uni.id} whileHover={{ y: -10 }} className="card-hover-glow bg-white rounded-[32px] overflow-hidden shadow-lg border border-transparent flex flex-col">
+          {universitiesDisplay.length ? universitiesDisplay.map((uni, index) => (
+            <motion.div key={`${uni.id}-${index}`} whileHover={{ y: -10 }} className="card-hover-glow bg-white rounded-[32px] overflow-hidden shadow-lg border border-transparent flex flex-col">
               <div className="relative h-[200px] flex-shrink-0 group overflow-hidden">
                 <Image src={uni.image} alt={uni.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" unoptimized />
                 <button className="absolute top-4 right-4 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all"><Heart size={22} className="text-gray-600" /></button>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal, CircleDollarSign, Clock, X, ChevronDown, Crown } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const DashboardPageContent = () => {
   const router = useRouter();
@@ -13,7 +14,9 @@ const DashboardPageContent = () => {
   const searchParams = useSearchParams();
   const shouldAutoOpenFilter = searchParams.get("openFilter") === "true";
 
-  const [userName] = useState("Aklima");
+  const { user, loading } = useCurrentUser();
+  const userName = user?.fullName?.split(" ")[0] || "Guest";
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(shouldAutoOpenFilter);
   const [currentStep, setCurrentStep] = useState(1);
@@ -119,7 +122,11 @@ const DashboardPageContent = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Greeting */}
         <h1 className="text-4xl md:text-6xl font-medium text-[#E3572B] mb-2 font-outfit text-center">
-          Hello, {userName}!
+          {loading ? (
+            <span className="inline-block w-48 h-10 md:h-14 bg-[#E3572B]/20 animate-pulse rounded-full align-middle"></span>
+          ) : (
+            `Hello, ${userName}!`
+          )}
         </h1>
         <h2 className="text-4xl md:text-6xl font-medium  mb-8 font-outfit text-center">
           Here&apos;s your personalized list of universities!

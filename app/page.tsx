@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import StaggerReveal from "@/components/animations/StaggerReveal";
 import { useRouter } from "next/navigation";
+import { fillGridRows } from "@/lib/grid-fill";
 
 let hasHandledScholarModalEntry = false;
 
@@ -71,7 +72,26 @@ function formatDateMeta(dateValue: string | null) {
 }
 
 export default function Home() {
-  const [showScholarModal, setShowScholarModal] = useState(true);
+  const [showScholarModal, setShowScholarModal] = useState(() => {
+    if (typeof window !== "undefined") {
+      if (hasHandledScholarModalEntry) return false;
+
+      const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+      const navType = navEntry?.type;
+
+      let initialPath = window.location.pathname;
+      if (navEntry?.name) {
+        try {
+          initialPath = new URL(navEntry.name).pathname;
+        } catch {
+          initialPath = window.location.pathname;
+        }
+      }
+
+      return initialPath === "/" && (navType === "reload" || navType === "navigate" || !navType);
+    }
+    return true;
+  });
   const [isFlashExiting, setIsFlashExiting] = useState(false);
   const [scholarBarWidth, setScholarBarWidth] = useState(100);
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
@@ -88,29 +108,8 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (hasHandledScholarModalEntry) {
-      setShowScholarModal(false);
-      return;
-    }
-
-    hasHandledScholarModalEntry = true;
-
-    const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
-    const navType = navEntry?.type;
-
-    let initialPath = window.location.pathname;
-    if (navEntry?.name) {
-      try {
-        initialPath = new URL(navEntry.name).pathname;
-      } catch {
-        initialPath = window.location.pathname;
-      }
-    }
-
-    const shouldOpen = initialPath === "/" && (navType === "reload" || navType === "navigate" || !navType);
-
-    if (!shouldOpen) {
-      setShowScholarModal(false);
+    if (!hasHandledScholarModalEntry) {
+      hasHandledScholarModalEntry = true;
     }
   }, []);
 
@@ -266,13 +265,24 @@ export default function Home() {
   const universities = isFiltering ? filteredUniversities.slice(0, 2) : allUniversities;
   const hasMoreResults = isFiltering && filteredUniversities.length > 2;
 
-  const nationalUniversities = homeUniversities
+  const universitiesDisplay = fillGridRows(universities, allUniversities, {
+    columns: [1, 2, 3],
+  });
+
+  const nationalUniversitiesBase = homeUniversities
     .filter((university) => {
       const type = university.type.toLowerCase();
       return nationalType === "public" ? type.includes("public") : type.includes("private");
     })
     .slice(0, 3);
-  const newsCards = homeNews.slice(0, 4);
+
+  const nationalUniversities = fillGridRows(nationalUniversitiesBase, nationalUniversitiesBase, {
+    columns: [1, 2, 3],
+  });
+
+  const newsCards = fillGridRows(homeNews.slice(0, 4), homeNews, {
+    columns: [1, 2, 4],
+  });
 
   return (
     <div className="overflow-x-hidden">
@@ -362,6 +372,7 @@ export default function Home() {
         </div>
       ) : null}
 
+      <div className={showScholarModal && !isFlashExiting ? "opacity-0" : "opacity-100 transition-opacity duration-500"}>
       {/* Hero Section */}
       <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12">
         <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden">
@@ -392,7 +403,7 @@ export default function Home() {
               </p>
             </ScrollReveal>
 
-            <div className="grid grid-cols-2 gap-3 w-full max-w-xl px-4 z-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-xl px-4 z-10">
               <Link href="/national-university" className="col-span-1">
                 <button className="group flex items-center justify-center gap-2 w-full h-[52px] md:h-[60px] rounded-xl md:rounded-2xl font-outfit font-extrabold text-sm md:text-base transition-all duration-300 bg-white/95 backdrop-blur-sm text-gray-800 hover:bg-[#F88210] hover:text-white hover:shadow-[0_10px_30px_rgba(248,130,16,0.35)] hover:-translate-y-1 border border-white/40">
                   <span className="group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
@@ -599,9 +610,9 @@ export default function Home() {
         </ScrollReveal>
 
         <StaggerReveal key={selectedCountry} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {universities.length ? (
-            universities.map((university, index) => (
-              <motion.div key={university.id || index} whileHover={{ y: -8 }} className="card-hover-glow relative rounded-3xl overflow-hidden bg-white shadow-md border border-transparent flex flex-col">
+          {universitiesDisplay.length ? (
+            universitiesDisplay.map((university, index) => (
+              <motion.div key={`${university.id}-${index}`} whileHover={{ y: -8 }} className="card-hover-glow relative rounded-3xl overflow-hidden bg-white shadow-md border border-transparent flex flex-col">
                 <div className="relative h-[220px] flex-shrink-0 overflow-hidden">
                   <Image src={failedImages.has(university.image) ? 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop' : university.image} alt={university.name} fill className="object-cover transition-transform duration-500 hover:scale-110" onError={() => setFailedImages(prev => new Set(prev).add(university.image))} />
                   <button className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md"><Heart size={20} strokeWidth={2} className="text-gray-600" /></button>
@@ -653,7 +664,7 @@ export default function Home() {
         <StaggerReveal key={nationalType} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {nationalUniversities.length ? (
             nationalUniversities.map((university, index) => (
-              <motion.div key={university.id || index} whileHover={{ y: -8 }} className="card-hover-glow relative rounded-3xl overflow-hidden bg-white shadow-md border border-transparent flex flex-col">
+              <motion.div key={`${university.id}-${index}`} whileHover={{ y: -8 }} className="card-hover-glow relative rounded-3xl overflow-hidden bg-white shadow-md border border-transparent flex flex-col">
                 <div className="relative h-[220px] flex-shrink-0 overflow-hidden">
                   <Image src={university.image} alt={university.name} fill className="object-cover transition-transform duration-500 hover:scale-110" />
                   <button className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md"><Heart size={20} strokeWidth={2} className="text-gray-600" /></button>
@@ -706,8 +717,8 @@ export default function Home() {
         </ScrollReveal>
         <StaggerReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {newsCards.length ? (
-            newsCards.map((article) => (
-              <motion.div key={article.id} whileHover={{ y: -8 }} className="card-hover-glow bg-white rounded-2xl overflow-hidden shadow-sm border border-transparent cursor-pointer flex flex-col">
+            newsCards.map((article, index) => (
+              <motion.div key={`${article.id}-${index}`} whileHover={{ y: -8 }} className="card-hover-glow bg-white rounded-2xl overflow-hidden shadow-sm border border-transparent cursor-pointer flex flex-col">
                 <div className="relative h-[180px] flex-shrink-0 overflow-hidden"><Image src={article.image} alt={article.title} fill className="object-cover transition-transform duration-500 hover:scale-110" /></div>
                 <div className="p-4 flex flex-col flex-1">
                   <h3 className="font-bold text-base mb-2 line-clamp-2 min-h-[3rem]">{article.title}</h3>
@@ -788,6 +799,7 @@ export default function Home() {
             </motion.div>
           ))}
         </StaggerReveal>
+      </div>
       </div>
     </div>
   );

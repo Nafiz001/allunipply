@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import StaggerReveal from "@/components/animations/StaggerReveal";
+import { fillGridRows } from "@/lib/grid-fill";
 
 type NewsFilter = "All" | "International" | "National" | "Scholarships" | "Admissions";
 
@@ -30,6 +31,7 @@ type NewsCard = {
 };
 
 const filters: NewsFilter[] = ["All", "International", "National", "Scholarships", "Admissions"];
+const CARDS_PER_SECTION = 8;
 
 function mapCategory(category: ApiNewsArticle["category"]): NewsFilter {
   if (category === "INTERNATIONAL") return "International";
@@ -134,13 +136,32 @@ const NewsUpdatesPage = () => {
         : newsCards.filter((article) => article.category === selectedFilter);
 
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return filteredByCategory;
+    if (!query) {
+      if (selectedFilter === "All") return filteredByCategory;
+      return fillGridRows(filteredByCategory, newsCards, {
+        columns: [1, 2, 4],
+        minItems: CARDS_PER_SECTION,
+      });
+    }
 
-    return filteredByCategory.filter(
+    const searched = filteredByCategory.filter(
       (article) =>
         article.title.toLowerCase().includes(query) ||
         article.description.toLowerCase().includes(query),
     );
+
+    if (selectedFilter === "All") return searched;
+
+    const fallbackBySearch = newsCards.filter(
+      (article) =>
+        article.title.toLowerCase().includes(query) ||
+        article.description.toLowerCase().includes(query),
+    );
+
+    return fillGridRows(searched, fallbackBySearch, {
+      columns: [1, 2, 4],
+      minItems: CARDS_PER_SECTION,
+    });
   }, [newsCards, searchQuery, selectedFilter]);
 
   const internationalNews = useMemo(() => {
@@ -148,36 +169,42 @@ const NewsUpdatesPage = () => {
       (article) => article.category === "International" || article.category === "Scholarships",
     );
 
-    if (preferred.length) return preferred.slice(0, 4);
-    return searchedNews.slice(0, 4);
-  }, [searchedNews]);
+    const fallbackPool = searchedNews.length ? searchedNews : newsCards;
+    return fillGridRows(preferred, fallbackPool, {
+      columns: [1, 2, 4],
+      minItems: CARDS_PER_SECTION,
+    }).slice(0, CARDS_PER_SECTION);
+  }, [searchedNews, newsCards]);
 
   const nationalNews = useMemo(() => {
     const preferred = searchedNews.filter(
       (article) => article.category === "National" || article.category === "Admissions",
     );
 
-    if (preferred.length) return preferred.slice(0, 4);
-    return searchedNews.slice(4, 8);
-  }, [searchedNews]);
+    const fallbackPool = searchedNews.length ? searchedNews : newsCards;
+    return fillGridRows(preferred, fallbackPool, {
+      columns: [1, 2, 4],
+      minItems: CARDS_PER_SECTION,
+    }).slice(0, CARDS_PER_SECTION);
+  }, [searchedNews, newsCards]);
 
   const newsRevealKey = `${selectedFilter}:${searchQuery.trim().toLowerCase()}`;
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="py-10 md:py-16 bg-gradient-to-b from-orange-50/60 to-white">
+      <div className="py-8 md:py-14 bg-gradient-to-b from-orange-50/60 to-white">
         <ScrollReveal direction="down" className="max-w-[1320px] mx-auto px-4 md:px-6 text-center">
-          <h1 className="text-4xl md:text-[48px] font-bold text-gray-900 mb-4 font-outfit">
+          <h1 className="text-3xl leading-tight sm:text-4xl md:text-[48px] font-bold text-gray-900 mb-4 font-outfit">
             News &amp; Updates
           </h1>
-          <p className="text-gray-500 text-lg md:text-xl font-outfit">
+          <p className="text-gray-500 text-base sm:text-lg md:text-xl font-outfit px-2">
             Here&apos;s the news &amp; updates that you need to stay up to date
           </p>
         </ScrollReveal>
       </div>
 
       <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-8">
-        <div className="flex gap-3 items-center max-w-3xl mx-auto mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center max-w-3xl mx-auto mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
@@ -188,7 +215,7 @@ const NewsUpdatesPage = () => {
               className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-full font-outfit text-base input-glow"
             />
           </div>
-          <button className="btn-outline px-6 py-4 flex items-center gap-2" type="button">
+          <button className="btn-outline px-6 py-4 flex items-center justify-center gap-2" type="button">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="4" y1="6" x2="20" y2="6" />
               <line x1="4" y1="12" x2="20" y2="12" />
@@ -237,9 +264,9 @@ const NewsUpdatesPage = () => {
         </ScrollReveal>
 
         <StaggerReveal key={`international-${newsRevealKey}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {internationalNews.map((article) => (
+          {internationalNews.map((article, index) => (
             <motion.div
-              key={article.id}
+              key={`${article.id}-${index}`}
               whileHover={{ y: -8 }}
               className="card-hover-glow bg-white rounded-2xl overflow-hidden shadow-sm border border-transparent cursor-pointer"
             >
@@ -283,9 +310,9 @@ const NewsUpdatesPage = () => {
         </ScrollReveal>
 
         <StaggerReveal key={`national-${newsRevealKey}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {nationalNews.map((article) => (
+          {nationalNews.map((article, index) => (
             <motion.div
-              key={article.id}
+              key={`${article.id}-${index}`}
               whileHover={{ y: -8 }}
               className="card-hover-glow bg-white rounded-2xl overflow-hidden shadow-sm border border-transparent cursor-pointer"
             >
