@@ -8,6 +8,7 @@ import ScrollReveal from "@/components/animations/ScrollReveal";
 import StaggerReveal from "@/components/animations/StaggerReveal";
 import { useRouter } from "next/navigation";
 import { fillGridRows } from "@/lib/grid-fill";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 let hasHandledScholarModalEntry = false;
 
@@ -71,7 +72,19 @@ function formatDateMeta(dateValue: string | null) {
   });
 }
 
+function truncateToFullRows<T>(items: T[], columns: number, maxRows: number) {
+  const cappedItems = items.slice(0, columns * maxRows);
+  const remainder = cappedItems.length % columns;
+
+  if (remainder === 0) {
+    return cappedItems;
+  }
+
+  return cappedItems.slice(0, cappedItems.length - remainder);
+}
+
 export default function Home() {
+  const { user } = useCurrentUser();
   const [showScholarModal, setShowScholarModal] = useState(() => {
     if (typeof window !== "undefined") {
       if (hasHandledScholarModalEntry) return false;
@@ -101,6 +114,7 @@ export default function Home() {
   const [gpa, setGpa] = useState('');
   const [ielts, setIelts] = useState('');
   const [tuitionRange, setTuitionRange] = useState([0, 60000]);
+  const [isMarqueePaused, setIsMarqueePaused] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
   const [homeUniversities, setHomeUniversities] = useState<HomeUniversity[]>([]);
   const [homeNews, setHomeNews] = useState<HomeNews[]>([]);
@@ -249,7 +263,7 @@ export default function Home() {
   }, [countries, selectedCountry]);
 
   const allUniversities = homeUniversities.filter((university) => university.country === selectedCountry);
-  const filteredUniversities = allUniversities.filter(uni => {
+  const filteredUniversities = allUniversities.filter((uni) => {
     const userGpa = parseFloat(gpa) || 0;
     const userIelts = parseFloat(ielts) || 0;
 
@@ -262,12 +276,11 @@ export default function Home() {
     return meetsGpa && meetsIelts && meetsTuition;
   });
 
-  const universities = isFiltering ? filteredUniversities.slice(0, 2) : allUniversities;
-  const hasMoreResults = isFiltering && filteredUniversities.length > 2;
-
-  const universitiesDisplay = fillGridRows(universities, allUniversities, {
-    columns: [1, 2, 3],
-  });
+  const isGuestFiltering = isFiltering && !user;
+  const fullRowUniversities = truncateToFullRows(filteredUniversities, 3, 2);
+  const universitiesDisplay = isGuestFiltering ? filteredUniversities.slice(0, 2) : fullRowUniversities;
+  const hiddenUniversitiesCount = Math.max(filteredUniversities.length - universitiesDisplay.length, 0);
+  const hasMoreResults = isGuestFiltering && hiddenUniversitiesCount > 0;
 
   const nationalUniversitiesBase = homeUniversities
     .filter((university) => {
@@ -561,46 +574,50 @@ export default function Home() {
           </h2>
         </ScrollReveal>
 
-        <div className="relative overflow-hidden mb-12">
+        <ScrollReveal
+          className="relative overflow-hidden mb-16 p-3 md:p-4 rounded-[32px] bg-white/95 border border-[#E3572B]/15 shadow-[0_18px_40px_rgba(15,23,42,0.08)] marquee-container"
+          onMouseEnter={() => setIsMarqueePaused(true)}
+          onMouseLeave={() => setIsMarqueePaused(false)}
+          onFocusCapture={() => setIsMarqueePaused(true)}
+          onBlurCapture={() => setIsMarqueePaused(false)}
+        >
           <style jsx>{`
             @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-            .marquee-container { display: flex; animation: marquee 20s linear infinite; }
-            .marquee-container:hover { animation-play-state: paused; }
+            .marquee-content { display: flex; width: max-content; animation: marquee 14s linear infinite; }
+            .marquee-container:hover .marquee-content,
+            .marquee-container:focus-within .marquee-content { animation-play-state: paused; }
           `}</style>
-          <div className="flex">
-            <div className="marquee-container">
-              {[...countries, ...countries].map((country, i) => (
-                <button
-                  key={`${country.name}-${i}`}
-                  onClick={() => setSelectedCountry(country.name)}
-                  className={`flex justify-center items-center gap-2 px-4 md:px-6 py-2 rounded-full font-outfit font-semibold text-sm md:text-base transition-all border mx-2 whitespace-nowrap ${selectedCountry === country.name ? 'bg-[#d95d39] text-white border-[#d95d39]' : 'bg-white text-gray-700 border-gray-300 hover:border-[#d95d39]'}`}>
-                  <span className={`fi fi-${country.code} text-xl fis rounded-full`}></span>
-                  {country.name}
-                </button>
-              ))}
-            </div>
+          <div className="marquee-content gap-3 md:gap-4" style={{ animationPlayState: isMarqueePaused ? "paused" : "running" }}>
+            {[...countries, ...countries].map((country, i) => (
+              <motion.button key={`${country.name}-${i}`} onClick={() => setSelectedCountry(country.name)} onPointerDown={() => setIsMarqueePaused(true)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                className={`flex items-center gap-3 px-6 md:px-8 py-2.5 md:py-3 rounded-full font-semibold text-base md:text-lg transition-all border whitespace-nowrap shadow-sm ${selectedCountry === country.name ? 'bg-[#E3572B] text-white border-[#E3572B] shadow-[#E3572B]/30' : 'bg-white text-gray-700 border-gray-200 hover:border-[#E3572B]'}`}
+              >
+                <span className={`fi fi-${country.code} text-2xl fis rounded-full shadow-sm`}></span>
+                {country.name}
+              </motion.button>
+            ))}
           </div>
-        </div>
+        </ScrollReveal>
 
-        <ScrollReveal className="bg-white rounded-3xl shadow-lg p-6 md:p-8 mb-12 border border-gray-100">
-          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 font-outfit">Refine Your Search</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <ScrollReveal className="bg-gradient-to-br from-white to-[#fff9f4] rounded-[32px] shadow-[0_20px_48px_rgba(15,23,42,0.1)] p-8 md:p-10 mb-12 border border-[#E3572B]/15">
+          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 font-outfit">Refine Your Search</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
             <div>
-              <label className="block text-gray-900 font-semibold mb-3 font-outfit text-sm md:text-base">Your GPA (0.0 - 4.0)</label>
-              <input type="number" placeholder="e.g., 3.5" value={gpa} onChange={(e) => setGpa(e.target.value)} min="0" max="4" step="0.1" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit focus:outline-none focus:border-[#E3572B] transition-colors text-gray-700 placeholder:text-gray-400" />
+              <label className="block text-gray-900 font-bold mb-4 text-lg">Your GPA (0.0 - 4.0)</label>
+              <input type="number" placeholder="e.g., 3.5" value={gpa} onChange={(e) => setGpa(e.target.value)} min="0" max="4" step="0.1" className="w-full px-6 py-4 border-2 border-gray-100 rounded-2xl font-outfit focus:border-orange-400 outline-none transition-all placeholder:text-gray-300" />
             </div>
             <div>
-              <label className="block text-gray-900 font-semibold mb-3 font-outfit text-sm md:text-base">Your IELTS Score (0.0 - 9.0)</label>
-              <input type="number" placeholder="e.g., 7.0" value={ielts} onChange={(e) => setIelts(e.target.value)} min="0" max="9" step="0.5" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit focus:outline-none focus:border-[#E3572B] transition-colors text-gray-700 placeholder:text-gray-400" />
+              <label className="block text-gray-900 font-bold mb-4 text-lg">Your IELTS Score (0.0 - 9.0)</label>
+              <input type="number" placeholder="e.g., 7.0" value={ielts} onChange={(e) => setIelts(e.target.value)} min="0" max="9" step="0.5" className="w-full px-6 py-4 border-2 border-gray-100 rounded-2xl font-outfit focus:border-orange-400 outline-none transition-all placeholder:text-gray-300" />
             </div>
           </div>
           <div>
-            <div className="flex justify-between items-center mb-3">
-              <label className="text-gray-900 font-semibold font-outfit text-sm md:text-base">Tuition Fee Range</label>
-              <span className="text-[#E3572B] font-bold font-outfit text-sm md:text-base">${tuitionRange[0].toLocaleString()} - ${tuitionRange[1].toLocaleString()}</span>
+            <div className="flex justify-between items-center mb-6">
+              <label className="text-gray-900 font-bold text-lg">Tuition Fee Range</label>
+              <span className="text-orange-500 font-extrabold text-2xl">${tuitionRange[0].toLocaleString()} - ${tuitionRange[1].toLocaleString()}</span>
             </div>
             <div className="relative">
-              <input type="range" min="0" max="60000" step="1000" value={tuitionRange[1]} onChange={(e) => setTuitionRange([tuitionRange[0], parseInt(e.target.value)])} className="w-full h-2 bg-gradient-to-r from-[#E3572B] to-[#FF8B22] rounded-lg appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #E3572B 0%, #FF8B22 ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb 100%)` }} />
+              <input type="range" min="0" max="60000" step="1000" value={tuitionRange[1]} onChange={(e) => setTuitionRange([tuitionRange[0], parseInt(e.target.value)])} className="w-full h-3 bg-gray-100 rounded-full appearance-none cursor-pointer accent-orange-500" />
               <style jsx>{`
                 input[type='range']::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #E3572B; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3); }
                 input[type='range']::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #E3572B; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3); }
@@ -609,7 +626,7 @@ export default function Home() {
           </div>
         </ScrollReveal>
 
-        <StaggerReveal key={selectedCountry} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <StaggerReveal key={selectedCountry} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
           {universitiesDisplay.length ? (
             universitiesDisplay.map((university, index) => (
               <motion.div key={`${university.id}-${index}`} whileHover={{ y: -8 }} className="card-hover-glow relative rounded-3xl overflow-hidden bg-white shadow-md border border-transparent flex flex-col">
@@ -638,9 +655,9 @@ export default function Home() {
 
         <div className="text-center mt-8">
           {hasMoreResults ? (
-            <button onClick={() => router.push('/sign-in')} className="font-outfit font-semibold text-white text-xl md:text-2xl py-4 md:py-5 px-6 md:px-8 bg-[#E3572B] rounded-[40px] hover:bg-[#c24d2b] transition-all shadow-lg">See More Results({filteredUniversities.length - 2} more)</button>
+            <button onClick={() => router.push('/sign-in')} className="font-outfit font-semibold text-white text-xl md:text-2xl py-4 md:py-5 px-6 md:px-8 bg-[#E3572B] rounded-[40px] hover:bg-[#c24d2b] transition-all shadow-lg">See {hiddenUniversitiesCount} more universities</button>
           ) : (
-            <button className="font-outfit font-semibold text-white text-xl md:text-2xl py-4 md:py-5 px-6 md:px-8 bg-[#E3572B] rounded-[40px] hover:bg-[#c24d2b] transition-all">Explore More Institute</button>
+            <button onClick={() => router.push('/international-university')} className="font-outfit font-semibold text-white text-xl md:text-2xl py-4 md:py-5 px-6 md:px-8 bg-[#E3572B] rounded-[40px] hover:bg-[#c24d2b] transition-all">Explore More Institute</button>
           )}
         </div>
       </div>
@@ -689,7 +706,7 @@ export default function Home() {
         </StaggerReveal>
 
         <div className="text-center">
-          <button className="font-outfit font-semibold text-white text-2xl py-5 px-8 bg-[#E3572B] rounded-[40px]">Explore More Institute</button>
+          <button onClick={() => router.push('/national-university')} className="font-outfit font-semibold text-white text-2xl py-5 px-8 bg-[#E3572B] rounded-[40px]">Explore More Institute</button>
         </div>
       </div>
 
