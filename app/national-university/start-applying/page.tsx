@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 
 const StartApplyingPage = () => {
+  const router = useRouter();
   const [acknowledged, setAcknowledged] = useState(false);
 
   return (
@@ -73,6 +75,7 @@ const StartApplyingPage = () => {
           <div>
             <button
               disabled={!acknowledged}
+              onClick={() => router.push('/national-university/public-university/my-application')}
               className="px-6 py-2.5 rounded-lg bg-[#E3572B] text-[#FFFFFF] font-outfit font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#cc4a22] transition-colors"
             >
               Save & Continue

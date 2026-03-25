@@ -322,6 +322,7 @@ const NationalUniversityPage = () => {
               ))}
               <div className="col-span-2 sm:col-span-4 lg:col-span-1">
                 <motion.button
+                  onClick={handlePublicUniversityClick}
                   whileHover={{ scale: 1.05 }}
                   className="w-full py-3 rounded-full bg-[#F88210] text-white font-outfit font-bold text-sm"
                 >
@@ -364,6 +365,7 @@ const NationalUniversityPage = () => {
               <p className="text-gray-600 font-outfit text-base">Trusted by over 50+ consultants & institutes</p>
             </div>
             <motion.button
+              onClick={() => router.push('/national-university/public-university')}
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="mt-6 sm:mt-0 px-8 py-3 rounded-full bg-[#E3572B] text-white font-outfit font-bold text-base shadow-lg"
@@ -425,6 +427,7 @@ const NationalUniversityPage = () => {
                 <p className="text-[#F88210] text-sm font-bold mb-1">{uni.type}</p>
                 <p className="text-gray-500 text-sm mb-5 flex-1">{uni.location}</p>
                 <motion.button
+                  onClick={handlePublicUniversityClick}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="w-full py-3 rounded-xl bg-[#E3572B] text-white font-outfit font-bold text-sm flex items-center justify-center gap-2"

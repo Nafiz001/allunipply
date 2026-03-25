@@ -310,7 +310,7 @@ const InternationalUniversityPage = () => {
                 <h3 className="font-bold text-lg mb-2 text-gray-900 line-clamp-2 min-h-[3.25rem]">{uni.name}</h3>
                 <p className="text-orange-500 font-bold text-sm mb-1">{uni.type}</p>
                 <p className="text-gray-500 text-sm mb-5 flex-1">{uni.location}</p>
-                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full py-3 rounded-2xl bg-[#E3572B] text-white font-bold text-sm flex items-center justify-center gap-2">Apply Now <ArrowUpRight size={16} /></motion.button>
+                <motion.button onClick={() => router.push(user ? '/dashboard/my-application' : '/sign-in?next=%2Fdashboard%2Fmy-application')} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full py-3 rounded-2xl bg-[#E3572B] text-white font-bold text-sm flex items-center justify-center gap-2">Apply Now <ArrowUpRight size={16} /></motion.button>
               </div>
             </motion.div>
           )) : isUniversitiesLoading ? <div className="col-span-full py-20 text-center text-gray-400 text-xl font-medium">Crunching university data...</div> : <div className="col-span-full py-20 text-center text-gray-400 text-xl font-medium">No results match your criteria.</div>}

@@ -294,7 +294,7 @@ const PublicUniversityPageContent = () => {
                 Consult with our experts to understand how to create the best shortlist for your needs
               </p>
             </div>
-            <button className="px-10 py-3 bg-white text-gray-900 rounded-full font-outfit font-semibold hover:shadow-lg transition-all whitespace-nowrap">
+            <button onClick={() => { setSearchQuery(''); setCurrentStep(1); setIsModalOpen(true); }} className="px-10 py-3 bg-white text-gray-900 rounded-full font-outfit font-semibold hover:shadow-lg transition-all whitespace-nowrap">
               Try again
             </button>
           </div>

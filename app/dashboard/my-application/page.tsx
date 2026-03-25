@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, SlidersHorizontal, Check, Trash2, Download } from 'lucide-react';
 import DashboardHeader from "@/components/layout/DashboardHeader";
 
 const MyApplicationPage = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('myApplication');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProgramTab, setSelectedProgramTab] = useState('find');
@@ -13,7 +15,7 @@ const MyApplicationPage = () => {
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
 
   // Programs data
-  const [programs] = useState([
+  const [programs, setPrograms] = useState([
     {
       id: 1,
       university: 'Duquesne University',
@@ -69,7 +71,7 @@ const MyApplicationPage = () => {
   ]);
 
   // Submit application data
-  const [applicationsForSubmission] = useState([
+  const [applicationsForSubmission, setApplicationsForSubmission] = useState([
     {
       id: 1,
       university: 'Duquesne University',
@@ -139,6 +141,35 @@ const MyApplicationPage = () => {
       items: ['Program details']
     }
   ];
+
+  const filteredPrograms = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return programs;
+
+    return programs.filter((program) =>
+      `${program.university} ${program.program} ${program.state} ${program.campus}`
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [programs, searchQuery]);
+
+  const handleDownloadApplication = (applicationId: number) => {
+    const application = applicationsForSubmission.find((item) => item.id === applicationId);
+    if (!application) return;
+
+    const payload = {
+      generatedAt: new Date().toISOString(),
+      application,
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${application.university.replace(/\s+/g, '-').toLowerCase()}-application.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -265,10 +296,11 @@ const MyApplicationPage = () => {
 
       {/* Navigation Tabs */}
           <div className="border-b border-gray-200">
-            <div className="flex items-center gap-8 max-w-7xl mx-auto px-4 justify-between">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex items-center gap-4 md:gap-8 overflow-x-auto md:overflow-visible whitespace-nowrap md:justify-between">
               <button
                 onClick={() => setActiveTab('myApplication')}
-                className={`py-4 font-outfit text-[22px] font-medium transition-colors relative ${
+                className={`shrink-0 py-4 font-outfit text-base md:text-[22px] font-medium transition-colors relative ${
                   activeTab === 'myApplication'
                     ? 'text-[#E3572B]'
                     : 'text-gray-500 hover:text-gray-700'
@@ -281,7 +313,7 @@ const MyApplicationPage = () => {
               </button>
               <button
                 onClick={() => setActiveTab('addPrograms')}
-                className={`py-4 font-outfit text-[22px] font-medium transition-colors relative ${
+                className={`shrink-0 py-4 font-outfit text-base md:text-[22px] font-medium transition-colors relative ${
                   activeTab === 'addPrograms'
                     ? 'text-[#E3572B]'
                     : 'text-gray-500 hover:text-gray-700'
@@ -294,7 +326,7 @@ const MyApplicationPage = () => {
               </button>
               <button
                 onClick={() => setActiveTab('submitApplication')}
-                className={`py-4 font-outfit text-[22px] font-medium transition-colors relative ${
+                className={`shrink-0 py-4 font-outfit text-base md:text-[22px] font-medium transition-colors relative ${
                   activeTab === 'submitApplication'
                     ? 'text-[#E3572B]'
                     : 'text-gray-500 hover:text-gray-700'
@@ -307,7 +339,7 @@ const MyApplicationPage = () => {
               </button>
               <button
                 onClick={() => setActiveTab('checkStatus')}
-                className={`py-4 font-outfit text-[22px] font-medium transition-colors relative ${
+                className={`shrink-0 py-4 font-outfit text-base md:text-[22px] font-medium transition-colors relative ${
                   activeTab === 'checkStatus'
                     ? 'text-[#E3572B]'
                     : 'text-gray-500 hover:text-gray-700'
@@ -319,10 +351,11 @@ const MyApplicationPage = () => {
                 )}
               </button>
             </div>
+            </div>
           </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* My Application Tab Content */}
         {activeTab === 'myApplication' && (
           <>
@@ -398,7 +431,7 @@ const MyApplicationPage = () => {
                     Consult with our experts to understand how to create the best shortlist for your needs
                   </p>
                 </div>
-                <button className="px-10 py-3 bg-white text-gray-900 rounded-full font-outfit font-semibold hover:shadow-lg transition-all whitespace-nowrap">
+                <button onClick={() => { setSearchQuery(''); setSelectedProgramTab('find'); setActiveTab('addPrograms'); }} className="px-10 py-3 bg-white text-gray-900 rounded-full font-outfit font-semibold hover:shadow-lg transition-all whitespace-nowrap">
                   Try again
                 </button>
               </div>
@@ -410,7 +443,7 @@ const MyApplicationPage = () => {
         {activeTab === 'addPrograms' && (
           <div className="bg-[#ff8b2221] rounded-3xl p-6 md:p-8">
             {/* Sub Navigation */}
-            <div className="flex gap-2 mb-6">
+            <div className="flex flex-wrap gap-2 mb-6">
               <button
                 onClick={() => setSelectedProgramTab('find')}
                 className={`px-6 py-2 rounded-full font-outfit font-semibold text-sm transition-all ${
@@ -444,7 +477,7 @@ const MyApplicationPage = () => {
             </div>
 
             {/* Search and Filter */}
-            <div className="flex gap-4 mb-6">
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
               <div className="flex-1 relative">
                 <Search size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
@@ -455,7 +488,7 @@ const MyApplicationPage = () => {
                   className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl font-outfit focus:outline-none focus:border-[#E3572B]"
                 />
               </div>
-              <button className="px-6 py-3 border border-gray-300 rounded-xl font-outfit font-semibold text-gray-700 hover:border-[#E3572B] transition-all flex items-center gap-2">
+              <button onClick={() => setSelectedProgramTab('available')} className="px-6 py-3 border border-gray-300 rounded-xl font-outfit font-semibold text-gray-700 hover:border-[#E3572B] transition-all flex items-center justify-center gap-2">
                 <SlidersHorizontal size={20} />
                 Filter
               </button>
@@ -463,7 +496,8 @@ const MyApplicationPage = () => {
 
             {/* Programs Table */}
             <div className="bg-white rounded-2xl overflow-hidden">
-              <table className="w-full">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[960px]">
                 <thead className="bg-[#FFF4EA]">
                   <tr>
                     <th className="px-4 py-4 text-left font-outfit font-bold text-gray-900 text-sm"># Add Program Name</th>
@@ -478,7 +512,7 @@ const MyApplicationPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {programs.map((program) => (
+                  {filteredPrograms.map((program) => (
                     <React.Fragment key={program.id}>
                       <tr className="border-t border-gray-200">
                         <td colSpan={9} className="px-4 py-3 font-outfit font-semibold text-gray-900 bg-gray-50">
@@ -495,7 +529,7 @@ const MyApplicationPage = () => {
                         <td className="px-4 py-4 font-outfit text-sm text-gray-700">{program.state}</td>
                         <td className="px-4 py-4 font-outfit text-sm text-gray-700">{program.campus}</td>
                         <td className="px-4 py-4">
-                          <button className="text-[#E3572B] hover:text-[#d95d39] font-outfit font-semibold text-sm">
+                          <button onClick={() => router.push('/dashboard/my-application/program-materials/program-details')} className="text-[#E3572B] hover:text-[#d95d39] font-outfit font-semibold text-sm">
                             Edit
                           </button>
                         </td>
@@ -504,6 +538,7 @@ const MyApplicationPage = () => {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}
@@ -525,13 +560,13 @@ const MyApplicationPage = () => {
             <div className=" rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
               <div>
                 <p className="text-gray-700 font-outfit text-sm mb-1">Applications ready for submission</p>
-                <p className="text-5xl font-bold text-gray-900 font-outfit">0</p>
+                <p className="text-3xl md:text-5xl font-bold text-gray-900 font-outfit">0</p>
               </div>
               <div>
                 <p className="text-gray-700 font-outfit text-sm mb-1">Total Fee(s)</p>
-                <p className="text-5xl font-bold text-gray-900 font-outfit">$58.00</p>
+                <p className="text-3xl md:text-5xl font-bold text-gray-900 font-outfit">$58.00</p>
               </div>
-              <button className="px-10 py-3 bg-[#FFF4EA] text-gray-900 rounded-lg font-outfit font-semibold border-2 border-gray-300 hover:border-[#E3572B] transition-all">
+              <button onClick={() => setIsSubmitModalOpen(true)} className="px-10 py-3 bg-[#FFF4EA] text-gray-900 rounded-lg font-outfit font-semibold border-2 border-gray-300 hover:border-[#E3572B] transition-all">
                 Submit All
               </button>
             </div>
@@ -552,6 +587,9 @@ const MyApplicationPage = () => {
 
             {/* Application Cards */}
             <div className="space-y-6">
+              {!applicationsForSubmission.length ? (
+                <div className="rounded-2xl border border-dashed border-[#E3572B]/30 bg-white p-8 text-center text-gray-600">No applications selected for submission yet.</div>
+              ) : null}
               {applicationsForSubmission.map((app) => (
                 <div key={app.id}>
                   <div className="bg-[#F4EEEA] rounded-[28px] p-8 md:p-10">
@@ -581,10 +619,10 @@ const MyApplicationPage = () => {
                       </div>
 
                       <div className="flex items-center gap-5 md:pt-1">
-                        <button className="text-[#E7CFC8] hover:text-[#D9B4AA] transition-colors">
+                        <button onClick={() => handleDownloadApplication(app.id)} className="text-[#E7CFC8] hover:text-[#D9B4AA] transition-colors">
                           <Download size={34} />
                         </button>
-                        <button className="text-[#E7CFC8] hover:text-[#D9B4AA] transition-colors">
+                        <button onClick={() => setApplicationsForSubmission((prev) => prev.filter((item) => item.id !== app.id))} className="text-[#E7CFC8] hover:text-[#D9B4AA] transition-colors">
                           <Trash2 size={34} />
                         </button>
                       </div>
@@ -610,7 +648,7 @@ const MyApplicationPage = () => {
         {activeTab === 'checkStatus' && (
           <>
             <div className="bg-[#ffe5ce] rounded-2xl p-6 mb-8">
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div>
                   <h4 className="font-outfit font-bold text-gray-900 text-sm mb-2">My Program</h4>
                 </div>
