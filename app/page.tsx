@@ -294,11 +294,21 @@ export default function Home() {
   });
 
   const newsCards = fillGridRows(homeNews.slice(0, 4), homeNews, {
-    columns: [1, 2, 4],
+      columns: [1, 2, 4],
   });
 
   return (
-    <div className="overflow-x-hidden">
+    <>
+      <style jsx>{`
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee-content { display: flex; width: max-content; animation: marquee 14s linear infinite; }
+        .marquee-container:hover .marquee-content,
+        .marquee-container:focus-within .marquee-content { animation-play-state: paused; }
+        .tuition-slider::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #E3572B; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 10px rgba(227, 87, 43, 0.4); margin-top: -6px; }
+        .tuition-slider::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #E3572B; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 10px rgba(227, 87, 43, 0.4); }
+        .tuition-slider::-webkit-slider-runnable-track { height: 12px; border-radius: 9999px; }
+        .tuition-slider::-moz-range-track { height: 12px; border-radius: 9999px; background: transparent; }
+      `}</style>
       {/* Flash Screen — 4-Strip Horizontal Curtain Exit */}
       {showScholarModal ? (
         <div className="fixed inset-0 z-[9999]">
@@ -471,6 +481,29 @@ export default function Home() {
           </h2>
         </ScrollReveal>
 
+        <ScrollReveal direction="up" delay={0.15}>
+          <div className="rounded-2xl md:rounded-3xl bg-[#FFF4EA] border border-[#E3572B]/10 px-6 py-8 md:px-10 md:py-10 mb-12 md:mb-16">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 text-center">
+              <div>
+                <h3 className="font-playfair text-3xl md:text-4xl lg:text-[42px] font-bold text-[#2f2823] mb-1.5">500+</h3>
+                <p className="text-[#9a6f5b] text-xs md:text-sm font-medium tracking-wide">Universities Listed</p>
+              </div>
+              <div>
+                <h3 className="font-playfair text-3xl md:text-4xl lg:text-[42px] font-bold text-[#2f2823] mb-1.5">1,200+</h3>
+                <p className="text-[#9a6f5b] text-xs md:text-sm font-medium tracking-wide">Scholarships Available</p>
+              </div>
+              <div>
+                <h3 className="font-playfair text-3xl md:text-4xl lg:text-[42px] font-bold text-[#2f2823] mb-1.5">50+</h3>
+                <p className="text-[#9a6f5b] text-xs md:text-sm font-medium tracking-wide">Countries Covered</p>
+              </div>
+              <div>
+                <h3 className="font-playfair text-3xl md:text-4xl lg:text-[42px] font-bold text-[#2f2823] mb-1.5">95%</h3>
+                <p className="text-[#9a6f5b] text-xs md:text-sm font-medium tracking-wide">Success Rate</p>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 w-full max-w-[1280px] mx-auto">
           <ScrollReveal direction="left" className="bg-white hover:bg-orange-50/20 transition-colors duration-500 rounded-[32px] p-6 md:p-10 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_20px_40px_rgba(227,87,43,0.08)] transform hover:-translate-y-1 group">
             <h3 className="text-3xl md:text-4xl font-outfit font-extrabold text-[#E3572B] mb-10 tracking-tight group-hover:scale-[1.02] transition-transform origin-left">International University</h3>
@@ -581,12 +614,6 @@ export default function Home() {
           onFocusCapture={() => setIsMarqueePaused(true)}
           onBlurCapture={() => setIsMarqueePaused(false)}
         >
-          <style jsx>{`
-            @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-            .marquee-content { display: flex; width: max-content; animation: marquee 14s linear infinite; }
-            .marquee-container:hover .marquee-content,
-            .marquee-container:focus-within .marquee-content { animation-play-state: paused; }
-          `}</style>
           <div className="marquee-content gap-3 md:gap-4" style={{ animationPlayState: isMarqueePaused ? "paused" : "running" }}>
             {[...countries, ...countries].map((country, i) => (
               <motion.button key={`${country.name}-${i}`} onClick={() => setSelectedCountry(country.name)} onPointerDown={() => setIsMarqueePaused(true)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
@@ -617,11 +644,7 @@ export default function Home() {
               <span className="text-orange-500 font-extrabold text-2xl">${tuitionRange[0].toLocaleString()} - ${tuitionRange[1].toLocaleString()}</span>
             </div>
             <div className="relative">
-              <input type="range" min="0" max="60000" step="1000" value={tuitionRange[1]} onChange={(e) => setTuitionRange([tuitionRange[0], parseInt(e.target.value)])} className="w-full h-3 bg-gray-100 rounded-full appearance-none cursor-pointer accent-orange-500" />
-              <style jsx>{`
-                input[type='range']::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #E3572B; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3); }
-                input[type='range']::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #E3572B; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 8px rgba(227, 87, 43, 0.3); }
-              `}</style>
+              <input type="range" min="0" max="60000" step="1000" value={tuitionRange[1]} onChange={(e) => setTuitionRange([tuitionRange[0], parseInt(e.target.value)])} className="tuition-slider w-full h-3 rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #E3572B 0%, #E3572B ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb 100%)` }} />
             </div>
           </div>
         </ScrollReveal>
@@ -818,6 +841,6 @@ export default function Home() {
         </StaggerReveal>
       </div>
       </div>
-    </div>
+    </>
   );
 }

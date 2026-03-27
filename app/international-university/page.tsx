@@ -145,6 +145,10 @@ const InternationalUniversityPage = () => {
         .marquee-content { display: flex; width: max-content; animation: marquee 14s linear infinite; }
         .marquee-container:hover .marquee-content,
         .marquee-container:focus-within .marquee-content { animation-play-state: paused; }
+        .intl-tuition-slider::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #E3572B; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 10px rgba(227, 87, 43, 0.4); margin-top: -6px; }
+        .intl-tuition-slider::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #E3572B; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 10px rgba(227, 87, 43, 0.4); }
+        .intl-tuition-slider::-webkit-slider-runnable-track { height: 12px; border-radius: 9999px; }
+        .intl-tuition-slider::-moz-range-track { height: 12px; border-radius: 9999px; background: transparent; }
       `}</style>
 
       {/* Hero Section */}
@@ -295,7 +299,7 @@ const InternationalUniversityPage = () => {
               <label className="text-gray-900 font-bold text-lg">Tuition Fee Range</label>
               <span className="text-orange-500 font-extrabold text-2xl">${tuitionRange[1].toLocaleString()}</span>
             </div>
-            <input type="range" min="0" max="60000" step="1000" value={tuitionRange[1]} onChange={(e) => setTuitionRange([tuitionRange[0], parseInt(e.target.value)])} className="w-full h-3 bg-gray-100 rounded-full appearance-none cursor-pointer accent-orange-500" />
+            <input type="range" min="0" max="60000" step="1000" value={tuitionRange[1]} onChange={(e) => setTuitionRange([tuitionRange[0], parseInt(e.target.value)])} className="intl-tuition-slider w-full h-3 rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #E3572B 0%, #E3572B ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb ${(tuitionRange[1] / 60000) * 100}%, #e5e7eb 100%)` }} />
           </div>
         </ScrollReveal>
 
