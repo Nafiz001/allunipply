@@ -276,11 +276,11 @@ const NationalUniversityPage = () => {
       {/* ── Hero ── */}
       <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12">
         <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden h-[560px] sm:h-[600px] md:h-[650px] lg:h-[733px]">
-          <Image src="/hero/national_banner.jpeg" alt="National University Banner" fill className="object-cover brightness-75" priority />
+          <Image src="/hero/national_banner.jpeg" alt="National University Banner" fill className="object-cover brightness-60" priority />
         </div>
         <div className="absolute inset-0 flex flex-col items-center px-4 text-center">
           <ScrollReveal direction="down" className="absolute left-1/2 top-14 w-[92%] -translate-x-1/2 md:left-8 md:top-30 md:w-auto md:translate-x-0">
-            <h1 className="font-pacifico text-2xl sm:text-3xl text-orange-800 text-center md:text-right leading-relaxed drop-shadow-lg">
+            <h1 className="font-pacifico text-2xl sm:text-3xl text-white text-center md:text-right leading-relaxed drop-shadow-lg">
               Streamline your university<br />applications – one submission,<br />multiple choices.
             </h1>
           </ScrollReveal>

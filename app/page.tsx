@@ -404,7 +404,7 @@ export default function Home() {
               src="/hero/banner.jpeg"
               alt="Students with backpacks"
               fill
-              className="object-cover brightness-75"
+              className="object-cover brightness-60"
               priority
             />
           </div>

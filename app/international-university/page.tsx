@@ -154,10 +154,10 @@ const InternationalUniversityPage = () => {
       {/* Hero Section */}
       <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12 ">
         <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden  h-[550px] md:h-[750px] lg:h-[850px]">
-          <Image src="/hero/international_banner.jpeg" alt="International Banner" fill className="object-cover brightess-75" priority />
+          <Image src="/hero/international_banner.jpeg" alt="International Banner" fill className="object-cover brightess-50" priority />
           
           <div className="absolute top-10 right-10 max-w-lg hidden lg:block">
-            <p className="font-pacifico text-3xl text-orange-400 text-right leading-relaxed drop-shadow-lg">
+            <p className="font-pacifico text-3xl text-white text-right leading-relaxed drop-shadow-lg">
               &quot;Your dream university is just a click away — no stress, no mess, just success!&quot;
             </p>
           </div>
