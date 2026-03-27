@@ -302,10 +302,10 @@ const Navbar = () => {
   };
 
   const desktopNavLinkClass = (isActive: boolean) =>
-    `rounded-full px-4 py-2.5 text-sm xl:text-[15px] font-semibold transition-all ${
+    `px-3 py-1.5 text-[13px] xl:text-sm font-medium transition-all duration-200 rounded-full ${
       isActive
-        ? "bg-[#E3572B] text-white shadow-[0_10px_28px_rgba(227,87,43,0.28)]"
-        : "text-[#4f463f] hover:bg-[#fff1e7] hover:text-[#d95d39]"
+        ? "text-[#E3572B] font-semibold bg-[#E3572B]/[0.06]"
+        : "text-[#5a5a5a] hover:text-[#E3572B] hover:bg-[#E3572B]/[0.04]"
     }`;
 
   return (
@@ -322,7 +322,15 @@ const Navbar = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 20 }}
           >
-            <div className="w-full max-w-[560px] rounded-[36px] bg-[#F7EFE6] p-8 md:p-12 text-center shadow-2xl border border-white/20">
+            <div className="relative w-full max-w-[560px] rounded-[36px] bg-[#F7EFE6] p-8 md:p-12 text-center shadow-2xl border border-white/20">
+              <button
+                onClick={() => setShowScholarshipAuthModal(false)}
+                className="absolute top-5 right-5 flex h-9 w-9 items-center justify-center rounded-full bg-black/[0.05] text-gray-500 transition-all duration-200 hover:bg-black/[0.1] hover:text-gray-800"
+                type="button"
+                aria-label="Close"
+              >
+                <X size={18} strokeWidth={2} />
+              </button>
               <h2 className="font-outfit text-3xl md:text-4xl font-bold text-gray-900 mb-8">Sign in to continue</h2>
               <div className="space-y-4 max-w-[280px] mx-auto">
                 <Link
@@ -349,71 +357,82 @@ const Navbar = () => {
           isHeaderVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-      <div className="mx-auto max-w-7xl px-3 py-3 md:px-4">
-        <nav className="relative rounded-[30px] bg-gray-200/95 backdrop-blur-md px-4 py-3 md:bg-gray-200/50 md:px-6">
-          <div className="absolute inset-x-10 top-0 h-px" />
+      <div className="mx-auto max-w-7xl px-4 pt-4 pb-2 md:px-6 md:pt-5">
+        {/* Single pill capsule — logo + links + CTA all inside one container */}
+        <nav className="relative flex items-center gap-2 md:gap-3 rounded-full bg-white/80 backdrop-blur-xl border border-black/[0.06] px-3 py-1.5 md:px-5 md:py-2 shadow-[0_2px_20px_rgba(0,0,0,0.06)]">
 
-          <div className="flex items-center justify-between gap-2 md:gap-4">
-            <div className="flex items-center gap-3 lg:gap-6">
-              <Link href="/" className="flex items-center rounded-full transition-transform hover:scale-[1.01]">
-                <Image src="/icons/logo.png" alt="allunipply logo" width={216} height={84} className="h-10 w-auto object-contain md:h-14" />
+          {/* Logo */}
+          <Link href="/" className="flex shrink-0 items-center rounded-full transition-transform duration-200 hover:scale-[1.02]">
+            <Image src="/icons/logo.png" alt="allunipply logo" width={216} height={84} className="h-7 w-auto object-contain md:h-10" />
+          </Link>
+
+          {/* Divider */}
+          <div className="hidden lg:block h-4 w-px bg-black/[0.08] mx-1" />
+
+          {/* Desktop nav links — flat, no inner pill */}
+          <ul className="hidden items-center gap-0 lg:flex flex-1">
+            <li>
+              {pathname === "/" ? (
+                <Link
+                  href="/"
+                  className="rotating-border-glow inline-flex items-center rounded-full px-3 py-1.5 text-[13px] xl:text-sm font-semibold bg-white text-[#E3572B] transition-all duration-200 relative z-[1]"
+                >
+                  ✦ S-genie
+                </Link>
+              ) : (
+                <Link href="/" className={desktopNavLinkClass(false)}>
+                  Home
+                </Link>
+              )}
+            </li>
+            <li>
+              <Link href="/contact" className={desktopNavLinkClass(pathname === "/contact")}>
+                Contact
               </Link>
+            </li>
+            <li>
+              <button
+                onClick={() => void handleScholarshipClick()}
+                className={desktopNavLinkClass(isScholarshipActive)}
+                type="button"
+              >
+                Scholarship
+              </button>
+            </li>
+            <li className="relative">
+              <button
+                onClick={() => setIsUniversitiesMenuOpen((current) => !current)}
+                className={`${desktopNavLinkClass(isUniversitiesActive)} inline-flex items-center gap-0.5`}
+                type="button"
+              >
+                Universities
+                <ChevronDown size={13} strokeWidth={2} className={`transition-transform duration-200 ${isUniversitiesMenuOpen ? "rotate-180" : ""}`} />
+              </button>
 
-              <ul className="hidden items-center gap-1 rounded-full border border-[#f0e0d4] bg-[#fff8f3] p-1.5 lg:flex">
-                <li>
-                  <Link href="/" className={desktopNavLinkClass(pathname === "/")}>
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className={desktopNavLinkClass(pathname === "/contact")}>
-                    Contact
-                  </Link>
-                </li>
-                <li>
-                  <button
-                    onClick={() => void handleScholarshipClick()}
-                    className={desktopNavLinkClass(isScholarshipActive)}
-                    type="button"
-                  >
-                    Scholarship
-                  </button>
-                </li>
-                <li className="relative">
-                  <button
-                    onClick={() => setIsUniversitiesMenuOpen((current) => !current)}
-                    className={`${desktopNavLinkClass(isUniversitiesActive)} inline-flex items-center gap-1.5`}
-                    type="button"
-                  >
-                    Universities
-                    <ChevronDown size={16} strokeWidth={2.5} className={`transition-transform ${isUniversitiesMenuOpen ? "rotate-180" : ""}`} />
-                  </button>
-
-                  {isUniversitiesMenuOpen ? (
-                    <div className="absolute left-0 top-full mt-3 w-64 rounded-3xl border border-[#f0ddd2] bg-white p-3 shadow-[0_22px_50px_rgba(35,24,18,0.12)]">
-                      {universityLinks.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-[#433b35] transition-colors hover:bg-[#fff2e8] hover:text-[#E3572B]"
-                          onClick={() => setIsUniversitiesMenuOpen(false)}
-                        >
-                          {item.label}
-                          <span className="text-[#E3572B]">↗</span>
-                        </Link>
-                      ))}
-                    </div>
-                  ) : null}
-                </li>
-              </ul>
-            </div>
-
-            <div className="flex items-center gap-2 lg:gap-3 ml-auto">
+              {isUniversitiesMenuOpen ? (
+                <div className="absolute left-0 top-full mt-2 w-60 rounded-2xl border border-black/[0.06] bg-white/95 backdrop-blur-xl p-2 shadow-[0_12px_40px_rgba(0,0,0,0.1)]">
+                  {universityLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-[#433b35] transition-all duration-200 hover:bg-[#E3572B]/[0.05] hover:text-[#E3572B]"
+                      onClick={() => setIsUniversitiesMenuOpen(false)}
+                    >
+                      {item.label}
+                      <span className="text-[#E3572B]">↗</span>
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
+            </li>
+          </ul>
+          {/* Right side: user controls + mobile hamburger */}
+          <div className="flex items-center gap-2 lg:gap-3 ml-auto">
               {currentUser ? (
                 <>
                   <div className="md:relative">
                     <button
-                      className="relative flex h-10 w-10 lg:h-12 lg:w-12 items-center justify-center rounded-full border border-[#f0ddd2] bg-[#fff8f3] text-[#4f463f] transition-colors hover:border-[#E3572B] hover:text-[#E3572B]"
+                      className="relative flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white/60 text-[#4f463f] transition-all duration-200 hover:border-[#E3572B]/30 hover:text-[#E3572B] hover:bg-[#E3572B]/[0.04]"
                       onClick={() => {
                         if (!isNotificationOpen) {
                           setIsNotificationsLoading(true);
@@ -423,7 +442,7 @@ const Navbar = () => {
                       }}
                       type="button"
                     >
-                      <Bell size={20} className="w-5 h-5" />
+                      <Bell size={18} className="w-[18px] h-[18px]" />
                       {unreadCount > 0 ? (
                         <span className="absolute -right-1 -top-1 lg:right-2 lg:top-2 min-w-4 rounded-full bg-[#E3572B] px-1 text-center text-[10px] font-bold leading-4 text-white">
                           {unreadCount > 9 ? "9+" : unreadCount}
@@ -535,10 +554,10 @@ const Navbar = () => {
                         setIsProfileDropdownOpen((current) => !current);
                         setIsNotificationOpen(false);
                       }}
-                      className="flex items-center gap-2 lg:gap-3 rounded-full border border-[#f0ddd2] bg-[#fff8f3] p-1 lg:px-2.5 lg:py-2 lg:pr-4 text-left transition-colors hover:border-[#E3572B]"
+                      className="flex items-center gap-2 lg:gap-2.5 rounded-full border border-black/[0.06] bg-white/60 p-1 lg:px-2 lg:py-1.5 lg:pr-3.5 text-left transition-all duration-200 hover:border-[#E3572B]/30 hover:bg-[#E3572B]/[0.03]"
                       type="button"
                     >
-                      <div className="flex h-10 w-10 lg:h-11 lg:w-11 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#E3572B] to-[#ff9d6b] text-sm font-bold text-white shadow-[0_10px_20px_rgba(227,87,43,0.22)]">
+                      <div className="flex h-9 w-9 lg:h-10 lg:w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#E3572B] to-[#ff9d6b] text-xs font-bold text-white shadow-[0_4px_12px_rgba(227,87,43,0.2)]">
                         {initials}
                       </div>
                       <div className="hidden lg:block min-w-0">
@@ -576,10 +595,13 @@ const Navbar = () => {
                   </div>
                 </>
               ) : isUserLoading ? (
-                <div className="hidden lg:block w-[104px] h-[46px] rounded-full bg-gray-200/60 animate-pulse border border-[#f0ddd2]" />
+                <div className="hidden lg:block w-[96px] h-[40px] rounded-full bg-gray-200/40 animate-pulse border border-black/[0.05]" />
               ) : (
                 <div className="hidden lg:block">
-                  <Link href="/sign-in" className="rounded-full border border-[#E3572B] bg-white px-6 py-3 text-sm font-bold text-[#E3572B] transition-all hover:-translate-y-0.5 hover:bg-[#E3572B] hover:text-white hover:shadow-[0_14px_32px_rgba(227,87,43,0.26)]">
+                  <Link
+                    href="/sign-in"
+                    className="rotating-border-glow-cta inline-flex rounded-full bg-[#E3572B] px-5 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 relative z-[1]"
+                  >
                     Get Started
                   </Link>
                 </div>
@@ -587,32 +609,40 @@ const Navbar = () => {
 
               <button
                 onClick={() => setIsMobileMenuOpen((current) => !current)}
-                className="flex h-10 w-10 lg:h-12 lg:w-12 shrink-0 items-center justify-center rounded-full border border-[#f0ddd2] bg-[#fff8f3] text-[#4f463f] transition-colors hover:border-[#E3572B] hover:text-[#E3572B] lg:hidden"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/[0.06] bg-white/60 text-[#4f463f] transition-all duration-200 hover:border-[#E3572B]/30 hover:text-[#E3572B] hover:bg-[#E3572B]/[0.04] lg:hidden"
                 aria-label="Toggle menu"
                 type="button"
               >
-                {isMobileMenuOpen ? <X size={24} strokeWidth={2.2} /> : <Menu size={24} strokeWidth={2.2} />}
+                {isMobileMenuOpen ? <X size={20} strokeWidth={2} /> : <Menu size={20} strokeWidth={2} />}
               </button>
-            </div>
           </div>
 
-          <div className={`overflow-hidden transition-all duration-300 lg:hidden ${isMobileMenuOpen ? "max-h-[80vh] pt-5 opacity-100" : "max-h-0 opacity-0"}`}>
-            <div className="space-y-3 border-t border-[#f0ddd2] pt-5">
-              <Link href="/" className={`block rounded-full px-5 py-3 text-center text-sm font-semibold transition-colors ${pathname === "/" ? "bg-[#E3572B] text-white" : "bg-[#fff8f3] text-[#4f463f]"}`} onClick={() => setIsMobileMenuOpen(false)}>
-                Home
+          {/* Mobile expandable menu */}
+          <div className={`overflow-hidden transition-all duration-300 lg:hidden ${isMobileMenuOpen ? "max-h-[80vh] pt-3 opacity-100" : "max-h-0 opacity-0"}`}>
+            <div className="space-y-1.5 border-t border-black/[0.06] pt-4">
+              <Link
+                href="/"
+                className={`block rounded-full px-4 py-2.5 text-center text-[13px] font-medium transition-all duration-200 ${
+                  pathname === "/"
+                    ? "bg-[#E3572B] text-white shadow-[0_0_14px_rgba(227,87,43,0.45)]"
+                    : "bg-black/[0.03] text-[#4f463f] hover:bg-[#E3572B]/[0.06]"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {pathname === "/" ? "S-genie" : "Home"}
               </Link>
-              <Link href="/contact" className={`block rounded-full px-5 py-3 text-center text-sm font-semibold transition-colors ${pathname === "/contact" ? "bg-[#E3572B] text-white" : "bg-[#fff8f3] text-[#4f463f]"}`} onClick={() => setIsMobileMenuOpen(false)}>
+              <Link href="/contact" className={`block rounded-full px-4 py-2.5 text-center text-[13px] font-medium transition-all duration-200 ${pathname === "/contact" ? "bg-[#E3572B] text-white" : "bg-black/[0.03] text-[#4f463f] hover:bg-[#E3572B]/[0.06]"}`} onClick={() => setIsMobileMenuOpen(false)}>
                 Contact
               </Link>
-              <button onClick={() => { setIsMobileMenuOpen(false); void handleScholarshipClick(); }} className={`block w-full rounded-full px-5 py-3 text-center text-sm font-semibold transition-colors ${isScholarshipActive ? "bg-[#E3572B] text-white" : "bg-[#fff8f3] text-[#4f463f]"}`} type="button">
+              <button onClick={() => { setIsMobileMenuOpen(false); void handleScholarshipClick(); }} className={`block w-full rounded-full px-4 py-2.5 text-center text-[13px] font-medium transition-all duration-200 ${isScholarshipActive ? "bg-[#E3572B] text-white" : "bg-black/[0.03] text-[#4f463f] hover:bg-[#E3572B]/[0.06]"}`} type="button">
                 Scholarship
               </button>
 
-              <div className="rounded-3xl bg-[#fff8f3] border border-[#f0ddd2] p-2">
-                <p className="px-3 pb-2 pt-1 text-xs uppercase tracking-[0.18em] text-[#9a6f5b]">Universities</p>
-                <div className="space-y-2">
+              <div className="rounded-2xl bg-black/[0.02] border border-black/[0.05] p-2">
+                <p className="px-3 pb-1.5 pt-1 text-[11px] uppercase tracking-[0.18em] text-[#9a6f5b]">Universities</p>
+                <div className="space-y-0.5">
                   {universityLinks.map((item) => (
-                    <Link key={item.href} href={item.href} className="block rounded-2xl px-4 py-3 text-sm font-semibold text-[#4f463f] transition-colors hover:bg-[#fff2e8] hover:text-[#E3572B]" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Link key={item.href} href={item.href} className="block rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-[#4f463f] transition-all duration-200 hover:bg-[#E3572B]/[0.05] hover:text-[#E3572B]" onClick={() => setIsMobileMenuOpen(false)}>
                       {item.label}
                     </Link>
                   ))}
@@ -621,18 +651,22 @@ const Navbar = () => {
 
               {currentUser ? (
                 <>
-                  <Link href="/dashboard" className="block rounded-full bg-[#fff8f3] px-5 py-3 text-center text-sm font-semibold text-[#4f463f]" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link href="/dashboard" className="block rounded-full bg-black/[0.03] px-4 py-2.5 text-center text-[13px] font-medium text-[#4f463f] hover:bg-[#E3572B]/[0.06]" onClick={() => setIsMobileMenuOpen(false)}>
                     Dashboard
                   </Link>
-                  <button onClick={() => void handleSignOut()} className="flex w-full items-center justify-center gap-2 rounded-full border border-[#f0ddd2] bg-white px-5 py-3 text-sm font-semibold text-[#4f463f] hover:text-[#E3572B] hover:border-[#E3572B]" type="button">
+                  <button onClick={() => void handleSignOut()} className="flex w-full items-center justify-center gap-2 rounded-full border border-black/[0.06] bg-white/80 px-4 py-2.5 text-[13px] font-medium text-[#4f463f] transition-all duration-200 hover:text-[#E3572B] hover:border-[#E3572B]/30" type="button">
                     <LogOut size={16} />
                     Sign Out
                   </button>
                 </>
               ) : isUserLoading ? (
-                <div className="w-full h-[46px] rounded-full bg-gray-200/60 animate-pulse border border-[#f0ddd2]" />
+                <div className="w-full h-[40px] rounded-full bg-gray-200/40 animate-pulse border border-black/[0.05]" />
               ) : (
-                <Link href="/sign-in" className="block rounded-full border border-[#E3572B] px-5 py-3 text-center text-sm font-semibold text-[#E3572B]" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link
+                  href="/sign-in"
+                  className="block rounded-full bg-[#E3572B] px-4 py-2.5 text-center text-[13px] font-medium text-white shadow-[0_0_14px_rgba(227,87,43,0.4)] transition-all duration-200 hover:bg-[#d95d39]"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
                   Get Started
                 </Link>
               )}
@@ -642,7 +676,61 @@ const Navbar = () => {
       </div>
       </div>
 
-      <div aria-hidden="true" className="h-[92px] md:h-[104px]" />
+      <div aria-hidden="true" className="h-[80px] md:h-[92px]" />
+
+      <style>{`
+        @property --border-angle {
+          syntax: '<angle>';
+          initial-value: 0deg;
+          inherits: false;
+        }
+
+        @keyframes rotate-border {
+          to { --border-angle: 360deg; }
+        }
+
+        /* S-genie: white bg pill with orange rotating line */
+        .rotating-border-glow {
+          --border-angle: 0deg;
+          border: 1.5px solid transparent;
+          background:
+            linear-gradient(white, white) padding-box,
+            conic-gradient(
+              from var(--border-angle),
+              transparent 60%,
+              rgba(227,87,43,0.8) 78%,
+              rgba(227,87,43,1) 90%,
+              rgba(227,87,43,0.8) 95%,
+              transparent 100%
+            ) border-box;
+          animation: rotate-border 2.8s linear infinite;
+          box-shadow: 0 0 10px rgba(227,87,43,0.15), 0 0 20px rgba(227,87,43,0.08);
+        }
+        .rotating-border-glow:hover {
+          box-shadow: 0 0 14px rgba(227,87,43,0.3), 0 0 28px rgba(227,87,43,0.15);
+        }
+
+        /* Get Started: orange bg pill with brighter rotating line */
+        .rotating-border-glow-cta {
+          --border-angle: 0deg;
+          border: 1.5px solid transparent;
+          background:
+            linear-gradient(#E3572B, #E3572B) padding-box,
+            conic-gradient(
+              from var(--border-angle),
+              rgba(227,87,43,0.6) 55%,
+              rgba(255,255,255,0.9) 78%,
+              rgba(255,255,255,1) 90%,
+              rgba(255,255,255,0.9) 95%,
+              rgba(227,87,43,0.6) 100%
+            ) border-box;
+          animation: rotate-border 2.8s linear infinite;
+          box-shadow: 0 0 16px rgba(227,87,43,0.45), 0 0 32px rgba(227,87,43,0.2);
+        }
+        .rotating-border-glow-cta:hover {
+          box-shadow: 0 0 24px rgba(227,87,43,0.65), 0 0 48px rgba(227,87,43,0.35);
+        }
+      `}</style>
     </>
   );
 };
