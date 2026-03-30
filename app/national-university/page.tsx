@@ -102,6 +102,10 @@ function toUniversityTab(type: string): UniversityTab | null {
 const NationalUniversityPage = () => {
   const router = useRouter();
   const [selectedUniversityType, setSelectedUniversityType] = useState<UniversityTab>('public');
+  const [heroLocation, setHeroLocation] = useState('');
+  const [heroDate, setHeroDate] = useState('');
+  const [heroProcess, setHeroProcess] = useState('');
+  const [heroCriteria, setHeroCriteria] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [newsItems, setNewsItems] = useState<NewsCard[]>([]);
   const [isNewsLoading, setIsNewsLoading] = useState(true);
@@ -219,7 +223,18 @@ const NationalUniversityPage = () => {
     setShowAuthModal(true);
   };
 
-  const universities = universitiesByType[selectedUniversityType] || [];
+  const universities = useMemo(
+    () => universitiesByType[selectedUniversityType] ?? [],
+    [selectedUniversityType, universitiesByType],
+  );
+  const filteredUniversities = useMemo(() => {
+    const locationQuery = heroLocation.trim().toLowerCase();
+    if (!locationQuery) return universities;
+
+    return universities.filter((item) =>
+      `${item.name} ${item.location}`.toLowerCase().includes(locationQuery),
+    );
+  }, [heroLocation, universities]);
   const allUniversitiesPool = useMemo(
     () => Object.values(universitiesByType).flat(),
     [universitiesByType],
@@ -227,12 +242,22 @@ const NationalUniversityPage = () => {
 
   const visibleUniversities = useMemo(
     () =>
-      fillGridRows(universities, allUniversitiesPool, {
+      fillGridRows(filteredUniversities, allUniversitiesPool, {
         columns: [1, 2, 4],
         minItems: GRID_TARGET_COUNT,
       }).slice(0, GRID_TARGET_COUNT),
-    [universities, allUniversitiesPool],
+    [allUniversitiesPool, filteredUniversities],
   );
+
+  const handleHeroSearch = () => {
+    if (heroProcess === "public") setSelectedUniversityType("public");
+    if (heroProcess === "private") setSelectedUniversityType("private");
+    if (heroProcess === "agricultural") setSelectedUniversityType("agricultural");
+    if (heroProcess === "engineering") setSelectedUniversityType("engineering");
+
+    const gridSection = document.getElementById("national-university-grid");
+    gridSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const visibleNewsItems = useMemo(
     () =>
@@ -314,19 +339,59 @@ const NationalUniversityPage = () => {
 
           <ScrollReveal direction="up" delay={0.4} className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 w-full max-w-5xl mx-2 sm:mx-4 border border-white/20">
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-6 items-center">
-              {['Location', 'Date', 'Process', 'Criteria'].map((label) => (
-                <div key={label} className="flex flex-col text-center border-r border-white/20 last:border-0 pr-4">
-                  <h3 className="font-outfit font-bold text-white text-base mb-1">{label}</h3>
-                  <p className="text-white/60 text-xs">Search {label.toLowerCase()}</p>
-                </div>
-              ))}
+              <div className="flex flex-col text-center border-r border-white/20 pr-4">
+                <h3 className="font-outfit font-bold text-white text-base mb-1">Location</h3>
+                <input
+                  type="text"
+                  value={heroLocation}
+                  onChange={(event) => setHeroLocation(event.target.value)}
+                  placeholder="City / Campus"
+                  className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white placeholder:text-white/60 outline-none"
+                />
+              </div>
+              <div className="flex flex-col text-center border-r border-white/20 pr-4">
+                <h3 className="font-outfit font-bold text-white text-base mb-1">Date</h3>
+                <input
+                  type="date"
+                  value={heroDate}
+                  onChange={(event) => setHeroDate(event.target.value)}
+                  className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                />
+              </div>
+              <div className="flex flex-col text-center border-r border-white/20 pr-4">
+                <h3 className="font-outfit font-bold text-white text-base mb-1">Process</h3>
+                <select
+                  value={heroProcess}
+                  onChange={(event) => setHeroProcess(event.target.value)}
+                  className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                >
+                  <option value="" className="text-gray-900">All types</option>
+                  <option value="public" className="text-gray-900">Public</option>
+                  <option value="private" className="text-gray-900">Private</option>
+                  <option value="agricultural" className="text-gray-900">Agricultural</option>
+                  <option value="engineering" className="text-gray-900">Engineering</option>
+                </select>
+              </div>
+              <div className="flex flex-col text-center border-r border-white/20 pr-4">
+                <h3 className="font-outfit font-bold text-white text-base mb-1">Criteria</h3>
+                <select
+                  value={heroCriteria}
+                  onChange={(event) => setHeroCriteria(event.target.value)}
+                  className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                >
+                  <option value="" className="text-gray-900">See all info</option>
+                  <option value="merit" className="text-gray-900">Merit</option>
+                  <option value="quota" className="text-gray-900">Quota</option>
+                  <option value="admission-test" className="text-gray-900">Admission test</option>
+                </select>
+              </div>
               <div className="col-span-2 sm:col-span-4 lg:col-span-1">
                 <motion.button
-                  onClick={handlePublicUniversityClick}
+                  onClick={handleHeroSearch}
                   whileHover={{ scale: 1.05 }}
                   className="w-full py-3 rounded-full bg-[#F88210] text-white font-outfit font-bold text-sm"
                 >
-                  See details
+                  Search now
                 </motion.button>
               </div>
             </div>
@@ -342,11 +407,7 @@ const NationalUniversityPage = () => {
         </ScrollReveal>
 
         <StaggerReveal className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {[
-            { title: "One-Click Multi-University Application", icon: "/icons/application-icon.png", desc: "Apply to multiple universities worldwide with a single, smart profile." },
-            { title: "Smart Document Management", icon: "/icons/document-icon.png", desc: "Upload and reuse your credentials securely for every application." },
-            { title: "Real-Time Application Tracking", icon: "/icons/tracking-icon.png", desc: "Know exactly where your application stands at every moment." }
-          ].map((s, i) => (
+          {serviceCards.map((s, i) => (
             <motion.div key={i} whileHover={{ y: -12 }} className="card-hover-glow bg-[#fff4ea] rounded-[40px] p-10 text-center border border-orange-100/50">
               <h3 className="font-bold text-2xl mb-6 text-gray-900 leading-tight">{s.title}</h3>
               <p className="text-gray-600 mb-10 leading-relaxed text-lg">{s.desc}</p>
@@ -385,7 +446,7 @@ const NationalUniversityPage = () => {
       </div>
 
       {/* ── University Grid ── */}
-      <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-20">
+      <div id="national-university-grid" className="max-w-[1320px] mx-auto px-4 md:px-6 py-20">
         <ScrollReveal className="text-center mb-16">
           <h2 className="text-4xl md:text-6xl font-bold font-outfit mb-4">
             <span className="text-[#E3572B]">University</span> we are working with

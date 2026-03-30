@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { db } from "@/lib/db";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 export async function GET(
   _request: NextRequest,
@@ -62,13 +63,25 @@ export async function GET(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimitResult = checkRateLimit(request, `documents:delete:${session.user.id}`, {
+      windowMs: 10 * 60 * 1000,
+      maxRequests: 30,
+    });
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many document delete attempts. Please try again later." },
+        { status: 429, headers: getRateLimitHeaders(rateLimitResult) },
+      );
     }
 
     const { id } = await context.params;

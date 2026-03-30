@@ -2,6 +2,7 @@ import { NotificationType, Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 type SignUpPayload = {
   fullName?: string;
@@ -44,6 +45,18 @@ function validatePayload(payload: SignUpPayload) {
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResult = checkRateLimit(request, "auth:signup", {
+      windowMs: 15 * 60 * 1000,
+      maxRequests: 10,
+    });
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many sign-up attempts. Please try again later." },
+        { status: 429, headers: getRateLimitHeaders(rateLimitResult) },
+      );
+    }
+
     const body = (await request.json()) as SignUpPayload;
     const parsed = validatePayload(body);
 

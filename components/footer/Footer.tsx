@@ -5,21 +5,31 @@ import {
   Facebook,
   Instagram,
   Linkedin,
+  Mail,
+  MapPin,
+  Phone,
   Share2,
   Twitter,
   Youtube,
 } from "lucide-react";
 
 const companyLinks = [
-  { label: "Home Page", href: "#" },
-  { label: "About us", href: "#" },
-  { label: "Listing", href: "#" },
-  { label: "Agents", href: "#" },
+  { label: "Home", href: "/" },
+  { label: "National Universities", href: "/national-university" },
+  { label: "International Universities", href: "/international-university" },
+  { label: "Scholarships", href: "/scholarship" },
 ];
 
 const supportLinks = [
-  { label: "Contact us", href: "#" },
-  { label: "Help", href: "#" },
+  { label: "Contact us", href: "/contact" },
+  { label: "Sign In", href: "/sign-in" },
+  { label: "Create Account", href: "/sign-up" },
+];
+
+const contactItems = [
+  { icon: Phone, label: "Phone", value: "+880-1531-395312" },
+  { icon: Mail, label: "Email", value: "allunipply@gmail.com" },
+  { icon: MapPin, label: "Address", value: "Chittagong, Bangladesh" },
 ];
 
 const socialLinks = [
@@ -72,9 +82,9 @@ export default function Footer() {
           </Link>
 
           <p className="max-w-3xl text-sm leading-7 text-[#596273] md:text-[17px]">
-            iniAstra Tech is creating a simple, efficient, and affordable
-            e-commerce platform for small entrepreneurs, helping them grow
-            their businesses and improve their livelihoods.
+            allunipply helps students discover universities, shortlist programs,
+            and manage applications in one streamlined platform designed for
+            studying abroad.
           </p>
         </div>
 
@@ -162,9 +172,11 @@ export default function Footer() {
 
              
 
+             
+
               <Link
                 href="/national-university/start-applying"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#2a459a] px-6 py-4 text-base font-semibold text-white  transition duration-300 hover:-translate-y-0.5 hover:bg-[#223b83] sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#2a459a] px-6 py-4 text-base font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-[#223b83] sm:w-auto"
               >
                 Start Your Application
                 <ArrowRight className="h-4 w-4" />
@@ -175,13 +187,13 @@ export default function Footer() {
 
         <div className="mt-10 border-t border-[#ded6cc] pt-5">
           <div className="flex flex-col gap-4 text-sm text-[#7a8597] md:flex-row md:items-center md:justify-between">
-            <p>&copy; 2026 All Rights Reserved to iniAstra Tech</p>
+            <p>&copy; 2026 All Rights Reserved to allunipply</p>
 
             <div className="flex flex-wrap items-center gap-6">
-              <Link href="#" className="transition hover:text-[#1f2a44]">
+              <Link href="/privacy-policy" className="transition hover:text-[#1f2a44]">
                 Privacy Policy
               </Link>
-              <Link href="#" className="transition hover:text-[#1f2a44]">
+              <Link href="/terms-and-conditions" className="transition hover:text-[#1f2a44]">
                 Terms and condition
               </Link>
             </div>

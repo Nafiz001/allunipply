@@ -106,7 +106,6 @@ export default function Home() {
     return true;
   });
   const [isFlashExiting, setIsFlashExiting] = useState(false);
-  const [scholarBarWidth, setScholarBarWidth] = useState(100);
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
   const [selectedCountry, setSelectedCountry] = useState('Canada');
   const [nationalType, setNationalType] = useState<'public' | 'private'>('public');
@@ -119,6 +118,13 @@ export default function Home() {
   const [homeUniversities, setHomeUniversities] = useState<HomeUniversity[]>([]);
   const [homeNews, setHomeNews] = useState<HomeNews[]>([]);
   const [isHomeDataLoading, setIsHomeDataLoading] = useState(true);
+  const [heroLocation, setHeroLocation] = useState('');
+  const [heroDate, setHeroDate] = useState('');
+  const [heroProcess, setHeroProcess] = useState('');
+  const [heroCriteria, setHeroCriteria] = useState('');
+  const [heroTestScore, setHeroTestScore] = useState('');
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterMessage, setNewsletterMessage] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -132,13 +138,10 @@ export default function Home() {
       return;
     }
 
-    setScholarBarWidth(100);
-    const animateTimer = window.setTimeout(() => setScholarBarWidth(0), 30);
     const exitTimer = window.setTimeout(() => setIsFlashExiting(true), 3500);
     const closeTimer = window.setTimeout(() => setShowScholarModal(false), 4200);
 
     return () => {
-      window.clearTimeout(animateTimer);
       window.clearTimeout(exitTimer);
       window.clearTimeout(closeTimer);
     };
@@ -281,6 +284,45 @@ export default function Home() {
   const universitiesDisplay = isGuestFiltering ? filteredUniversities.slice(0, 2) : fullRowUniversities;
   const hiddenUniversitiesCount = Math.max(filteredUniversities.length - universitiesDisplay.length, 0);
   const hasMoreResults = isGuestFiltering && hiddenUniversitiesCount > 0;
+
+  const handleHeroSearch = () => {
+    const normalizedLocation = heroLocation.trim().toLowerCase();
+
+    if (normalizedLocation) {
+      const matchedCountry = countries.find((country) =>
+        country.name.toLowerCase().includes(normalizedLocation),
+      );
+
+      if (matchedCountry) {
+        setSelectedCountry(matchedCountry.name);
+      }
+    }
+
+    if (heroCriteria === "gpa" && heroTestScore) {
+      setGpa(heroTestScore);
+    }
+
+    if (heroCriteria === "ielts" && heroTestScore) {
+      setIelts(heroTestScore);
+    }
+
+    if (heroProcess === "national") {
+      setNationalType("public");
+    }
+
+    const explorerSection = document.getElementById("home-universities-explorer");
+    explorerSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleNewsletterSubmit = () => {
+    if (!newsletterEmail.trim() || !newsletterEmail.includes("@")) {
+      setNewsletterMessage("Please provide a valid email address.");
+      return;
+    }
+
+    setNewsletterMessage("Thanks! You are now subscribed for updates.");
+    setNewsletterEmail('');
+  };
 
   const nationalUniversitiesBase = homeUniversities
     .filter((university) => {
@@ -446,26 +488,70 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md hover:bg-white/15 transition-colors duration-500 rounded-2xl md:rounded-[32px] p-6 lg:p-8 w-full max-w-6xl mx-4 mt-6 md:mt-8 border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] z-10 relative overflow-hidden group cursor-pointer">
+            <div className="bg-white/10 backdrop-blur-md hover:bg-white/15 transition-colors duration-500 rounded-2xl md:rounded-[32px] p-6 lg:p-8 w-full max-w-6xl mx-4 mt-6 md:mt-8 border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] z-10 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 divide-x divide-white/20">
                 <div className="flex flex-col px-4 first:pl-0 last:pr-0 group/item transition-transform duration-300 hover:scale-[1.02]">
                   <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Location</h3>
-                  <p className="text-white/70 font-outfit font-normal text-xs md:text-base">Search destination</p>
+                  <input
+                    type="text"
+                    value={heroLocation}
+                    onChange={(event) => setHeroLocation(event.target.value)}
+                    placeholder="Country / City"
+                    className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white placeholder:text-white/60 outline-none"
+                  />
                 </div>
                 <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
                   <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Application<br /> date</h3>
+                  <input
+                    type="date"
+                    value={heroDate}
+                    onChange={(event) => setHeroDate(event.target.value)}
+                    className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                  />
                 </div>
                 <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
                   <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Application<br /> Process</h3>
+                  <select
+                    value={heroProcess}
+                    onChange={(event) => setHeroProcess(event.target.value)}
+                    className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                  >
+                    <option value="" className="text-gray-900">Any process</option>
+                    <option value="direct" className="text-gray-900">Direct</option>
+                    <option value="agent" className="text-gray-900">Agent-assisted</option>
+                    <option value="national" className="text-gray-900">National route</option>
+                  </select>
                 </div>
                 <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
                   <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Criteria</h3>
-                  <p className="text-white/70 font-outfit font-normal text-xs md:text-base">See all info</p>
+                  <select
+                    value={heroCriteria}
+                    onChange={(event) => setHeroCriteria(event.target.value)}
+                    className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                  >
+                    <option value="" className="text-gray-900">See all info</option>
+                    <option value="gpa" className="text-gray-900">GPA</option>
+                    <option value="ielts" className="text-gray-900">IELTS</option>
+                  </select>
                 </div>
                 <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
                   <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">IELTS, GRE</h3>
-                  <p className="text-white/70 font-outfit font-normal text-xs md:text-base">facilities Program</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={heroTestScore}
+                      onChange={(event) => setHeroTestScore(event.target.value)}
+                      placeholder="Score"
+                      className="w-full rounded-xl bg-white/20 px-3 py-2 text-xs text-white placeholder:text-white/60 outline-none"
+                    />
+                    <button
+                      onClick={handleHeroSearch}
+                      className="rounded-xl bg-[#F88210] px-3 py-2 text-xs font-semibold text-white hover:bg-[#e67609]"
+                    >
+                      Search
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -474,7 +560,7 @@ export default function Home() {
       </div>
 
       {/* What We Offer Section */}
-      <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
+      <div id="home-universities-explorer" className="max-w-[1320px] mx-auto px-4 md:px-6 py-12 md:py-20">
         <ScrollReveal direction="up">
           <h2 className="text-4xl md:text-5xl lg:text-[64px] font-extrabold  font-poppins text-center mb-12 md:mb-16">
             What we <span className="text-[#E3572B]">offer</span>
@@ -694,8 +780,8 @@ export default function Home() {
         </ScrollReveal>
 
         <div className="flex justify-center gap-4 mb-12">
-          {['public', 'private'].map((type) => (
-            <button key={type} onClick={() => setNationalType(type as any)} className={`px-14 py-1 rounded-[20px] font-outfit font-semibold text-base md:text-lg transition-all ${nationalType === type ? 'bg-[#d95d39] text-white' : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#d95d39]'}`}>
+          {(['public', 'private'] as const).map((type) => (
+            <button key={type} onClick={() => setNationalType(type)} className={`px-14 py-1 rounded-[20px] font-outfit font-semibold text-base md:text-lg transition-all ${nationalType === type ? 'bg-[#d95d39] text-white' : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-[#d95d39]'}`}>
               {type.charAt(0).toUpperCase() + type.slice(1)} University
             </button>
           ))}
@@ -741,9 +827,12 @@ export default function Home() {
             <h2 className="text-lg md:text-2xl lg:text-3xl font-normal font-poppins mb-4">Choose from 12000+ study Program</h2>
             <p className="text-sm md:text-base mb-6 opacity-90">Stay informed with the latest news delivered straight to your inbox</p>
             <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input type="email" placeholder="✉ Email address" className="w-full px-4 py-3 text-gray-800 bg-white/20 rounded-full border border-white/40 placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white" />
-              <button className="px-8 py-3 bg-white text-[#ff8b22] rounded-full font-semibold hover:bg-gray-100 transition-all">Submit</button>
+              <input type="email" value={newsletterEmail} onChange={(event) => setNewsletterEmail(event.target.value)} placeholder="✉ Email address" className="w-full px-4 py-3 text-gray-800 bg-white/20 rounded-full border border-white/40 placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white" />
+              <button onClick={handleNewsletterSubmit} className="px-8 py-3 bg-white text-[#ff8b22] rounded-full font-semibold hover:bg-gray-100 transition-all">Submit</button>
             </div>
+            {newsletterMessage ? (
+              <p className="mt-3 text-sm text-white/90">{newsletterMessage}</p>
+            ) : null}
           </div>
           <div className="relative w-[120px] h-[150px] md:w-[200px] md:h-[280px] lg:w-[280px] lg:h-[350px]"><Image src="/hero/girl2.png" alt="Student" fill className="object-contain" /></div>
         </div>
@@ -830,12 +919,16 @@ export default function Home() {
           <p className="text-gray-500">Start your university application journey today</p>
         </ScrollReveal>
         <StaggerReveal className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[{icon: Mail, title: 'Email', text: 'Office : hello@skyline.co'},{icon: Phone, title: 'Phone', text: 'Office : +91 8932-1151-22'},{icon: MapPin, title: 'Location', text: 'Office : 123 Maple Street'}].map((item, i) => (
+          {[
+            { icon: Mail, title: 'Email', text: 'allunipply@gmail.com' },
+            { icon: Phone, title: 'Phone', text: '+880-1531-395312' },
+            { icon: MapPin, title: 'Address', text: 'Chittagong, Bangladesh' },
+          ].map((item, i) => (
             <motion.div key={i} whileHover={{ y: -8 }} className="card-hover-glow bg-white rounded-3xl p-8 border border-gray-100/80">
               <div className="w-12 h-12 bg-[#fff4ea] rounded-full flex items-center justify-center mb-4"><item.icon className="text-[#d95d39]" size={24} /></div>
               <h3 className="font-bold text-xl mb-2">{item.title}</h3>
               <p className="text-gray-600 mb-4">{item.text}</p>
-              <button className="px-6 py-2.5 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-semibold hover:bg-[#d95d39] hover:text-white transition-all">Contact us</button>
+              <Link href="/contact" className="inline-block px-6 py-2.5 border-2 border-[#d95d39] text-[#d95d39] rounded-full font-semibold hover:bg-[#d95d39] hover:text-white transition-all">Contact us</Link>
             </motion.div>
           ))}
         </StaggerReveal>

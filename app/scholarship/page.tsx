@@ -69,6 +69,76 @@ const ScholarshipPageContent = () => {
     publishedPapers: "",
   });
 
+  const countryOptions = [
+    { value: "usa", label: "United States" },
+    { value: "canada", label: "Canada" },
+    { value: "uk", label: "United Kingdom" },
+    { value: "australia", label: "Australia" },
+    { value: "germany", label: "Germany" },
+    { value: "france", label: "France" },
+    { value: "netherlands", label: "Netherlands" },
+    { value: "sweden", label: "Sweden" },
+    { value: "japan", label: "Japan" },
+    { value: "singapore", label: "Singapore" },
+  ];
+
+  const majorOptions = [
+    { value: "engineering", label: "Engineering" },
+    { value: "cs", label: "Computer Science" },
+    { value: "business", label: "Business" },
+    { value: "medicine", label: "Medicine" },
+    { value: "law", label: "Law" },
+    { value: "architecture", label: "Architecture" },
+    { value: "data-science", label: "Data Science" },
+    { value: "economics", label: "Economics" },
+    { value: "public-health", label: "Public Health" },
+    { value: "design", label: "Design" },
+  ];
+
+  const collegeOptions = [
+    { value: "dhaka-college", label: "Dhaka College" },
+    { value: "chittagong-college", label: "Chittagong College" },
+    { value: "rajshahi-college", label: "Rajshahi College" },
+    { value: "eden-college", label: "Eden College" },
+    { value: "notre-dame", label: "Notre Dame College" },
+    { value: "rajuk", label: "Rajuk College" },
+    { value: "holy-cross", label: "Holy Cross College" },
+    { value: "city-college", label: "City College" },
+  ];
+
+  const undergradMajorOptions = [
+    { value: "cs", label: "Computer Science" },
+    { value: "ece", label: "Electrical Engineering" },
+    { value: "me", label: "Mechanical Engineering" },
+    { value: "civil", label: "Civil Engineering" },
+    { value: "bba", label: "BBA" },
+    { value: "economics", label: "Economics" },
+    { value: "biology", label: "Biology" },
+    { value: "chemistry", label: "Chemistry" },
+  ];
+
+  const aptitudeTestOptions = [
+    { value: "None", label: "None" },
+    { value: "GRE", label: "GRE" },
+    { value: "GMAT", label: "GMAT" },
+    { value: "SAT", label: "SAT" },
+    { value: "ACT", label: "ACT" },
+    { value: "LSAT", label: "LSAT" },
+    { value: "MCAT", label: "MCAT" },
+    { value: "GATE", label: "GATE" },
+  ];
+
+  const workExperienceOptions = [
+    { value: "0-6", label: "0-6 months" },
+    { value: "6-12", label: "6-12 months" },
+    { value: "12-18", label: "12-18 months" },
+    { value: "18-24", label: "18-24 months" },
+    { value: "24-36", label: "2-3 years" },
+    { value: "36-60", label: "3-5 years" },
+    { value: "60-84", label: "5-7 years" },
+    { value: "84+", label: "7+ years" },
+  ];
+
   useEffect(() => {
     setIsHydrated(true);
   }, []);
@@ -166,12 +236,19 @@ const ScholarshipPageContent = () => {
 
   const filteredScholarships = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return scholarships;
+    const countryLabel = countryOptions.find((option) => option.value === formData.country)?.label.toLowerCase() || "";
+    const majorLabel = majorOptions.find((option) => option.value === formData.major)?.label.toLowerCase() || "";
 
-    return scholarships.filter((scholarship) =>
-      `${scholarship.title} ${scholarship.description}`.toLowerCase().includes(query),
-    );
-  }, [scholarships, searchQuery]);
+    return scholarships.filter((scholarship) => {
+      const haystack = `${scholarship.title} ${scholarship.description} ${scholarship.universityName} ${scholarship.programName || ""}`.toLowerCase();
+
+      const matchesQuery = !query || haystack.includes(query);
+      const matchesCountry = !countryLabel || haystack.includes(countryLabel);
+      const matchesMajor = !majorLabel || haystack.includes(majorLabel);
+
+      return matchesQuery && matchesCountry && matchesMajor;
+    });
+  }, [countryOptions, formData.country, formData.major, majorOptions, scholarships, searchQuery]);
 
   const scholarshipsGrid = useMemo(() => {
     return fillGridRows(filteredScholarships, scholarships, { columns: [1, 2, 3] });
@@ -424,9 +501,9 @@ const ScholarshipPageContent = () => {
                                 className="w-full px-6 py-3.5 border border-[#DDDDDD] rounded-2xl font-outfit text-gray-600 focus:outline-none focus:border-[#E3572B] focus:ring-4 focus:ring-[#E3572B]/10 transition-all appearance-none bg-white cursor-pointer"
                               >
                                 <option value="">Which country</option>
-                                <option value="usa">United States</option>
-                                <option value="canada">Canada</option>
-                                <option value="uk">United Kingdom</option>
+                                {countryOptions.map((option) => (
+                                  <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
                               </select>
                               <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                             </div>
@@ -443,9 +520,9 @@ const ScholarshipPageContent = () => {
                                 className="w-full px-6 py-3.5 border border-[#DDDDDD] rounded-2xl font-outfit text-gray-600 focus:outline-none focus:border-[#E3572B] focus:ring-4 focus:ring-[#E3572B]/10 transition-all appearance-none bg-white cursor-pointer"
                               >
                                 <option value="">Which major</option>
-                                <option value="engineering">Engineering</option>
-                                <option value="cs">Computer Science</option>
-                                <option value="business">Business</option>
+                                {majorOptions.map((option) => (
+                                  <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
                               </select>
                               <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                             </div>
@@ -462,6 +539,14 @@ const ScholarshipPageContent = () => {
                             <div className="relative group grayscale">
                               <select disabled className="w-full px-6 py-3.5 border border-[#DDDDDD] rounded-2xl font-outfit text-gray-400 appearance-none bg-gray-50">
                                 <option>Unlock with Premium</option>
+                                <option>AI</option>
+                                <option>ML</option>
+                                <option>Cybersecurity</option>
+                                <option>FinTech</option>
+                                <option>Bioinformatics</option>
+                                <option>Robotics</option>
+                                <option>Cloud Computing</option>
+                                <option>Sustainable Systems</option>
                               </select>
                               <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
                             </div>
@@ -482,8 +567,9 @@ const ScholarshipPageContent = () => {
                                 className="w-full px-6 py-3.5 border border-[#DDDDDD] rounded-2xl font-outfit text-gray-600 focus:outline-none focus:border-[#E3572B] shadow-sm appearance-none bg-white cursor-pointer"
                               >
                                 <option value="">Which college</option>
-                                <option value="college-a">College A</option>
-                                <option value="college-b">College B</option>
+                                {collegeOptions.map((option) => (
+                                  <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
                               </select>
                               <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                             </div>
@@ -500,8 +586,9 @@ const ScholarshipPageContent = () => {
                                 className="w-full px-6 py-3.5 border border-[#DDDDDD] rounded-2xl font-outfit text-gray-600 focus:outline-none focus:border-[#E3572B] shadow-sm appearance-none bg-white cursor-pointer"
                               >
                                 <option value="">Which major</option>
-                                <option value="cs">Computer Science</option>
-                                <option value="ece">Electrical Engineering</option>
+                                {undergradMajorOptions.map((option) => (
+                                  <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
                               </select>
                               <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                             </div>
@@ -575,9 +662,9 @@ const ScholarshipPageContent = () => {
                                 onChange={(e) => setFormData({ ...formData, aptitudeTest: e.target.value })}
                                 className="w-full px-6 py-3.5 border border-[#DDDDDD] rounded-2xl font-outfit text-gray-600 focus:outline-none focus:border-[#E3572B] shadow-sm bg-white"
                               >
-                                <option value="None">None</option>
-                                <option value="GRE">GRE</option>
-                                <option value="GMAT">GMAT</option>
+                                {aptitudeTestOptions.map((option) => (
+                                  <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
                               </select>
                             </div>
                           </div>
@@ -594,9 +681,9 @@ const ScholarshipPageContent = () => {
                               className="w-full px-6 py-3.5 border border-[#DDDDDD] rounded-2xl font-outfit text-gray-600 focus:outline-none focus:border-[#E3572B] shadow-sm bg-white"
                             >
                               <option value="">Which month</option>
-                              <option value="0-6">0-6 months</option>
-                              <option value="6-12">6-12 months</option>
-                              <option value="12+">12+ months</option>
+                              {workExperienceOptions.map((option) => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                              ))}
                             </select>
                           </div>
 

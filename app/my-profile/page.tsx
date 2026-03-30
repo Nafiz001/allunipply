@@ -47,6 +47,22 @@ const ProfileContent = () => {
   const [activeSection, setActiveSection] = useState<ProfileSection>("profile");
   const { user, loading } = useCurrentUser();
   const fullName = user?.fullName || "Guest";
+  const [profileNotice, setProfileNotice] = useState("");
+  const [profileForm, setProfileForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    confirmEmail: "",
+    phone: "",
+    location: "",
+    username: "",
+    authorizationAccepted: false,
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   useEffect(() => {
     const section = searchParams.get("section") as ProfileSection | null;
@@ -54,6 +70,76 @@ const ProfileContent = () => {
       setActiveSection(section);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const [firstName = "", ...rest] = (user.fullName || "").split(" ");
+    const lastName = rest.join(" ");
+
+    setProfileForm((previous) => ({
+      ...previous,
+      firstName,
+      lastName,
+      email: user.email || "",
+      confirmEmail: user.email || "",
+      phone: previous.phone,
+      location: "Chittagong, Bangladesh",
+      username: user.email?.split("@")[0] || "",
+    }));
+  }, [user]);
+
+  const handleProfileInput = (field: keyof typeof profileForm, value: string | boolean) => {
+    setProfileNotice("");
+    setProfileForm((previous) => ({ ...previous, [field]: value }));
+  };
+
+  const handleProfileSave = () => {
+    if (!profileForm.firstName.trim() || !profileForm.lastName.trim()) {
+      setProfileNotice("Please provide both first and last name.");
+      return;
+    }
+
+    if (!profileForm.email || profileForm.email !== profileForm.confirmEmail) {
+      setProfileNotice("Email and confirm email must match.");
+      return;
+    }
+
+    setProfileNotice("Profile form is valid and ready to sync.");
+  };
+
+  const handleProfileReset = () => {
+    setProfileNotice("Form reset to current account values.");
+    if (!user) return;
+
+    const [firstName = "", ...rest] = (user.fullName || "").split(" ");
+    const lastName = rest.join(" ");
+    setProfileForm({
+      firstName,
+      lastName,
+      email: user.email || "",
+      confirmEmail: user.email || "",
+      phone: "",
+      location: "Chittagong, Bangladesh",
+      username: user.email?.split("@")[0] || "",
+      authorizationAccepted: false,
+    });
+  };
+
+  const handlePasswordSave = () => {
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      setProfileNotice("All password fields are required.");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setProfileNotice("New password and confirm password do not match.");
+      return;
+    }
+
+    setProfileNotice("Password form is valid and ready to update.");
+    setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  };
 
   const sectionTitle = useMemo(() => {
     if (activeSection === "privacy") return "Privacy Policy";
@@ -142,18 +228,20 @@ const ProfileContent = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-outfit text-gray-700 mb-1">Legal First Name*</label>
-                  <input className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
+                  <input value={profileForm.firstName} onChange={(event) => handleProfileInput("firstName", event.target.value)} className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
                 </div>
 
                 <div>
                   <label className="block text-sm font-outfit text-gray-700 mb-1">Last or Family Name*</label>
-                  <input className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
+                  <input value={profileForm.lastName} onChange={(event) => handleProfileInput("lastName", event.target.value)} className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
                 </div>
 
                 <div>
                   <label className="block text-sm font-outfit text-gray-700 mb-1">Email*</label>
                   <input
                     type="email"
+                    value={profileForm.email}
+                    onChange={(event) => handleProfileInput("email", event.target.value)}
                     className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]"
                   />
                 </div>
@@ -162,30 +250,32 @@ const ProfileContent = () => {
                   <label className="block text-sm font-outfit text-gray-700 mb-1">Confirm Email*</label>
                   <input
                     type="email"
+                    value={profileForm.confirmEmail}
+                    onChange={(event) => handleProfileInput("confirmEmail", event.target.value)}
                     className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-outfit text-gray-700 mb-1">Preferred Phone Number*</label>
-                  <input className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
+                  <input value={profileForm.phone} onChange={(event) => handleProfileInput("phone", event.target.value)} className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
                 </div>
 
                 <div>
                   <label className="block text-sm font-outfit text-gray-700 mb-1 uppercase">Location</label>
-                  <input className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
+                  <input value={profileForm.location} onChange={(event) => handleProfileInput("location", event.target.value)} className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
                 </div>
 
                 <div>
                   <label className="block text-sm font-outfit text-gray-700 mb-1">User Name*</label>
-                  <input className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
+                  <input value={profileForm.username} onChange={(event) => handleProfileInput("username", event.target.value)} className="w-full h-11 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
                 </div>
               </div>
 
               <h3 className="text-2xl font-bold text-gray-900 font-outfit mt-7 mb-3">Text and Phone Authorization</h3>
 
               <label className="flex items-start gap-3 mb-6">
-                <input type="checkbox" className="mt-1 w-4 h-4 accent-[#22C5C7]" />
+                <input type="checkbox" checked={profileForm.authorizationAccepted} onChange={(event) => handleProfileInput("authorizationAccepted", event.target.checked)} className="mt-1 w-4 h-4 accent-[#22C5C7]" />
                 <span className="text-sm text-gray-600 font-outfit leading-relaxed">
                   I agree to the Terms of Service and to receive calls and/or texts at any phone number I have
                   provided or in the future, including any wireless number, from any entity associated with my
@@ -194,11 +284,15 @@ const ProfileContent = () => {
                 </span>
               </label>
 
+              {profileNotice ? (
+                <p className="mb-4 text-sm font-outfit text-[#E3572B]">{profileNotice}</p>
+              ) : null}
+
               <div className="flex items-center gap-3">
-                <button className="px-8 py-2.5 rounded-lg bg-[#F4DAC3] text-gray-800 text-sm font-outfit hover:bg-[#f0d4bc] transition-colors">
+                <button onClick={handleProfileSave} className="px-8 py-2.5 rounded-lg bg-[#F4DAC3] text-gray-800 text-sm font-outfit hover:bg-[#f0d4bc] transition-colors">
                   Save
                 </button>
-                <button className="px-8 py-2.5 rounded-lg bg-[#E3572B] text-white text-sm font-outfit hover:bg-[#d95d39] transition-colors">
+                <button onClick={handleProfileReset} className="px-8 py-2.5 rounded-lg bg-[#E3572B] text-white text-sm font-outfit hover:bg-[#d95d39] transition-colors">
                   Reset
                 </button>
               </div>
@@ -224,18 +318,18 @@ const ProfileContent = () => {
               <div className="space-y-4 max-w-xl">
                 <div>
                   <label className="block text-sm font-outfit text-gray-700 mb-1">Current Password</label>
-                  <input type="password" className="w-full h-10 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
+                  <input type="password" value={passwordForm.currentPassword} onChange={(event) => setPasswordForm((previous) => ({ ...previous, currentPassword: event.target.value }))} className="w-full h-10 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
                 </div>
                 <div>
                   <label className="block text-sm font-outfit text-gray-700 mb-1">New Password</label>
-                  <input type="password" className="w-full h-10 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
+                  <input type="password" value={passwordForm.newPassword} onChange={(event) => setPasswordForm((previous) => ({ ...previous, newPassword: event.target.value }))} className="w-full h-10 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
                 </div>
                 <div>
                   <label className="block text-sm font-outfit text-gray-700 mb-1">Confirm New Password</label>
-                  <input type="password" className="w-full h-10 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
+                  <input type="password" value={passwordForm.confirmPassword} onChange={(event) => setPasswordForm((previous) => ({ ...previous, confirmPassword: event.target.value }))} className="w-full h-10 rounded-lg border border-gray-200 px-4 font-outfit text-sm focus:outline-none focus:border-[#E3572B]" />
                 </div>
               </div>
-              <button className="mt-4 px-5 py-2.5 rounded-lg bg-[#E3572B] text-white text-sm font-outfit hover:bg-[#d95d39] transition-colors">
+              <button onClick={handlePasswordSave} className="mt-4 px-5 py-2.5 rounded-lg bg-[#E3572B] text-white text-sm font-outfit hover:bg-[#d95d39] transition-colors">
                 Save new password
               </button>
 

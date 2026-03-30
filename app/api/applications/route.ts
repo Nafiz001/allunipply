@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { db } from "@/lib/db";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 type CreateApplicationPayload = {
   universityId?: string;
@@ -269,6 +270,18 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimitResult = checkRateLimit(request, `applications:create:${session.user.id}`, {
+      windowMs: 10 * 60 * 1000,
+      maxRequests: 20,
+    });
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many application create attempts. Please try again later." },
+        { status: 429, headers: getRateLimitHeaders(rateLimitResult) },
+      );
     }
 
     const payload = (await request.json()) as CreateApplicationPayload;

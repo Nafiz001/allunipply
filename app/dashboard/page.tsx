@@ -41,6 +41,74 @@ const DashboardPageContent = () => {
     researchPapers: ''
   });
 
+  const countryOptions = [
+    { value: "usa", label: "United States" },
+    { value: "uk", label: "United Kingdom" },
+    { value: "canada", label: "Canada" },
+    { value: "australia", label: "Australia" },
+    { value: "germany", label: "Germany" },
+    { value: "france", label: "France" },
+    { value: "netherlands", label: "Netherlands" },
+    { value: "sweden", label: "Sweden" },
+    { value: "japan", label: "Japan" },
+    { value: "singapore", label: "Singapore" },
+  ];
+
+  const majorOptions = [
+    { value: "cs", label: "Computer Science" },
+    { value: "engineering", label: "Engineering" },
+    { value: "business", label: "Business" },
+    { value: "medicine", label: "Medicine" },
+    { value: "law", label: "Law" },
+    { value: "architecture", label: "Architecture" },
+    { value: "data-science", label: "Data Science" },
+    { value: "economics", label: "Economics" },
+  ];
+
+  const collegeOptions = [
+    { value: "dhaka-college", label: "Dhaka College" },
+    { value: "chittagong-college", label: "Chittagong College" },
+    { value: "rajshahi-college", label: "Rajshahi College" },
+    { value: "eden-college", label: "Eden College" },
+    { value: "notre-dame", label: "Notre Dame College" },
+    { value: "rajuk", label: "Rajuk College" },
+    { value: "holy-cross", label: "Holy Cross College" },
+    { value: "city-college", label: "City College" },
+  ];
+
+  const courseOptions = [
+    { value: "cs", label: "Computer Science" },
+    { value: "engineering", label: "Engineering" },
+    { value: "business", label: "Business Administration" },
+    { value: "economics", label: "Economics" },
+    { value: "mathematics", label: "Mathematics" },
+    { value: "biology", label: "Biology" },
+    { value: "chemistry", label: "Chemistry" },
+    { value: "physics", label: "Physics" },
+  ];
+
+  const workExperienceOptions = [
+    { value: "0-6", label: "0-6 months" },
+    { value: "6-12", label: "6-12 months" },
+    { value: "12-18", label: "12-18 months" },
+    { value: "18-24", label: "18-24 months" },
+    { value: "24-36", label: "2-3 years" },
+    { value: "36-60", label: "3-5 years" },
+    { value: "60-84", label: "5-7 years" },
+    { value: "84+", label: "7+ years" },
+  ];
+
+  const projectOptions = [
+    { value: "0", label: "0" },
+    { value: "1", label: "1" },
+    { value: "2", label: "2" },
+    { value: "3", label: "3" },
+    { value: "4-5", label: "4-5" },
+    { value: "6-8", label: "6-8" },
+    { value: "9-12", label: "9-12" },
+    { value: "12+", label: "12+" },
+  ];
+
   useEffect(() => {
     if (shouldAutoOpenFilter) {
       router.replace(pathname, { scroll: false });
@@ -52,67 +120,87 @@ const DashboardPageContent = () => {
       id: 1,
       name: "University of Delaware",
       location: "United States",
+      major: "cs",
       image: "/universities/delaware.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 2,
-      name: "University of Delaware",
-      location: "United States",
+      name: "University of Toronto",
+      location: "Canada",
+      major: "engineering",
       image: "/universities/delaware.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 3,
-      name: "University of Delaware",
-      location: "United States",
+      name: "University of Melbourne",
+      location: "Australia",
+      major: "business",
       image: "/universities/delaware.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 4,
-      name: "University of Delaware",
-      location: "United States",
+      name: "University of Manchester",
+      location: "United Kingdom",
+      major: "medicine",
       image: "/universities/delaware.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 5,
-      name: "University of Delaware",
-      location: "United States",
+      name: "Technical University of Munich",
+      location: "Germany",
+      major: "engineering",
       image: "/universities/delaware.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 6,
-      name: "University of Delaware",
-      location: "United States",
+      name: "Sorbonne University",
+      location: "France",
+      major: "law",
       image: "/universities/delaware.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 7,
-      name: "University of Delaware",
-      location: "United States",
+      name: "Delft University of Technology",
+      location: "Netherlands",
+      major: "architecture",
       image: "/universities/delaware.png",
       price: "$21,090/year",
       duration: "24 months"
     },
     {
       id: 8,
-      name: "University of Delaware",
-      location: "United States",
+      name: "National University of Singapore",
+      location: "Singapore",
+      major: "data-science",
       image: "/universities/delaware.png",
       price: "$21,090/year",
       duration: "24 months"
     }
   ];
+
+  const filteredUniversities = universities.filter((university) => {
+    const query = searchQuery.trim().toLowerCase();
+    const countryLabel = countryOptions.find((option) => option.value === formData.country)?.label || "";
+    const matchesQuery =
+      !query ||
+      `${university.name} ${university.location} ${university.major}`.toLowerCase().includes(query);
+    const matchesCountry = !countryLabel || university.location.toLowerCase() === countryLabel.toLowerCase();
+    const matchesMajor = !formData.major || university.major === formData.major;
+
+    return matchesQuery && matchesCountry && matchesMajor;
+  });
 
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
@@ -187,7 +275,7 @@ const DashboardPageContent = () => {
 
         {/* University Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {universities.map((university) => (
+          {filteredUniversities.map((university) => (
             <div key={university.id} className="bg-white rounded-t-[32px] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               {/* University Image */}
               <div className="relative h-[366px] w-full overflow-hidden">
@@ -254,6 +342,11 @@ const DashboardPageContent = () => {
               </div>
             </div>
           ))}
+          {!filteredUniversities.length ? (
+            <div className="col-span-full rounded-3xl border border-dashed border-[#E3572B]/40 bg-white p-8 text-center text-gray-600">
+              No universities match your current search and filter criteria.
+            </div>
+          ) : null}
         </div>
 
         {/* Bottom Banner */}
@@ -354,10 +447,9 @@ const DashboardPageContent = () => {
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit text-gray-500 focus:outline-none focus:border-[#E3572B] transition-colors appearance-none"
                         >
                           <option value="">Which country</option>
-                          <option value="usa">United States</option>
-                          <option value="uk">United Kingdom</option>
-                          <option value="canada">Canada</option>
-                          <option value="australia">Australia</option>
+                          {countryOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
                         </select>
                         <ChevronDown size={20} className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                       </div>
@@ -375,10 +467,9 @@ const DashboardPageContent = () => {
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit text-gray-500 focus:outline-none focus:border-[#E3572B] transition-colors appearance-none"
                         >
                           <option value="">Which major</option>
-                          <option value="cs">Computer Science</option>
-                          <option value="engineering">Engineering</option>
-                          <option value="business">Business</option>
-                          <option value="medicine">Medicine</option>
+                          {majorOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
                         </select>
                         <ChevronDown size={20} className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                       </div>
@@ -403,6 +494,14 @@ const DashboardPageContent = () => {
                           disabled
                         >
                           <option value="">Unlock</option>
+                          <option value="ai">AI</option>
+                          <option value="ml">Machine Learning</option>
+                          <option value="robotics">Robotics</option>
+                          <option value="cyber">Cybersecurity</option>
+                          <option value="fintech">FinTech</option>
+                          <option value="bio">Bioinformatics</option>
+                          <option value="cloud">Cloud Computing</option>
+                          <option value="sustainability">Sustainability</option>
                         </select>
                         <ChevronDown size={20} className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                       </div>
@@ -425,8 +524,9 @@ const DashboardPageContent = () => {
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit text-gray-500 focus:outline-none focus:border-[#E3572B] transition-colors appearance-none"
                         >
                           <option value="">Which college</option>
-                          <option value="college1">College 1</option>
-                          <option value="college2">College 2</option>
+                          {collegeOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
                         </select>
                         <ChevronDown size={20} className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                       </div>
@@ -444,8 +544,9 @@ const DashboardPageContent = () => {
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit text-gray-500 focus:outline-none focus:border-[#E3572B] transition-colors appearance-none"
                         >
                           <option value="">Which major</option>
-                          <option value="cs">Computer Science</option>
-                          <option value="engineering">Engineering</option>
+                          {courseOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
                         </select>
                         <ChevronDown size={20} className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                       </div>
@@ -599,10 +700,9 @@ const DashboardPageContent = () => {
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit text-gray-500 focus:outline-none focus:border-[#E3572B] transition-colors appearance-none"
                         >
                           <option value="">Which month</option>
-                          <option value="0-6">0-6 months</option>
-                          <option value="6-12">6-12 months</option>
-                          <option value="1-2">1-2 years</option>
-                          <option value="2+">2+ years</option>
+                          {workExperienceOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
                         </select>
                         <ChevronDown size={20} className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                       </div>
@@ -619,10 +719,9 @@ const DashboardPageContent = () => {
                           onChange={(e) => setFormData({...formData, projects: e.target.value})}
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-outfit text-gray-500 focus:outline-none focus:border-[#E3572B] transition-colors appearance-none"
                         >
-                          <option value="">0</option>
-                          <option value="1-2">1-2</option>
-                          <option value="3-5">3-5</option>
-                          <option value="5+">5+</option>
+                          {projectOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
                         </select>
                         <ChevronDown size={20} className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                       </div>

@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { db } from "@/lib/db";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 const MUTABLE_STATUSES: ApplicationStatus[] = ["DRAFT", "IN_PROGRESS"];
 
@@ -184,6 +185,18 @@ export async function PATCH(
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimitResult = checkRateLimit(request, `applications:update:${session.user.id}`, {
+      windowMs: 5 * 60 * 1000,
+      maxRequests: 60,
+    });
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many application update attempts. Please try again later." },
+        { status: 429, headers: getRateLimitHeaders(rateLimitResult) },
+      );
     }
 
     const { id } = await context.params;
@@ -411,13 +424,25 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimitResult = checkRateLimit(request, `applications:delete:${session.user.id}`, {
+      windowMs: 10 * 60 * 1000,
+      maxRequests: 20,
+    });
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many application delete attempts. Please try again later." },
+        { status: 429, headers: getRateLimitHeaders(rateLimitResult) },
+      );
     }
 
     const { id } = await context.params;

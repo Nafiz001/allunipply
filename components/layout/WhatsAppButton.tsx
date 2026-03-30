@@ -1,20 +1,26 @@
 import React from 'react';
 import Link from 'next/link';
 
+const DEFAULT_WHATSAPP_NUMBER = '8801874789624';
+const configuredNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? DEFAULT_WHATSAPP_NUMBER;
+const sanitizedNumber = configuredNumber.replace(/\D/g, '') || DEFAULT_WHATSAPP_NUMBER;
+const displayNumber = sanitizedNumber.startsWith('880') ? `+${sanitizedNumber}` : sanitizedNumber;
+const WHATSAPP_LINK = `https://wa.me/${sanitizedNumber}?text=Hi%20allunipply%2C%20I%20want%20to%20join%20the%20community.`;
+
 export default function WhatsAppButton() {
   return (
-    <div className="fixed bottom-6 right-4 md:right-6 z-[90] flex items-center gap-4">
+    <div className="fixed bottom-6 right-4 md:right-6 z-90 flex items-center gap-4">
       {/* Tooltip / Chat Bubble Message */}
       <div className="hidden sm:block relative bg-white border-2 border-gray-100 shadow-[0_10px_25px_rgba(0,0,0,0.05)] rounded-2xl px-5 py-3 animate-[fadeIn_0.5s_ease-out]">
         {/* Right-pointing triangle arrow */}
-        <div className="absolute top-1/2 -right-[7px] -translate-y-1/2 w-3 h-3 bg-white border-t-2 border-r-2 border-gray-100 rotate-45" />
+        <div className="absolute top-1/2 -right-1.75 -translate-y-1/2 w-3 h-3 bg-white border-t-2 border-r-2 border-gray-100 rotate-45" />
         <span className="font-outfit font-bold text-gray-800 whitespace-nowrap block drop-shadow-sm">
-          Join our community 👋
+          Join our community👋
         </span>
       </div>
 
       <Link
-        href="#"
+        href={WHATSAPP_LINK}
         target="_blank"
         rel="noopener noreferrer"
         className="group relative flex items-center justify-center bg-[#25D366] hover:bg-[#22bf5b] transition-all duration-300 rounded-full w-14 h-14 md:w-16 md:h-16 shadow-[0_8px_20px_rgba(37,211,102,0.4)] hover:-translate-y-1"

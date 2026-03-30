@@ -138,6 +138,31 @@ const InternationalUniversityPage = () => {
   const hiddenUniversitiesCount = Math.max(filteredUniversities.length - universitiesDisplay.length, 0);
   const hasMoreResults = isGuestFiltering && hiddenUniversitiesCount > 0;
 
+  const handleHeroSearch = () => {
+    const normalizedLocation = heroLocation.trim().toLowerCase();
+
+    if (normalizedLocation) {
+      const matchedCountry = countries.find((country) =>
+        country.name.toLowerCase().includes(normalizedLocation),
+      );
+
+      if (matchedCountry) {
+        setSelectedCountry(matchedCountry.name);
+      }
+    }
+
+    if (heroCriteria === "gpa" && heroTestScore) {
+      setGpa(heroTestScore);
+    }
+
+    if (heroCriteria === "ielts" && heroTestScore) {
+      setIelts(heroTestScore);
+    }
+
+    const explorerSection = document.getElementById("universities-explorer");
+    explorerSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="overflow-x-hidden">
       <style jsx>{`
@@ -206,7 +231,7 @@ const InternationalUniversityPage = () => {
                 <label className="font-outfit font-bold text-white text-sm mb-2 ml-1">Test Score</label>
                 <input type="number" placeholder="Score" value={heroTestScore} onChange={(e) => setHeroTestScore(e.target.value)} className="px-4 py-3 rounded-2xl bg-white/20 text-white placeholder-white/50 border border-white/30 outline-none focus:bg-white/30 transition-all text-sm" />
               </div>
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-6 py-3.5 rounded-2xl bg-[#E3572B] text-white font-outfit font-bold text-base shadow-xl shadow-orange-600/20">Search Now</motion.button>
+              <motion.button onClick={handleHeroSearch} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-6 py-3.5 rounded-2xl bg-[#E3572B] text-white font-outfit font-bold text-base shadow-xl shadow-orange-600/20">Search Now</motion.button>
             </div>
           </ScrollReveal>
         </div>
@@ -253,7 +278,7 @@ const InternationalUniversityPage = () => {
       </div>
 
       {/* University Explorer Grid */}
-      <div className="max-w-[1320px] mx-auto px-4 md:px-6 py-24">
+      <div id="universities-explorer" className="max-w-[1320px] mx-auto px-4 md:px-6 py-24">
         <ScrollReveal className="text-center mb-20">
           <h2 className="text-4xl md:text-6xl font-bold font-outfit mb-6 text-gray-900">
             <span className="text-orange-500">Universities</span> We Represent
