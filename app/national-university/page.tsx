@@ -338,32 +338,32 @@ const NationalUniversityPage = () => {
           </div>
 
           <ScrollReveal direction="up" delay={0.4} className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 w-full max-w-5xl mx-2 sm:mx-4 border border-white/20">
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-6 items-center">
-              <div className="flex flex-col text-center border-r border-white/20 pr-4">
-                <h3 className="font-outfit font-bold text-white text-base mb-1">Location</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+              <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
+                <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Location</h3>
                 <input
                   type="text"
                   value={heroLocation}
                   onChange={(event) => setHeroLocation(event.target.value)}
                   placeholder="City / Campus"
-                  className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white placeholder:text-white/60 outline-none"
+                  className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white placeholder:text-white/60 outline-none"
                 />
               </div>
-              <div className="flex flex-col text-center border-r border-white/20 pr-4">
-                <h3 className="font-outfit font-bold text-white text-base mb-1">Date</h3>
+              <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
+                <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Date</h3>
                 <input
                   type="date"
                   value={heroDate}
                   onChange={(event) => setHeroDate(event.target.value)}
-                  className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                  className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
                 />
               </div>
-              <div className="flex flex-col text-center border-r border-white/20 pr-4">
-                <h3 className="font-outfit font-bold text-white text-base mb-1">Process</h3>
+              <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
+                <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Process</h3>
                 <select
                   value={heroProcess}
                   onChange={(event) => setHeroProcess(event.target.value)}
-                  className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                  className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
                 >
                   <option value="" className="text-gray-900">All types</option>
                   <option value="public" className="text-gray-900">Public</option>
@@ -372,12 +372,12 @@ const NationalUniversityPage = () => {
                   <option value="engineering" className="text-gray-900">Engineering</option>
                 </select>
               </div>
-              <div className="flex flex-col text-center border-r border-white/20 pr-4">
-                <h3 className="font-outfit font-bold text-white text-base mb-1">Criteria</h3>
+              <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
+                <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Criteria</h3>
                 <select
                   value={heroCriteria}
                   onChange={(event) => setHeroCriteria(event.target.value)}
-                  className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                  className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
                 >
                   <option value="" className="text-gray-900">See all info</option>
                   <option value="merit" className="text-gray-900">Merit</option>
@@ -385,11 +385,12 @@ const NationalUniversityPage = () => {
                   <option value="admission-test" className="text-gray-900">Admission test</option>
                 </select>
               </div>
-              <div className="col-span-2 sm:col-span-4 lg:col-span-1">
+              <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
+                <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2 opacity-0">Search</h3>
                 <motion.button
                   onClick={handleHeroSearch}
                   whileHover={{ scale: 1.05 }}
-                  className="w-full py-3 rounded-full bg-[#F88210] text-white font-outfit font-bold text-sm"
+                  className="h-10 w-full rounded-xl bg-[#F88210] text-white font-outfit font-bold text-sm"
                 >
                   Search now
                 </motion.button>

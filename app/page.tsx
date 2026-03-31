@@ -488,34 +488,34 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md hover:bg-white/15 transition-colors duration-500 rounded-2xl md:rounded-[32px] p-6 lg:p-8 w-full max-w-6xl mx-4 mt-6 md:mt-8 border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] z-10 relative overflow-hidden group">
+            <div className="bg-white/10 backdrop-blur-md hover:bg-white/15 transition-colors duration-500 rounded-2xl md:rounded-[32px] p-5 md:p-6 lg:p-8 w-full max-w-6xl mx-4 mt-6 md:mt-8 border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] z-10 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 divide-x divide-white/20">
-                <div className="flex flex-col px-4 first:pl-0 last:pr-0 group/item transition-transform duration-300 hover:scale-[1.02]">
-                  <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Location</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+                <div className="flex flex-col rounded-2xl bg-white/5 p-3 md:p-4 group/item transition-transform duration-300 hover:scale-[1.02]">
+                  <h3 className="font-outfit font-normal text-white text-base md:text-lg mb-2 min-h-6 group-hover/item:text-orange-200 transition-colors">Location</h3>
                   <input
                     type="text"
                     value={heroLocation}
                     onChange={(event) => setHeroLocation(event.target.value)}
                     placeholder="Country / City"
-                    className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white placeholder:text-white/60 outline-none"
+                    className="h-10 md:h-11 rounded-xl bg-white/20 px-3 py-2 text-sm text-white placeholder:text-white/60 outline-none"
                   />
                 </div>
-                <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
-                  <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Application<br /> date</h3>
+                <div className="flex flex-col rounded-2xl bg-white/5 p-3 md:p-4 group/item transition-transform duration-300 hover:scale-[1.02]">
+                  <h3 className="font-outfit font-normal text-white text-base md:text-lg mb-2 min-h-6 group-hover/item:text-orange-200 transition-colors">Application Date</h3>
                   <input
                     type="date"
                     value={heroDate}
                     onChange={(event) => setHeroDate(event.target.value)}
-                    className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                    className="h-10 md:h-11 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
                   />
                 </div>
-                <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
-                  <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Application<br /> Process</h3>
+                <div className="flex flex-col rounded-2xl bg-white/5 p-3 md:p-4 group/item transition-transform duration-300 hover:scale-[1.02]">
+                  <h3 className="font-outfit font-normal text-white text-base md:text-lg mb-2 min-h-6 group-hover/item:text-orange-200 transition-colors">Application Process</h3>
                   <select
                     value={heroProcess}
                     onChange={(event) => setHeroProcess(event.target.value)}
-                    className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                    className="h-10 md:h-11 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
                   >
                     <option value="" className="text-gray-900">Any process</option>
                     <option value="direct" className="text-gray-900">Direct</option>
@@ -523,36 +523,37 @@ export default function Home() {
                     <option value="national" className="text-gray-900">National route</option>
                   </select>
                 </div>
-                <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
-                  <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">Criteria</h3>
+                <div className="flex flex-col rounded-2xl bg-white/5 p-3 md:p-4 group/item transition-transform duration-300 hover:scale-[1.02]">
+                  <h3 className="font-outfit font-normal text-white text-base md:text-lg mb-2 min-h-6 group-hover/item:text-orange-200 transition-colors">Criteria</h3>
                   <select
                     value={heroCriteria}
                     onChange={(event) => setHeroCriteria(event.target.value)}
-                    className="rounded-xl bg-white/20 px-3 py-2 text-xs text-white outline-none"
+                    className="h-10 md:h-11 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
                   >
                     <option value="" className="text-gray-900">See all info</option>
                     <option value="gpa" className="text-gray-900">GPA</option>
                     <option value="ielts" className="text-gray-900">IELTS</option>
                   </select>
                 </div>
-                <div className="flex flex-col px-4 group/item transition-transform duration-300 hover:scale-[1.02]">
-                  <h3 className="font-outfit font-normal text-white text-base md:text-2xl mb-1 md:mb-2 group-hover/item:text-orange-200 transition-colors">IELTS, GRE</h3>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      value={heroTestScore}
-                      onChange={(event) => setHeroTestScore(event.target.value)}
-                      placeholder="Score"
-                      className="w-full rounded-xl bg-white/20 px-3 py-2 text-xs text-white placeholder:text-white/60 outline-none"
-                    />
-                    <button
-                      onClick={handleHeroSearch}
-                      className="rounded-xl bg-[#F88210] px-3 py-2 text-xs font-semibold text-white hover:bg-[#e67609]"
-                    >
-                      Search
-                    </button>
-                  </div>
+                <div className="flex flex-col rounded-2xl bg-white/5 p-3 md:p-4 group/item transition-transform duration-300 hover:scale-[1.02]">
+                  <h3 className="font-outfit font-normal text-white text-base md:text-lg mb-2 min-h-6 group-hover/item:text-orange-200 transition-colors">IELTS, GRE</h3>
+                  <input
+                    type="number"
+                    value={heroTestScore}
+                    onChange={(event) => setHeroTestScore(event.target.value)}
+                    placeholder="Score"
+                    className="h-10 md:h-11 w-full rounded-xl bg-white/20 px-3 py-2 text-sm text-white placeholder:text-white/60 outline-none"
+                  />
                 </div>
+              </div>
+
+              <div className="mt-4 md:mt-5 flex justify-center">
+                <button
+                  onClick={handleHeroSearch}
+                  className="h-10 md:h-11 rounded-xl bg-[#F88210] px-8 md:px-10 text-sm font-semibold text-white hover:bg-[#e67609]"
+                >
+                  Search
+                </button>
               </div>
             </div>
           </div>
