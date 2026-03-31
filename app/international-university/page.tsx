@@ -178,30 +178,32 @@ const InternationalUniversityPage = () => {
 
       {/* Hero Section */}
       <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12 ">
-        <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden  h-[550px] md:h-[750px] lg:h-[850px]">
-          <Image src="/hero/international_banner.jpeg" alt="International Banner" fill className="object-cover brightess-50" priority />
+        <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden h-[620px] sm:h-[680px] md:h-[750px] lg:h-[850px]">
+          <Image src="/hero/international_banner.jpeg" alt="International Banner" fill className="object-cover brightness-55" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/60" />
           
-          <div className="absolute top-10 right-10 max-w-lg hidden lg:block">
-            <p className="font-pacifico text-3xl text-white text-right leading-relaxed drop-shadow-lg">
+          <div className="absolute top-10 left-10 max-w-lg hidden lg:block">
+            <p className="font-pacifico text-3xl text-[#fff7f0] text-left leading-relaxed drop-shadow-[0_4px_18px_rgba(0,0,0,0.65)]">
               &quot;Your dream university is just a click away — no stress, no mess, just success!&quot;
             </p>
           </div>
         </div>
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 md:px-6 text-center pt-20">
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 md:px-6 text-center pt-8 sm:pt-10 md:pt-14 lg:pt-16">
           <ScrollReveal direction="down">
-            <h1 className="text-white text-5xl md:text-7xl font-jakarta font-extrabold mb-6 tracking-tight drop-shadow-xl">
-              FLY TO YOUR <span className="text-orange-500">DREAM</span>
+            <h1 className="text-white text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-jakarta font-extrabold mb-4 md:mb-6 tracking-tight leading-[1.12] max-w-5xl drop-shadow-[0_6px_22px_rgba(0,0,0,0.7)]">
+              FLY TO YOUR <span className="text-[#FFC27A]">DREAM</span>
+              <span className="block">UNIVERSITY</span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
-            <p className="text-black/90 font-outfit text-lg md:text-2xl mb-12 max-w-3xl mx-auto font-medium mt-12">
+            <p className="text-white/95 font-outfit text-sm sm:text-base md:text-2xl mb-8 md:mb-12 max-w-3xl mx-auto font-medium mt-3 sm:mt-4 md:mt-10 drop-shadow-[0_3px_14px_rgba(0,0,0,0.55)]">
               Explore thousands of international universities and find your perfect academic home abroad.
             </p>
           </ScrollReveal>
 
-          <ScrollReveal direction="up" delay={0.4} className="bg-white/10 backdrop-blur-xl rounded-[40px] p-6 md:p-8 w-full max-w-6xl mx-auto border border-white/20 shadow-2xl">
+          <ScrollReveal direction="up" delay={0.4} className="bg-white/10 backdrop-blur-xl rounded-3xl md:rounded-[40px] p-4 sm:p-5 md:p-8 w-full max-w-6xl mx-auto border border-white/20 shadow-2xl">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4 items-stretch">
               <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
                 <label className="font-outfit font-bold text-white text-sm mb-2">Location</label>

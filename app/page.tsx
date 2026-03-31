@@ -446,23 +446,24 @@ export default function Home() {
               src="/hero/banner.jpeg"
               alt="Students with backpacks"
               fill
-              className="object-cover brightness-60"
+              className="object-cover brightness-55"
               priority
             />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-black/50" />
           </div>
 
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 md:px-6 text-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 md:px-6 text-center pt-4 sm:pt-6 md:pt-0">
             <ScrollReveal direction="down">
-              <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-outfit font-medium mb-3 md:mb-4 max-w-5xl leading-tight">
+              <h1 className="text-[#FFF9F4] text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-outfit font-medium mb-3 md:mb-4 max-w-5xl leading-tight drop-shadow-[0_5px_18px_rgba(0,0,0,0.65)]">
                 Let&apos;s fly to your{" "}
                 <span className="block mt-1 md:mt-2">
-                  Dream <span className="font-playfair font-semibold">University</span>
+                  Dream <span className="font-playfair font-semibold text-[#FFD3A2]">University</span>
                 </span>
               </h1>
             </ScrollReveal>
 
             <ScrollReveal delay={0.2}>
-              <p className="text-white font-outfit font-normal text-sm sm:text-base md:text-lg lg:text-xl max-w-3xl mb-6 md:mb-12 leading-relaxed px-4">
+              <p className="text-white/95 font-outfit font-normal text-xs sm:text-base md:text-lg lg:text-xl max-w-3xl mb-5 sm:mb-6 md:mb-12 leading-relaxed px-4 drop-shadow-[0_3px_12px_rgba(0,0,0,0.55)]">
                 Your dream university is just a click away - no stress, no mess, just success!<br />
                 Apply smart, not hard - we make admissions easy.
               </p>

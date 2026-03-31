@@ -301,11 +301,12 @@ const NationalUniversityPage = () => {
       {/* ── Hero ── */}
       <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12">
         <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden h-[560px] sm:h-[600px] md:h-[650px] lg:h-[733px]">
-          <Image src="/hero/national_banner.jpeg" alt="National University Banner" fill className="object-cover brightness-60" priority />
+          <Image src="/hero/national_banner.jpeg" alt="National University Banner" fill className="object-cover brightness-55" priority />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/28 to-black/52" />
         </div>
         <div className="absolute inset-0 flex flex-col items-center px-4 text-center">
-          <ScrollReveal direction="down" className="absolute left-1/2 top-14 w-[92%] -translate-x-1/2 md:left-8 md:top-30 md:w-auto md:translate-x-0">
-            <h1 className="font-pacifico text-2xl sm:text-3xl text-white text-center md:text-right leading-relaxed drop-shadow-lg">
+          <ScrollReveal direction="down" className="absolute left-1/2 top-12 w-[92%] max-w-[520px] -translate-x-1/2 md:left-8 md:top-30 md:w-auto md:max-w-none md:translate-x-0">
+            <h1 className="font-pacifico text-xl sm:text-3xl text-[#FFF4E8] text-center md:text-right leading-relaxed drop-shadow-[0_5px_18px_rgba(0,0,0,0.68)]">
               Streamline your university<br />applications – one submission,<br />multiple choices.
             </h1>
           </ScrollReveal>
@@ -317,7 +318,7 @@ const NationalUniversityPage = () => {
             </p>
           </ScrollReveal> */}
 
-          <div className="flex flex-col md:flex-row flex-wrap gap-3 sm:gap-4 justify-center mt-[280px] sm:mt-[320px] md:mt-100 mb-8">
+          <div className="flex flex-col md:flex-row flex-wrap gap-3 sm:gap-4 justify-center mt-[250px] sm:mt-[300px] md:mt-100 mb-8">
             <motion.button
               onClick={handlePublicUniversityClick}
               whileHover={{ scale: 1.05, y: -2 }}
