@@ -300,104 +300,99 @@ const NationalUniversityPage = () => {
 
       {/* ── Hero ── */}
       <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12">
-        <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden h-[560px] sm:h-[600px] md:h-[650px] lg:h-[733px]">
+        <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden h-[980px] sm:h-[920px] md:h-[760px] lg:h-[733px]">
           <Image src="/hero/national_banner.jpeg" alt="National University Banner" fill className="object-cover brightness-55" priority />
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/28 to-black/52" />
-        </div>
-        <div className="absolute inset-0 flex flex-col items-center px-4 text-center">
-          <ScrollReveal direction="down" className="absolute left-1/2 top-12 w-[92%] max-w-[520px] -translate-x-1/2 md:left-8 md:top-30 md:w-auto md:max-w-none md:translate-x-0">
-            <h1 className="font-pacifico text-xl sm:text-3xl text-[#FFF4E8] text-center md:text-right leading-relaxed drop-shadow-[0_5px_18px_rgba(0,0,0,0.68)]">
-              Streamline your university<br />applications – one submission,<br />multiple choices.
-            </h1>
-          </ScrollReveal>
+          <div className="absolute inset-0">
+            <div className="mx-auto flex h-full w-full max-w-6xl flex-col px-3 sm:px-4 md:px-6 pt-16 sm:pt-20 md:pt-24 lg:pt-16 pb-4 md:pb-8">
+              <ScrollReveal direction="down">
+                <h1 className="font-pacifico text-2xl sm:text-3xl md:text-4xl text-[#FFF4E8] text-center md:text-left leading-relaxed drop-shadow-[0_5px_18px_rgba(0,0,0,0.68)] max-w-3xl">
+                  Streamline your university applications - one submission, multiple choices.
+                </h1>
+              </ScrollReveal>
 
-          {/* <ScrollReveal delay={0.2}>
-            <p className="text-black font-outfit text-sm sm:text-base md:text-lg max-w-2xl mb-8 leading-relaxed mt-100">
-              Your dream university is just a click away — no stress, no mess, just success!<br />
-              Apply smart, not hard — we make admissions easy.
-            </p>
-          </ScrollReveal> */}
-
-          <div className="flex flex-col md:flex-row flex-wrap gap-3 sm:gap-4 justify-center mt-[250px] sm:mt-[300px] md:mt-100 mb-8">
-            <motion.button
-              onClick={handlePublicUniversityClick}
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#E3572B] text-white font-outfit font-bold text-base sm:text-lg shadow-xl shadow-orange-500/20 cursor-pointer"
-            >
-               Public University
-            </motion.button>
-            <Link href="/national-university/start-applying">
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-white text-[#E3572B] font-outfit font-bold text-base sm:text-lg shadow-xl border-2 border-white/50 cursor-pointer"
-              >
-                 Start Applying
-              </motion.button>
-            </Link>
-          </div>
-
-          <ScrollReveal direction="up" delay={0.4} className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 w-full max-w-5xl mx-2 sm:mx-4 border border-white/20">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-              <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
-                <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Location</h3>
-                <input
-                  type="text"
-                  value={heroLocation}
-                  onChange={(event) => setHeroLocation(event.target.value)}
-                  placeholder="City / Campus"
-                  className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white placeholder:text-white/60 outline-none"
-                />
-              </div>
-              <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
-                <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Date</h3>
-                <input
-                  type="date"
-                  value={heroDate}
-                  onChange={(event) => setHeroDate(event.target.value)}
-                  className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
-                />
-              </div>
-              <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
-                <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Process</h3>
-                <select
-                  value={heroProcess}
-                  onChange={(event) => setHeroProcess(event.target.value)}
-                  className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
-                >
-                  <option value="" className="text-gray-900">All types</option>
-                  <option value="public" className="text-gray-900">Public</option>
-                  <option value="private" className="text-gray-900">Private</option>
-                  <option value="agricultural" className="text-gray-900">Agricultural</option>
-                  <option value="engineering" className="text-gray-900">Engineering</option>
-                </select>
-              </div>
-              <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
-                <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Criteria</h3>
-                <select
-                  value={heroCriteria}
-                  onChange={(event) => setHeroCriteria(event.target.value)}
-                  className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
-                >
-                  <option value="" className="text-gray-900">See all info</option>
-                  <option value="merit" className="text-gray-900">Merit</option>
-                  <option value="quota" className="text-gray-900">Quota</option>
-                  <option value="admission-test" className="text-gray-900">Admission test</option>
-                </select>
-              </div>
-              <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
-                <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2 opacity-0">Search</h3>
+              <div className="mt-5 flex flex-col md:flex-row gap-3 sm:gap-4">
                 <motion.button
-                  onClick={handleHeroSearch}
-                  whileHover={{ scale: 1.05 }}
-                  className="h-10 w-full rounded-xl bg-[#F88210] text-white font-outfit font-bold text-sm"
+                  onClick={handlePublicUniversityClick}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full md:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#E3572B] text-white font-outfit font-bold text-base sm:text-lg shadow-xl shadow-orange-500/20 cursor-pointer"
                 >
-                  Search now
+                  Public University
                 </motion.button>
+                <Link href="/national-university/start-applying" className="w-full md:w-auto">
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full md:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-white text-[#E3572B] font-outfit font-bold text-base sm:text-lg shadow-xl border-2 border-white/50 cursor-pointer"
+                  >
+                    Start Applying
+                  </motion.button>
+                </Link>
               </div>
+
+              <ScrollReveal direction="up" delay={0.3} className="mt-5 bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 w-full border border-white/20">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+                  <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
+                    <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Location</h3>
+                    <input
+                      type="text"
+                      value={heroLocation}
+                      onChange={(event) => setHeroLocation(event.target.value)}
+                      placeholder="City / Campus"
+                      className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white placeholder:text-white/60 outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
+                    <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Date</h3>
+                    <input
+                      type="date"
+                      value={heroDate}
+                      onChange={(event) => setHeroDate(event.target.value)}
+                      className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
+                    <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Process</h3>
+                    <select
+                      value={heroProcess}
+                      onChange={(event) => setHeroProcess(event.target.value)}
+                      className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
+                    >
+                      <option value="" className="text-gray-900">All types</option>
+                      <option value="public" className="text-gray-900">Public</option>
+                      <option value="private" className="text-gray-900">Private</option>
+                      <option value="agricultural" className="text-gray-900">Agricultural</option>
+                      <option value="engineering" className="text-gray-900">Engineering</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
+                    <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2">Criteria</h3>
+                    <select
+                      value={heroCriteria}
+                      onChange={(event) => setHeroCriteria(event.target.value)}
+                      className="h-10 rounded-xl bg-white/20 px-3 py-2 text-sm text-white outline-none"
+                    >
+                      <option value="" className="text-gray-900">See all info</option>
+                      <option value="merit" className="text-gray-900">Merit</option>
+                      <option value="quota" className="text-gray-900">Quota</option>
+                      <option value="admission-test" className="text-gray-900">Admission test</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col text-left rounded-xl bg-white/5 p-3">
+                    <h3 className="font-outfit font-bold text-white text-sm sm:text-base mb-2 opacity-0">Search</h3>
+                    <motion.button
+                      onClick={handleHeroSearch}
+                      whileHover={{ scale: 1.02 }}
+                      className="h-10 w-full rounded-xl bg-[#F88210] text-white font-outfit font-bold text-sm"
+                    >
+                      Search now
+                    </motion.button>
+                  </div>
+                </div>
+              </ScrollReveal>
             </div>
-          </ScrollReveal>
+          </div>
         </div>
       </div>
 

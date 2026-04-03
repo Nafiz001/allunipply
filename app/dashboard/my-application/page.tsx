@@ -630,7 +630,7 @@ const MyApplicationPage = () => {
                     <div className="flex justify-center mt-4">
                     <button
                       onClick={() => setIsSubmitModalOpen(true)}
-                      className="min-w-[230px] px-10 py-3 bg-[#E3572B] text-white rounded-[22px] font-outfit text-[24px] leading-none hover:bg-[#d95d39] transition-all"
+                      className="w-full sm:w-auto sm:min-w-[230px] px-6 sm:px-10 py-3 bg-[#E3572B] text-white rounded-[22px] font-outfit text-[20px] sm:text-[24px] leading-none hover:bg-[#d95d39] transition-all"
                     >
                       Submit
                     </button>

@@ -357,13 +357,13 @@ const Navbar = () => {
           isHeaderVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-      <div className="mx-auto max-w-7xl px-4 pt-4 pb-2 md:px-6 md:pt-5">
+      <div className="mx-auto max-w-7xl px-3 pt-3 pb-2 md:px-6 md:pt-5">
         {/* Single pill capsule — logo + links + CTA all inside one container */}
-        <nav className="relative flex items-center gap-2 md:gap-3 rounded-full bg-white/80 backdrop-blur-xl border border-black/[0.06] px-3 py-1.5 md:px-5 md:py-2 shadow-[0_2px_20px_rgba(0,0,0,0.06)]">
+        <nav className="relative flex w-full min-w-0 items-center gap-1.5 md:gap-3 rounded-2xl md:rounded-full bg-white/80 backdrop-blur-xl border border-black/[0.06] px-2.5 py-1.5 md:px-5 md:py-2 shadow-[0_2px_20px_rgba(0,0,0,0.06)]">
 
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center rounded-full transition-transform duration-200 hover:scale-[1.02]">
-            <Image src="/icons/logo.png" alt="allunipply logo" width={216} height={84} className="h-7 w-auto object-contain md:h-10" />
+            <Image src="/icons/logo.png" alt="allunipply logo" width={216} height={84} className="h-6 w-auto max-w-[118px] object-contain sm:h-7 sm:max-w-[142px] md:h-10 md:max-w-none" />
           </Link>
 
           {/* Divider */}
@@ -427,10 +427,10 @@ const Navbar = () => {
             </li>
           </ul>
           {/* Right side: user controls + mobile hamburger */}
-          <div className="flex items-center gap-2 lg:gap-3 ml-auto">
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2 lg:gap-3">
               {currentUser ? (
                 <>
-                  <div className="md:relative">
+                  <div className="hidden min-[360px]:block md:relative">
                     <button
                       className="relative flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white/60 text-[#4f463f] transition-all duration-200 hover:border-[#E3572B]/30 hover:text-[#E3572B] hover:bg-[#E3572B]/[0.04]"
                       onClick={() => {
@@ -451,7 +451,7 @@ const Navbar = () => {
                     </button>
 
                     {isNotificationOpen ? (
-                      <div className="absolute left-0 right-0 md:left-auto md:w-80 lg:w-90 top-full mt-3 overflow-hidden rounded-[28px] border border-[#f0ddd2] bg-white shadow-[0_30px_70px_rgba(20,14,10,0.15)] z-[100]">
+                      <div className="absolute left-0 right-0 max-w-[calc(100vw-1.5rem)] md:left-auto md:w-80 md:max-w-none lg:w-90 top-full mt-3 overflow-hidden rounded-[28px] border border-[#f0ddd2] bg-white shadow-[0_30px_70px_rgba(20,14,10,0.15)] z-[100]">
                         <div className="flex items-center justify-between border-b border-[#f0ddd2] px-5 py-4">
                           <div>
                             <p className="text-xs uppercase tracking-[0.22em] text-[#9a6f5b]">Updates</p>
@@ -548,7 +548,7 @@ const Navbar = () => {
                     ) : null}
                   </div>
 
-                  <div className="md:relative">
+                  <div className="hidden min-[400px]:block md:relative">
                     <button
                       onClick={() => {
                         setIsProfileDropdownOpen((current) => !current);
@@ -568,7 +568,7 @@ const Navbar = () => {
                     </button>
 
                     {isProfileDropdownOpen ? (
-                      <div className="absolute left-0 right-0 md:left-auto md:w-64 top-full mt-3 rounded-3xl border border-[#f0ddd2] bg-white p-3 shadow-[0_22px_50px_rgba(35,24,18,0.12)] z-[100]">
+                      <div className="absolute left-0 right-0 max-w-[calc(100vw-1.5rem)] md:left-auto md:w-64 md:max-w-none top-full mt-3 rounded-3xl border border-[#f0ddd2] bg-white p-3 shadow-[0_22px_50px_rgba(35,24,18,0.12)] z-[100]">
                         <div className="mb-2 px-4 py-2 lg:hidden">
                           <p className="truncate text-sm font-bold text-[#2f2823]">{currentUser.fullName}</p>
                           <p className="text-[11px] uppercase tracking-[0.18em] text-[#9a6f5b]">{currentUser.role}</p>
@@ -617,32 +617,56 @@ const Navbar = () => {
               </button>
           </div>
 
-          {/* Mobile expandable menu */}
-          <div className={`overflow-hidden transition-all duration-300 lg:hidden ${isMobileMenuOpen ? "max-h-[80vh] pt-3 opacity-100" : "max-h-0 opacity-0"}`}>
-            <div className="space-y-1.5 border-t border-black/[0.06] pt-4">
+        </nav>
+
+        <div
+          className={`overflow-hidden transition-all duration-300 lg:hidden ${
+            isMobileMenuOpen ? "mt-2 max-h-[80vh] opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="rounded-2xl border border-black/[0.06] bg-white/95 p-3 shadow-[0_14px_34px_rgba(20,14,10,0.12)] backdrop-blur-xl">
+            <div className="space-y-2">
               <Link
                 href="/"
-                className={`block rounded-full px-4 py-2.5 text-center text-[13px] font-medium transition-all duration-200 ${
-                  pathname === "/"
-                    ? "bg-[#E3572B] text-white shadow-[0_0_14px_rgba(227,87,43,0.45)]"
-                    : "bg-black/[0.03] text-[#4f463f] hover:bg-[#E3572B]/[0.06]"
+                className={`block rounded-xl px-4 py-3 text-center text-sm font-semibold transition-all duration-200 ${
+                  pathname === "/" ? "bg-[#E3572B] text-white" : "bg-black/[0.03] text-[#4f463f]"
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                {pathname === "/" ? "S-genie" : "Home"}
+                Home
               </Link>
-              <Link href="/contact" className={`block rounded-full px-4 py-2.5 text-center text-[13px] font-medium transition-all duration-200 ${pathname === "/contact" ? "bg-[#E3572B] text-white" : "bg-black/[0.03] text-[#4f463f] hover:bg-[#E3572B]/[0.06]"}`} onClick={() => setIsMobileMenuOpen(false)}>
+              <Link
+                href="/contact"
+                className={`block rounded-xl px-4 py-3 text-center text-sm font-semibold transition-all duration-200 ${
+                  pathname === "/contact" ? "bg-[#E3572B] text-white" : "bg-black/[0.03] text-[#4f463f]"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
                 Contact
               </Link>
-              <button onClick={() => { setIsMobileMenuOpen(false); void handleScholarshipClick(); }} className={`block w-full rounded-full px-4 py-2.5 text-center text-[13px] font-medium transition-all duration-200 ${isScholarshipActive ? "bg-[#E3572B] text-white" : "bg-black/[0.03] text-[#4f463f] hover:bg-[#E3572B]/[0.06]"}`} type="button">
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  void handleScholarshipClick();
+                }}
+                className={`block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold transition-all duration-200 ${
+                  isScholarshipActive ? "bg-[#E3572B] text-white" : "bg-black/[0.03] text-[#4f463f]"
+                }`}
+                type="button"
+              >
                 Scholarship
               </button>
 
-              <div className="rounded-2xl bg-black/[0.02] border border-black/[0.05] p-2">
-                <p className="px-3 pb-1.5 pt-1 text-[11px] uppercase tracking-[0.18em] text-[#9a6f5b]">Universities</p>
-                <div className="space-y-0.5">
+              <div className="rounded-xl border border-black/[0.06] bg-[#fbfbfb] p-2.5">
+                <p className="px-2 pb-2 text-[11px] uppercase tracking-[0.18em] text-[#9a6f5b]">Universities</p>
+                <div className="space-y-1">
                   {universityLinks.map((item) => (
-                    <Link key={item.href} href={item.href} className="block rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-[#4f463f] transition-all duration-200 hover:bg-[#E3572B]/[0.05] hover:text-[#E3572B]" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="block rounded-lg px-3 py-2.5 text-sm font-medium text-[#4f463f] transition-colors hover:bg-[#E3572B]/[0.05] hover:text-[#E3572B]"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
                       {item.label}
                     </Link>
                   ))}
@@ -651,20 +675,35 @@ const Navbar = () => {
 
               {currentUser ? (
                 <>
-                  <Link href="/dashboard" className="block rounded-full bg-black/[0.03] px-4 py-2.5 text-center text-[13px] font-medium text-[#4f463f] hover:bg-[#E3572B]/[0.06]" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link
+                    href="/dashboard"
+                    className="block rounded-xl bg-black/[0.03] px-4 py-3 text-center text-sm font-semibold text-[#4f463f]"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
                     Dashboard
                   </Link>
-                  <button onClick={() => void handleSignOut()} className="flex w-full items-center justify-center gap-2 rounded-full border border-black/[0.06] bg-white/80 px-4 py-2.5 text-[13px] font-medium text-[#4f463f] transition-all duration-200 hover:text-[#E3572B] hover:border-[#E3572B]/30" type="button">
+                  <Link
+                    href="/my-profile"
+                    className="block rounded-xl bg-black/[0.03] px-4 py-3 text-center text-sm font-semibold text-[#4f463f]"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={() => void handleSignOut()}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-black/[0.08] bg-white px-4 py-3 text-sm font-semibold text-[#4f463f]"
+                    type="button"
+                  >
                     <LogOut size={16} />
                     Sign Out
                   </button>
                 </>
               ) : isUserLoading ? (
-                <div className="w-full h-[40px] rounded-full bg-gray-200/40 animate-pulse border border-black/[0.05]" />
+                <div className="h-[44px] w-full rounded-xl border border-black/[0.05] bg-gray-200/40 animate-pulse" />
               ) : (
                 <Link
                   href="/sign-in"
-                  className="block rounded-full bg-[#E3572B] px-4 py-2.5 text-center text-[13px] font-medium text-white shadow-[0_0_14px_rgba(227,87,43,0.4)] transition-all duration-200 hover:bg-[#d95d39]"
+                  className="block rounded-xl bg-[#E3572B] px-4 py-3 text-center text-sm font-semibold text-white"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Get Started
@@ -672,7 +711,7 @@ const Navbar = () => {
               )}
             </div>
           </div>
-        </nav>
+        </div>
       </div>
       </div>
 

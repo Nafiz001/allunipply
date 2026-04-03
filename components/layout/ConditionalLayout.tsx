@@ -26,11 +26,11 @@ export default function ConditionalLayout({
     pathname.startsWith("/national-university/public-university/");
 
   return (
-    <>
+    <div className="min-h-screen w-full overflow-x-clip">
       {!hideNavAndFooter && <Navbar />}
       {children}
       <WhatsAppButton />
       {!hideNavAndFooter && <Footer />}
-    </>
+    </div>
   );
 }

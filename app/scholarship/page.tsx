@@ -374,7 +374,7 @@ const ScholarshipPageContent = () => {
                 <motion.button 
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center justify-between min-w-[180px] pl-6 py-1.5 pr-1.5 rounded-full bg-[#E3572B] text-white font-urbanist text-[16px] leading-none font-semibold hover:bg-[#c24d2b] transition-colors cursor-pointer"
+                  className="inline-flex w-full sm:w-auto items-center justify-between sm:min-w-[180px] pl-6 py-1.5 pr-1.5 rounded-full bg-[#E3572B] text-white font-urbanist text-[16px] leading-none font-semibold hover:bg-[#c24d2b] transition-colors cursor-pointer"
                 >
                   <span>Learn more</span>
                   <span className="ml-5 h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">

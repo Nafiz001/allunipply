@@ -441,7 +441,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12">
         <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden">
-          <div className="relative h-[700px] sm:h-[650px] md:h-[600px] lg:h-[700px]">
+          <div className="relative h-[980px] sm:h-[900px] md:h-[760px] lg:h-[700px]">
             <Image
               src="/hero/banner.jpeg"
               alt="Students with backpacks"
@@ -452,44 +452,45 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-black/50" />
           </div>
 
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 md:px-6 text-center pt-4 sm:pt-6 md:pt-0">
-            <ScrollReveal direction="down">
-              <h1 className="text-[#FFF9F4] text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-outfit font-medium mb-3 md:mb-4 max-w-5xl leading-tight drop-shadow-[0_5px_18px_rgba(0,0,0,0.65)]">
-                Let&apos;s fly to your{" "}
-                <span className="block mt-1 md:mt-2">
-                  Dream <span className="font-playfair font-semibold text-[#FFD3A2]">University</span>
-                </span>
-              </h1>
-            </ScrollReveal>
-
-            <ScrollReveal delay={0.2}>
-              <p className="text-white/95 font-outfit font-normal text-xs sm:text-base md:text-lg lg:text-xl max-w-3xl mb-5 sm:mb-6 md:mb-12 leading-relaxed px-4 drop-shadow-[0_3px_12px_rgba(0,0,0,0.55)]">
-                Your dream university is just a click away - no stress, no mess, just success!<br />
-                Apply smart, not hard - we make admissions easy.
-              </p>
-            </ScrollReveal>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-xl px-4 z-10">
-              <Link href="/national-university" className="col-span-1">
-                <button className="group flex items-center justify-center gap-2 w-full h-[52px] md:h-[60px] rounded-xl md:rounded-2xl font-outfit font-extrabold text-sm md:text-base transition-all duration-300 bg-white/95 backdrop-blur-sm text-gray-800 hover:bg-[#F88210] hover:text-white hover:shadow-[0_10px_30px_rgba(248,130,16,0.35)] hover:-translate-y-1 border border-white/40">
-                  <span className="group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                    <Image src="/icons/bd-flag.png" width={22} height={22} alt="Bangladesh flag" className="drop-shadow-sm" />
+          <div className="absolute inset-0">
+            <div className="mx-auto flex h-full w-full max-w-6xl flex-col px-3 sm:px-4 md:px-6 pt-16 sm:pt-20 md:pt-24 lg:pt-16 pb-4 md:pb-8 text-center">
+              <ScrollReveal direction="down">
+                <h1 className="text-[#FFF9F4] text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-outfit font-medium mb-3 md:mb-4 max-w-5xl mx-auto leading-tight drop-shadow-[0_5px_18px_rgba(0,0,0,0.65)]">
+                  Let&apos;s fly to your{" "}
+                  <span className="block mt-1 md:mt-2">
+                    Dream <span className="font-playfair font-semibold text-[#FFD3A2]">University</span>
                   </span>
-                  <span className="truncate">National University</span>
-                </button>
-              </Link>
+                </h1>
+              </ScrollReveal>
 
-              <Link href="/international-university" className="col-span-1">
-                <button className="group flex items-center justify-center gap-2 w-full h-[52px] md:h-[60px] rounded-xl md:rounded-2xl font-outfit font-extrabold text-sm md:text-base transition-all duration-300 bg-white/95 backdrop-blur-sm text-gray-800 hover:bg-[#F88210] hover:text-white hover:shadow-[0_10px_30px_rgba(248,130,16,0.35)] hover:-translate-y-1 border border-white/40">
-                  <span className="group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                    <Image src="/icons/worldmap.png" width={22} height={22} alt="World Map" className="drop-shadow-sm" />
-                  </span>
-                  <span className="truncate">International University</span>
-                </button>
-              </Link>
-            </div>
+              <ScrollReveal delay={0.2}>
+                <p className="text-white/95 font-outfit font-normal text-sm sm:text-base md:text-lg lg:text-xl max-w-3xl mx-auto mb-5 sm:mb-6 md:mb-8 leading-relaxed px-2 drop-shadow-[0_3px_12px_rgba(0,0,0,0.55)]">
+                  Your dream university is just a click away - no stress, no mess, just success!<br />
+                  Apply smart, not hard - we make admissions easy.
+                </p>
+              </ScrollReveal>
 
-            <div className="bg-white/10 backdrop-blur-md hover:bg-white/15 transition-colors duration-500 rounded-2xl md:rounded-[32px] p-5 md:p-6 lg:p-8 w-full max-w-6xl mx-4 mt-6 md:mt-8 border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] z-10 relative overflow-hidden group">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-xl mx-auto z-10">
+                <Link href="/national-university" className="col-span-1">
+                  <button className="group flex items-center justify-center gap-2 w-full h-[52px] md:h-[60px] rounded-xl md:rounded-2xl font-outfit font-extrabold text-sm md:text-base transition-all duration-300 bg-white/95 backdrop-blur-sm text-gray-800 hover:bg-[#F88210] hover:text-white hover:shadow-[0_10px_30px_rgba(248,130,16,0.35)] hover:-translate-y-1 border border-white/40">
+                    <span className="group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                      <Image src="/icons/bd-flag.png" width={22} height={22} alt="Bangladesh flag" className="drop-shadow-sm" />
+                    </span>
+                    <span className="truncate">National University</span>
+                  </button>
+                </Link>
+
+                <Link href="/international-university" className="col-span-1">
+                  <button className="group flex items-center justify-center gap-2 w-full h-[52px] md:h-[60px] rounded-xl md:rounded-2xl font-outfit font-extrabold text-sm md:text-base transition-all duration-300 bg-white/95 backdrop-blur-sm text-gray-800 hover:bg-[#F88210] hover:text-white hover:shadow-[0_10px_30px_rgba(248,130,16,0.35)] hover:-translate-y-1 border border-white/40">
+                    <span className="group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                      <Image src="/icons/worldmap.png" width={22} height={22} alt="World Map" className="drop-shadow-sm" />
+                    </span>
+                    <span className="truncate">International University</span>
+                  </button>
+                </Link>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md hover:bg-white/15 transition-colors duration-500 rounded-2xl md:rounded-[32px] p-5 md:p-6 lg:p-8 w-full max-w-6xl mx-auto mt-6 md:mt-8 border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] z-10 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
                 <div className="flex flex-col rounded-2xl bg-white/5 p-3 md:p-4 group/item transition-transform duration-300 hover:scale-[1.02]">
@@ -551,11 +552,12 @@ export default function Home() {
               <div className="mt-4 md:mt-5 flex justify-center">
                 <button
                   onClick={handleHeroSearch}
-                  className="h-10 md:h-11 rounded-xl bg-[#F88210] px-8 md:px-10 text-sm font-semibold text-white hover:bg-[#e67609]"
+                  className="h-10 md:h-11 w-full sm:w-auto rounded-xl bg-[#F88210] px-8 md:px-10 text-sm font-semibold text-white hover:bg-[#e67609]"
                 >
                   Search
                 </button>
               </div>
+            </div>
             </div>
           </div>
         </div>
@@ -632,7 +634,7 @@ export default function Home() {
               ))}
             </div>
             <div className="text-center mt-10">
-              <button className="group relative w-[280px] mx-auto px-8 py-4 bg-white border-2 border-[#E3572B] text-[#E3572B] rounded-full font-outfit font-extrabold text-xl overflow-hidden shadow-[0_4px_15px_rgba(227,87,43,0.1)] hover:shadow-[0_8px_25px_rgba(227,87,43,0.25)] transition-all duration-300">
+              <button className="group relative w-full sm:w-[280px] mx-auto px-8 py-4 bg-white border-2 border-[#E3572B] text-[#E3572B] rounded-full font-outfit font-extrabold text-xl overflow-hidden shadow-[0_4px_15px_rgba(227,87,43,0.1)] hover:shadow-[0_8px_25px_rgba(227,87,43,0.25)] transition-all duration-300">
                 <span className="relative z-10 group-hover:text-white transition-colors duration-300">Start Application</span>
                 <div className="absolute inset-0 bg-[#E3572B] scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-500 ease-out" />
               </button>
@@ -678,7 +680,7 @@ export default function Home() {
               ))}
             </div>
             <div className="text-center mt-10">
-              <button className="group relative w-[280px] mx-auto px-8 py-4 bg-white border-2 border-[#E3572B] text-[#E3572B] rounded-full font-outfit font-extrabold text-xl overflow-hidden shadow-[0_4px_15px_rgba(227,87,43,0.1)] hover:shadow-[0_8px_25px_rgba(227,87,43,0.25)] transition-all duration-300">
+              <button className="group relative w-full sm:w-[280px] mx-auto px-8 py-4 bg-white border-2 border-[#E3572B] text-[#E3572B] rounded-full font-outfit font-extrabold text-xl overflow-hidden shadow-[0_4px_15px_rgba(227,87,43,0.1)] hover:shadow-[0_8px_25px_rgba(227,87,43,0.25)] transition-all duration-300">
                 <span className="relative z-10 group-hover:text-white transition-colors duration-300">Start Application</span>
                 <div className="absolute inset-0 bg-[#E3572B] scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-500 ease-out" />
               </button>

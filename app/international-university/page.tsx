@@ -178,67 +178,68 @@ const InternationalUniversityPage = () => {
 
       {/* Hero Section */}
       <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12 ">
-        <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden h-[620px] sm:h-[680px] md:h-[750px] lg:h-[850px]">
+        <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden h-[980px] sm:h-[940px] md:h-[780px] lg:h-[850px]">
           <Image src="/hero/international_banner.jpeg" alt="International Banner" fill className="object-cover brightness-55" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/60" />
-          
-          <div className="absolute top-10 left-10 max-w-lg hidden lg:block">
-            <p className="font-pacifico text-3xl text-[#fff7f0] text-left leading-relaxed drop-shadow-[0_4px_18px_rgba(0,0,0,0.65)]">
-              &quot;Your dream university is just a click away — no stress, no mess, just success!&quot;
-            </p>
-          </div>
-        </div>
+          <div className="absolute inset-0">
+            <div className="mx-auto flex h-full w-full max-w-6xl flex-col px-3 sm:px-4 md:px-6 pt-16 sm:pt-20 md:pt-24 lg:pt-16 pb-4 md:pb-8">
+              <div className="hidden lg:block max-w-lg">
+                <p className="font-pacifico text-3xl text-[#fff7f0] text-left leading-relaxed drop-shadow-[0_4px_18px_rgba(0,0,0,0.65)]">
+                  &quot;Your dream university is just a click away — no stress, no mess, just success!&quot;
+                </p>
+              </div>
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 md:px-6 text-center pt-8 sm:pt-10 md:pt-14 lg:pt-16">
-          <ScrollReveal direction="down">
-            <h1 className="text-white text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-jakarta font-extrabold mb-4 md:mb-6 tracking-tight leading-[1.12] max-w-5xl drop-shadow-[0_6px_22px_rgba(0,0,0,0.7)]">
-              FLY TO YOUR <span className="text-[#FFC27A]">DREAM</span>
-              <span className="block">UNIVERSITY</span>
-            </h1>
-          </ScrollReveal>
+              <ScrollReveal direction="down">
+                <h1 className="mt-4 text-center lg:text-left text-white text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-jakarta font-extrabold mb-3 md:mb-6 tracking-tight leading-[1.12] max-w-5xl drop-shadow-[0_6px_22px_rgba(0,0,0,0.7)]">
+                  FLY TO YOUR <span className="text-[#FFC27A]">DREAM</span>
+                  <span className="block">UNIVERSITY</span>
+                </h1>
+              </ScrollReveal>
 
-          <ScrollReveal delay={0.2}>
-            <p className="text-white/95 font-outfit text-sm sm:text-base md:text-2xl mb-8 md:mb-12 max-w-3xl mx-auto font-medium mt-3 sm:mt-4 md:mt-10 drop-shadow-[0_3px_14px_rgba(0,0,0,0.55)]">
-              Explore thousands of international universities and find your perfect academic home abroad.
-            </p>
-          </ScrollReveal>
+              <ScrollReveal delay={0.2}>
+                <p className="text-white/95 text-center lg:text-left font-outfit text-sm sm:text-base md:text-xl mb-5 md:mb-8 max-w-3xl font-medium drop-shadow-[0_3px_14px_rgba(0,0,0,0.55)]">
+                  Explore thousands of international universities and find your perfect academic home abroad.
+                </p>
+              </ScrollReveal>
 
-          <ScrollReveal direction="up" delay={0.4} className="bg-white/10 backdrop-blur-xl rounded-3xl md:rounded-[40px] p-4 sm:p-5 md:p-8 w-full max-w-6xl mx-auto border border-white/20 shadow-2xl">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4 items-stretch">
-              <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
-                <label className="font-outfit font-bold text-white text-sm mb-2">Location</label>
-                <input type="text" placeholder="Country / City" value={heroLocation} onChange={(e) => setHeroLocation(e.target.value)} className="h-10 md:h-11 px-4 py-2 rounded-xl bg-white/20 text-white placeholder-white/50 border border-white/30 outline-none focus:bg-white/30 transition-all text-sm" />
-              </div>
-              <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
-                <label className="font-outfit font-bold text-white text-sm mb-2">Date</label>
-                <input type="date" value={heroDate} onChange={(e) => setHeroDate(e.target.value)} className="h-10 md:h-11 px-4 py-2 rounded-xl bg-white/20 text-white border border-white/30 outline-none focus:bg-white/30 transition-all text-sm" />
-              </div>
-              <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
-                <label className="font-outfit font-bold text-white text-sm mb-2">Process</label>
-                <select value={heroProcess} onChange={(e) => setHeroProcess(e.target.value)} className="h-10 md:h-11 px-4 py-2 rounded-xl bg-white/20 text-white border border-white/30 outline-none focus:bg-white/30 transition-all text-sm">
-                  <option value="" className="text-gray-900">View process</option>
-                  <option value="direct" className="text-gray-900">Direct</option>
-                  <option value="agent" className="text-gray-900">Agent</option>
-                </select>
-              </div>
-              <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
-                <label className="font-outfit font-bold text-white text-sm mb-2">Criteria</label>
-                <select value={heroCriteria} onChange={(e) => setHeroCriteria(e.target.value)} className="h-10 md:h-11 px-4 py-2 rounded-xl bg-white/20 text-white border border-white/30 outline-none focus:bg-white/30 transition-all text-sm">
-                  <option value="" className="text-gray-900">See all info</option>
-                  <option value="gpa" className="text-gray-900">GPA Based</option>
-                  <option value="ielts" className="text-gray-900">IELTS</option>
-                </select>
-              </div>
-              <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
-                <label className="font-outfit font-bold text-white text-sm mb-2">Test Score</label>
-                <input type="number" placeholder="Score" value={heroTestScore} onChange={(e) => setHeroTestScore(e.target.value)} className="h-10 md:h-11 px-4 py-2 rounded-xl bg-white/20 text-white placeholder-white/50 border border-white/30 outline-none focus:bg-white/30 transition-all text-sm" />
-              </div>
-              <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
-                <label className="font-outfit font-bold text-white text-sm mb-2 opacity-0">Search</label>
-                <motion.button onClick={handleHeroSearch} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="h-10 md:h-11 px-6 rounded-xl bg-[#E3572B] text-white font-outfit font-bold text-sm md:text-base shadow-xl shadow-orange-600/20">Search Now</motion.button>
-              </div>
+              <ScrollReveal direction="up" delay={0.35} className="mt-1 bg-white/10 backdrop-blur-xl rounded-3xl md:rounded-[40px] p-4 sm:p-5 md:p-8 w-full border border-white/20 shadow-2xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4 items-stretch">
+                  <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
+                    <label className="font-outfit font-bold text-white text-sm mb-2">Location</label>
+                    <input type="text" placeholder="Country / City" value={heroLocation} onChange={(e) => setHeroLocation(e.target.value)} className="h-10 md:h-11 px-4 py-2 rounded-xl bg-white/20 text-white placeholder-white/50 border border-white/30 outline-none focus:bg-white/30 transition-all text-sm" />
+                  </div>
+                  <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
+                    <label className="font-outfit font-bold text-white text-sm mb-2">Date</label>
+                    <input type="date" value={heroDate} onChange={(e) => setHeroDate(e.target.value)} className="h-10 md:h-11 px-4 py-2 rounded-xl bg-white/20 text-white border border-white/30 outline-none focus:bg-white/30 transition-all text-sm" />
+                  </div>
+                  <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
+                    <label className="font-outfit font-bold text-white text-sm mb-2">Process</label>
+                    <select value={heroProcess} onChange={(e) => setHeroProcess(e.target.value)} className="h-10 md:h-11 px-4 py-2 rounded-xl bg-white/20 text-white border border-white/30 outline-none focus:bg-white/30 transition-all text-sm">
+                      <option value="" className="text-gray-900">View process</option>
+                      <option value="direct" className="text-gray-900">Direct</option>
+                      <option value="agent" className="text-gray-900">Agent</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
+                    <label className="font-outfit font-bold text-white text-sm mb-2">Criteria</label>
+                    <select value={heroCriteria} onChange={(e) => setHeroCriteria(e.target.value)} className="h-10 md:h-11 px-4 py-2 rounded-xl bg-white/20 text-white border border-white/30 outline-none focus:bg-white/30 transition-all text-sm">
+                      <option value="" className="text-gray-900">See all info</option>
+                      <option value="gpa" className="text-gray-900">GPA Based</option>
+                      <option value="ielts" className="text-gray-900">IELTS</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
+                    <label className="font-outfit font-bold text-white text-sm mb-2">Test Score</label>
+                    <input type="number" placeholder="Score" value={heroTestScore} onChange={(e) => setHeroTestScore(e.target.value)} className="h-10 md:h-11 px-4 py-2 rounded-xl bg-white/20 text-white placeholder-white/50 border border-white/30 outline-none focus:bg-white/30 transition-all text-sm" />
+                  </div>
+                  <div className="flex flex-col text-left rounded-2xl bg-white/5 p-3 md:p-4">
+                    <label className="font-outfit font-bold text-white text-sm mb-2 opacity-0">Search</label>
+                    <motion.button onClick={handleHeroSearch} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="h-10 md:h-11 w-full rounded-xl bg-[#E3572B] text-white font-outfit font-bold text-sm md:text-base shadow-xl shadow-orange-600/20">Search Now</motion.button>
+                  </div>
+                </div>
+              </ScrollReveal>
             </div>
-          </ScrollReveal>
+          </div>
         </div>
       </div>
 

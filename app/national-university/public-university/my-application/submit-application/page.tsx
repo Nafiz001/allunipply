@@ -404,7 +404,7 @@ const SubmitApplicationPage = () => {
                     <button
                       onClick={() => void submitApplication(application.id)}
                       disabled={submittingApplicationId === application.id || !application.readyToSubmit}
-                      className="min-w-[230px] px-10 py-3 bg-[#E3572B] text-white rounded-[22px] font-outfit text-[24px] leading-none hover:bg-[#d95d39] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full sm:w-auto sm:min-w-[230px] px-6 sm:px-10 py-3 bg-[#E3572B] text-white rounded-[22px] font-outfit text-[20px] sm:text-[24px] leading-none hover:bg-[#d95d39] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {submittingApplicationId === application.id ? "Submitting..." : "Submit"}
                     </button>
