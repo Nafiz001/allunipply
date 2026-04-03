@@ -441,7 +441,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="relative w-full px-4 md:px-6 pt-6 md:pt-12">
         <div className="relative rounded-[20px] md:rounded-[40px] overflow-hidden">
-          <div className="relative h-[980px] sm:h-[900px] md:h-[760px] lg:h-[700px]">
+          <div className="relative h-[1120px] sm:h-[980px] md:h-[760px] lg:h-[700px]">
             <Image
               src="/hero/banner.jpeg"
               alt="Students with backpacks"
@@ -453,7 +453,7 @@ export default function Home() {
           </div>
 
           <div className="absolute inset-0">
-            <div className="mx-auto flex h-full w-full max-w-6xl flex-col px-3 sm:px-4 md:px-6 pt-16 sm:pt-20 md:pt-24 lg:pt-16 pb-4 md:pb-8 text-center">
+            <div className="mx-auto flex h-full w-full max-w-6xl flex-col px-3 sm:px-4 md:px-6 pt-12 sm:pt-20 md:pt-24 lg:pt-16 pb-4 md:pb-8 text-center">
               <ScrollReveal direction="down">
                 <h1 className="text-[#FFF9F4] text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-outfit font-medium mb-3 md:mb-4 max-w-5xl mx-auto leading-tight drop-shadow-[0_5px_18px_rgba(0,0,0,0.65)]">
                   Let&apos;s fly to your{" "}
@@ -490,9 +490,9 @@ export default function Home() {
                 </Link>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-md hover:bg-white/15 transition-colors duration-500 rounded-2xl md:rounded-[32px] p-5 md:p-6 lg:p-8 w-full max-w-6xl mx-auto mt-6 md:mt-8 border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] z-10 relative overflow-hidden group">
+              <div className="bg-white/10 backdrop-blur-md hover:bg-white/15 transition-colors duration-500 rounded-2xl md:rounded-[32px] p-4 sm:p-5 md:p-6 lg:p-8 w-full max-w-6xl mx-auto mt-5 md:mt-8 border border-white/20 shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] z-10 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 md:gap-4">
                 <div className="flex flex-col rounded-2xl bg-white/5 p-3 md:p-4 group/item transition-transform duration-300 hover:scale-[1.02]">
                   <h3 className="font-outfit font-normal text-white text-base md:text-lg mb-2 min-h-6 group-hover/item:text-orange-200 transition-colors">Location</h3>
                   <input
